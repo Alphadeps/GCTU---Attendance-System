@@ -6,18 +6,50 @@ async function seed() {
   console.log('Starting seeding database...');
 
   try {
-    // 1. Clean existing records
-    await prisma.classStudent.deleteMany({});
-    await prisma.classCourse.deleteMany({});
-    await prisma.attendance.deleteMany({});
-    await prisma.attendanceSession.deleteMany({});
-    await prisma.class.deleteMany({});
-    await prisma.programme.deleteMany({});
-    await prisma.student.deleteMany({});
-    await prisma.course.deleteMany({});
-    await prisma.notification.deleteMany({});
-    await prisma.user.deleteMany({});
-    await prisma.systemSettings.deleteMany({});
+    // 1. Clean existing records (with error handling for non-existent tables)
+    try {
+      await prisma.classStudent.deleteMany({});
+    } catch (e) { console.log('ClassStudent table not found, skipping...'); }
+    
+    try {
+      await prisma.classCourse.deleteMany({});
+    } catch (e) { console.log('ClassCourse table not found, skipping...'); }
+    
+    try {
+      await prisma.attendance.deleteMany({});
+    } catch (e) { console.log('Attendance table not found, skipping...'); }
+    
+    try {
+      await prisma.attendanceSession.deleteMany({});
+    } catch (e) { console.log('AttendanceSession table not found, skipping...'); }
+    
+    try {
+      await prisma.class.deleteMany({});
+    } catch (e) { console.log('Class table not found, skipping...'); }
+    
+    try {
+      await prisma.programme.deleteMany({});
+    } catch (e) { console.log('Programme table not found, skipping...'); }
+    
+    try {
+      await prisma.student.deleteMany({});
+    } catch (e) { console.log('Student table not found, skipping...'); }
+    
+    try {
+      await prisma.course.deleteMany({});
+    } catch (e) { console.log('Course table not found, skipping...'); }
+    
+    try {
+      await prisma.notification.deleteMany({});
+    } catch (e) { console.log('Notification table not found, skipping...'); }
+    
+    try {
+      await prisma.user.deleteMany({});
+    } catch (e) { console.log('User table not found, skipping...'); }
+    
+    try {
+      await prisma.systemSettings.deleteMany({});
+    } catch (e) { console.log('SystemSettings table not found, skipping...'); }
 
     // 2. Seed System Settings
     await prisma.systemSettings.create({
