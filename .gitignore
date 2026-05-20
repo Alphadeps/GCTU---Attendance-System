@@ -32,3 +32,8 @@ dist-ssr/
 
 # Prisma generated client
 backend/generated/
+
+# Kiro and scratch folders
+.kiro/
+scratch/
+**/scratch/
