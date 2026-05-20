@@ -25,7 +25,8 @@ const PORT = process.env.PORT || 5000;
 const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  process.env.FRONTEND_URL // Add your deployed frontend URL as environment variable
+  'https://gctu-attendance-system-chi.vercel.app', // Deployed Vercel frontend
+  process.env.FRONTEND_URL // Additional frontend URL via env var
 ].filter(Boolean);
 
 app.use(cors({
