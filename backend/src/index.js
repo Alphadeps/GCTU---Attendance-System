@@ -53,9 +53,36 @@ app.use(cookieParser());
 // Apply rate limiter globally to all API endpoints
 app.use('/api', apiLimiter);
 
-// Health Check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date() });
+// Health Check & Diagnostics
+app.get('/api/health', async (req, res) => {
+  const diag = {
+    status: 'OK',
+    timestamp: new Date(),
+    env: {
+      NODE_ENV: process.env.NODE_ENV,
+      HAS_DATABASE_URL: !!process.env.DATABASE_URL,
+      DATABASE_URL_PROTOCOL: process.env.DATABASE_URL ? process.env.DATABASE_URL.split(':')[0] : null,
+      HAS_DIRECT_URL: !!process.env.DIRECT_URL,
+      DIRECT_URL_PROTOCOL: process.env.DIRECT_URL ? process.env.DIRECT_URL.split(':')[0] : null,
+    },
+    connectionMode: process.env.DIRECT_URL ? 'Direct (pg adapter)' : 'Prisma Accelerate',
+  };
+
+  try {
+    const rawResult = await prisma.$queryRaw`SELECT 1`;
+    diag.dbRawQuery = { success: true, result: rawResult };
+  } catch (err) {
+    diag.dbRawQuery = { success: false, error: err.message };
+  }
+
+  try {
+    const userCount = await prisma.user.count();
+    diag.dbUserQuery = { success: true, count: userCount };
+  } catch (err) {
+    diag.dbUserQuery = { success: false, error: err.message, stack: err.stack };
+  }
+
+  res.json(diag);
 });
 
 // Stats for dashboard views
