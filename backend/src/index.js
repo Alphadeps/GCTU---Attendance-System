@@ -17,6 +17,7 @@ const lecturerRoutes = require('./routes/lecturer.routes');
 
 const prisma = require('./lib/prisma');
 const { protect } = require('./middleware/auth');
+const seed = require('./seed');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,36 +54,23 @@ app.use(cookieParser());
 // Apply rate limiter globally to all API endpoints
 app.use('/api', apiLimiter);
 
-// Health Check & Diagnostics
+// Health Check
 app.get('/api/health', async (req, res) => {
-  const diag = {
-    status: 'OK',
-    timestamp: new Date(),
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      HAS_DATABASE_URL: !!process.env.DATABASE_URL,
-      DATABASE_URL_PROTOCOL: process.env.DATABASE_URL ? process.env.DATABASE_URL.split(':')[0] : null,
-      HAS_DIRECT_URL: !!process.env.DIRECT_URL,
-      DIRECT_URL_PROTOCOL: process.env.DIRECT_URL ? process.env.DIRECT_URL.split(':')[0] : null,
-    },
-    connectionMode: process.env.DIRECT_URL ? 'Direct (pg adapter)' : 'Prisma Accelerate',
-  };
-
   try {
-    const rawResult = await prisma.$queryRaw`SELECT 1`;
-    diag.dbRawQuery = { success: true, result: rawResult };
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({
+      status: 'OK',
+      database: 'CONNECTED',
+      timestamp: new Date()
+    });
   } catch (err) {
-    diag.dbRawQuery = { success: false, error: err.message };
+    res.status(500).json({
+      status: 'ERROR',
+      database: 'DISCONNECTED',
+      error: err.message,
+      timestamp: new Date()
+    });
   }
-
-  try {
-    const userCount = await prisma.user.count();
-    diag.dbUserQuery = { success: true, count: userCount };
-  } catch (err) {
-    diag.dbUserQuery = { success: false, error: err.message, stack: err.stack };
-  }
-
-  res.json(diag);
 });
 
 // Stats for dashboard views
@@ -224,6 +212,21 @@ process.on('uncaughtException', (err) => {
 // Bootstrapped server startup
 const bootstrap = async () => {
   await connectWithRetry();
+  
+  // Check if the database has any users; if not, auto-seed the initial records
+  try {
+    const userCount = await prisma.user.count();
+    if (userCount === 0) {
+      console.log('Database appears to be empty (0 users found). Running auto-seed...');
+      await seed();
+      console.log('Database auto-seeded successfully.');
+    } else {
+      console.log(`Database has ${userCount} users. Auto-seed not needed.`);
+    }
+  } catch (err) {
+    console.error('Failed to run auto-seed check:', err.message);
+  }
+
   server = app.listen(PORT, () => {
     console.log(`Class Attendance API running on port ${PORT}`);
     console.log('Active handles:', process._getActiveHandles().map(h => h.constructor.name));
