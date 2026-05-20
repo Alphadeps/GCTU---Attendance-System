@@ -20,178 +20,15 @@ function getDistance(lat1, lon1, lat2, lon2) {
 }
 
 // 1. Mark attendance
+const { resetFailures } = require('../lib/securityCache');
 const markAttendance = async (req, res) => {
   try {
-    const { indexNumber, name, qrCode, sessionId, deviceFingerprint, latitude, longitude, networkSSID, deviceInfo } = req.body;
+    const { student, session, attendanceStatus } = req.bodyguard;
+    const { latitude, longitude, deviceInfo } = req.body;
 
-    // Fetch system settings
-    const settings = await prisma.systemSettings.findFirst();
-    const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
-    const lateWindow = settings ? settings.lateWindowMinutes : 15;
-
-    if (!indexNumber || !name || !deviceFingerprint || (!qrCode && !sessionId)) {
-      return res.status(400).json({ error: 'Index number, name, device fingerprint, and either QR code or Session ID are required' });
-    }
-
-    // A. Verify student exists by index number
-    const student = await prisma.student.findUnique({
-      where: { indexNumber }
-    });
-
-    if (!student) {
-      return res.status(400).json({ error: 'Student record not found. Please verify your Index Number.' });
-    }
-
-    // B. Check device fingerprint security
-    // Check if this fingerprint is registered to ANY OTHER student
-    const otherStudentWithOwner = await prisma.student.findFirst({
-      where: {
-        deviceFingerprint,
-        NOT: { id: student.id }
-      }
-    });
-
-    if (otherStudentWithOwner) {
-      return res.status(400).json({
-        error: 'Security Block: This device is already registered to another student. Multiple check-ins from the same device are not permitted.'
-      });
-    }
-
-    // Verify or bind fingerprint to current student
-    if (!student.deviceFingerprint) {
-      await prisma.student.update({
-        where: { id: student.id },
-        data: { deviceFingerprint }
-      });
-    } else if (student.deviceFingerprint !== deviceFingerprint) {
-      return res.status(400).json({
-        error: 'Security Block: Device fingerprint mismatch. Your account is locked to a different device. Contact an admin to reset.'
-      });
-    }
-
-    // C. Resolve and validate the attendance session
-    let targetSessionId = sessionId;
-    let isQrCheckIn = !!qrCode;
-
-    let session;
-    if (isQrCheckIn) {
-      let decoded;
-      try {
-        decoded = jwt.verify(qrCode, JWT_SECRET);
-        targetSessionId = decoded.sessionId;
-      } catch (err) {
-        return res.status(400).json({ error: 'Invalid or expired QR code token. Please scan the current live QR code.' });
-      }
-
-      session = await prisma.attendanceSession.findUnique({
-        where: { id: targetSessionId },
-        include: { course: true }
-      });
-
-      if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      if (session.status !== 'OPEN') {
-        return res.status(400).json({ error: 'This attendance session has been closed' });
-      }
-
-      // Validate QR code matches active session QR
-      if (session.qrCode !== qrCode) {
-        return res.status(400).json({ error: 'Outdated QR code. Please scan the live QR code.' });
-      }
-
-      // Validate QR code expiry timestamp
-      if (new Date() > new Date(session.qrCodeExpiry)) {
-        return res.status(400).json({ error: 'QR code has expired. Please scan the live QR code.' });
-      }
-    } else {
-      // Location-Only Check-in
-      session = await prisma.attendanceSession.findUnique({
-        where: { id: targetSessionId },
-        include: { course: true }
-      });
-
-      if (!session) {
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      if (session.status !== 'OPEN') {
-        return res.status(400).json({ error: 'This attendance session has been closed' });
-      }
-
-      // Enforce physical coordinate verification for location-only check-in
-      if (session.latitude === null || session.longitude === null) {
-        return res.status(400).json({
-          error: 'Location-only check-in is not allowed for this session because classroom coordinates are not defined. Please scan the QR code instead.'
-        });
-      }
-    }
-
-    // D. Validate Physical features (Geofencing & SSID)
-    // Enforce geofencing if class is PHYSICAL or student is doing Location-Only Check-in
-    if (session.sessionType === 'PHYSICAL' || !isQrCheckIn) {
-      if (session.latitude !== null && session.longitude !== null) {
-        if (!latitude || !longitude) {
-          return res.status(400).json({ error: 'Location services (GPS) are required to verify your check-in.' });
-        }
-
-        const distance = getDistance(
-          session.latitude,
-          session.longitude,
-          parseFloat(latitude),
-          parseFloat(longitude)
-        );
-
-        if (distance > geofenceRadius) {
-          return res.status(400).json({
-            error: `Out of range. You are ${Math.round(distance)} meters away. You must be within ${geofenceRadius} meters of the classroom to check in.`
-          });
-        }
-      }
-
-      if (session.networkSSID && session.networkSSID.trim() !== '') {
-        if (!networkSSID || networkSSID.toLowerCase().trim() !== session.networkSSID.toLowerCase().trim()) {
-          return res.status(400).json({
-            error: `Network SSID mismatch. Please connect to the Wi-Fi network: ${session.networkSSID}`
-          });
-        }
-      }
-    }
-
-    // E. If session is class-scoped, verify student belongs to that class
-    if (session.classId) {
-      const isMember = await prisma.classStudent.findUnique({
-        where: {
-          classId_studentId: { classId: session.classId, studentId: student.id }
-        }
-      });
-
-      if (!isMember) {
-        return res.status(403).json({
-          error: 'You are not enrolled in the class for this session. Only registered class members can mark attendance.'
-        });
-      }
-    }
-
-    // F. Check duplicate check-in
-    const existingAttendance = await prisma.attendance.findFirst({
-      where: {
-        sessionId: session.id,
-        studentId: student.id
-      }
-    });
-
-    if (existingAttendance) {
-      return res.status(400).json({ error: 'You have already checked in for this session.' });
-    }
-
-    // G. Determine status based on grace period
-    const minutesElapsed = (new Date() - new Date(session.startTime)) / 60000;
-    const attendanceStatus = minutesElapsed > lateWindow ? 'LATE' : 'PRESENT';
-
-    // H. Save record
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
+
+    // Save record
     const newAttendance = await prisma.attendance.create({
       data: {
         sessionId: session.id,
@@ -203,11 +40,15 @@ const markAttendance = async (req, res) => {
       }
     });
 
+    // Reset security failure counters for this student and IP on successful check-in
+    resetFailures(student.indexNumber);
+    resetFailures(ipAddress);
+
     // Trigger Notifications in background
     (async () => {
       try {
-        const courseName = session.course?.name || 'Class';
-        const courseCode = session.course?.code || '';
+        const courseName = session.courseName || 'Class';
+        const courseCode = session.courseCode || '';
 
         // Student notification
         await createNotificationHelper({

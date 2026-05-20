@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, changePassword } = require('../controllers/auth.controller');
+const { register, login, refresh, logout, changePassword } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth');
 
 const router = express.Router();
@@ -13,7 +13,11 @@ router.post('/register', (req, res, next) => {
   }
 }, register);
 
-router.post('/login', login);
+const { loginLimiter } = require('../middleware/rateLimiter');
+
+router.post('/login', loginLimiter, login);
+router.post('/refresh', refresh);
+router.post('/logout', logout);
 router.patch('/change-password', protect, changePassword);
 
 module.exports = router;

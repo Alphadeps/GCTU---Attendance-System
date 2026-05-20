@@ -3,6 +3,7 @@ const QRCode = require('qrcode');
 const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
 const { createNotificationHelper } = require('./notification.controller');
+const { cacheSession, removeCachedSession, updateCachedSession } = require('../lib/securityCache');
 
 // 1. Create a session
 const createSession = async (req, res) => {
@@ -99,6 +100,9 @@ const createSession = async (req, res) => {
       include: { course: true }
     });
 
+    // Register active session in security cache
+    cacheSession(updatedSession);
+
     // Generate base64 QR code image
     const qrCodeImage = await QRCode.toDataURL(qrCodeToken);
 
@@ -181,6 +185,9 @@ const closeSession = async (req, res) => {
         endTime: new Date()
       }
     });
+
+    // Remove closed session from security cache
+    removeCachedSession(id);
 
     // 2. Find eligible students (if classId is present, only class students; otherwise, all)
     let eligibleStudents = [];
@@ -348,6 +355,12 @@ const refreshQRCode = async (req, res) => {
         qrCode: qrCodeToken,
         qrCodeExpiry: qrExpiry
       }
+    });
+
+    // Update refreshed QR parameters in security cache
+    updateCachedSession(id, {
+      qrCode: qrCodeToken,
+      qrCodeExpiry: qrExpiry
     });
 
     // Generate base64 QR code image

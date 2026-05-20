@@ -86,7 +86,12 @@ const LecturerPortal = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
     localStorage.clear();
     navigate('/');
   };

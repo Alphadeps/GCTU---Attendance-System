@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: 'http://localhost:5000/api',
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -17,6 +18,60 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle transparent token refresh on token expiry
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Check if error response is 401 Unauthorized and not already retried
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      // Do not try to refresh if the failed request was the login or refresh route itself
+      if (
+        originalRequest.url.includes('/auth/login') ||
+        originalRequest.url.includes('/auth/refresh')
+      ) {
+        return Promise.reject(error);
+      }
+
+      originalRequest._retry = true;
+
+      try {
+        // Attempt to request a new access token using the HTTP-only refresh token cookie
+        const res = await axios.post(
+          'http://localhost:5000/api/auth/refresh',
+          {},
+          { withCredentials: true }
+        );
+
+        if (res.status === 200 && res.data.token) {
+          const newToken = res.data.token;
+          localStorage.setItem('token', newToken);
+
+          // Retry the original request with the new access token
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshErr) {
+        console.error('Session expired. Redirecting to login.', refreshErr);
+        // Clear authentication items and redirect to login page
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+        return Promise.reject(refreshErr);
+      }
+    }
+
     return Promise.reject(error);
   }
 );
