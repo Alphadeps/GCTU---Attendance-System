@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -8,6 +9,9 @@ const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const auth = useAuth();
+  const accessDenied = location.state?.accessDenied === true;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,16 +22,16 @@ const LoginPage = () => {
       const response = await api.post('/auth/login', { username, password });
       const { token, user } = response.data;
 
-      // Store in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', user.role);
-      localStorage.setItem('username', user.username);
-      localStorage.setItem('needsPasswordChange', user.needsPasswordChange ? 'true' : 'false');
-      if (user.assignedClass) {
-        localStorage.setItem('assignedClass', JSON.stringify(user.assignedClass));
-      } else {
-        localStorage.removeItem('assignedClass');
-      }
+      // Use auth context to store user data
+      auth.login({
+        token,
+        role: user.role,
+        username: user.username,
+        needsPasswordChange: user.needsPasswordChange,
+        assignedClass: user.assignedClass || null,
+        dept_name: user.dept_name || null,
+        dept_logo: user.dept_logo || null
+      });
 
       // Redirect based on role
       if (user.role === 'SUPERADMIN') {
@@ -50,8 +54,8 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col justify-center items-center p-6 relative overflow-hidden">
       {/* Background logo watermark */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-        <img src="/logo.jfif" alt="GCTU Crest Watermark" className="w-[380px] h-[380px] object-contain filter grayscale" />
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+        <img src="/logo2.png" alt="GCTU Crest Watermark" className="w-[380px] h-[380px] object-contain" onError={(e) => console.error('Logo failed to load:', e)} />
       </div>
 
       {/* Background mesh/gradients */}
@@ -68,6 +72,15 @@ const LoginPage = () => {
           <h1 className="text-2xl font-bold tracking-tight text-white">GCTU Attendance & Reports</h1>
           <p className="text-slate-400 mt-2 text-sm">Sign in to manage classes and records</p>
         </div>
+
+        {accessDenied && (
+          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm flex gap-2 items-center">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <span>Access denied — insufficient permissions</span>
+          </div>
+        )}
 
         {errorMsg && (
           <div className="mb-6 p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex gap-2 items-center">

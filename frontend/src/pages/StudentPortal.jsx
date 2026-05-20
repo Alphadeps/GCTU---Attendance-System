@@ -1,7 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
-import QRScanner from '../components/QRScanner';
 import NotificationPanel from '../components/NotificationPanel';
+import { useToast } from '../components/ToastProvider';
+import ConfirmModal from '../components/ConfirmModal';
+import CheckInSheet from '../components/student/CheckInSheet';
+import GrievanceModal from '../components/student/GrievanceModal';
+
+const getInitials = (name) => {
+  const parts = name.trim().split(' ');
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return parts[0] ? parts[0][0].toUpperCase() : 'S';
+};
+
+const getTimeDiffText = (startTime) => {
+  const diffMs = Date.now() - new Date(startTime).getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'Started just now';
+  if (diffMins < 60) return `Started ${diffMins} mins ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  return `Started ${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+};
 
 const StudentPortal = () => {
   // Navigation & Tabs
@@ -15,6 +35,9 @@ const StudentPortal = () => {
   const [fullName, setFullName] = useState(localStorage.getItem('studentName') || '');
   const [rememberMe, setRememberMe] = useState(localStorage.getItem('remember_student') === 'true');
 
+  // Network Status
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
   // Data States
   const [activeSessions, setActiveSessions] = useState([]);
   const [history, setHistory] = useState([]);
@@ -24,40 +47,24 @@ const StudentPortal = () => {
   // Filter chips for history
   const [filter, setFilter] = useState('All'); // 'All' | 'Present' | 'Late' | 'Absent'
 
-  // Toast Notification State
-  const [toast, setToast] = useState({ show: false, message: '', type: 'error' });
+  // Global toast hook
+  const toast = useToast();
 
-  // Modal / Check-in Bottom Sheet States
+  // Confirm modal state
+  const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
+
+  // Grievance States
+  const [grievances, setGrievances] = useState([]);
+  const [loadingGrievances, setLoadingGrievances] = useState(false);
+  const [showGrievanceModal, setShowGrievanceModal] = useState(false);
+
+  // Check-in Bottom Sheet States
   const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
-  const [checkInStep, setCheckInStep] = useState(1); // 1: QR/Manual Input, 2: Location, 3: Success, 4: Error
-  const [manualCode, setManualCode] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [gpsVerified, setGpsVerified] = useState(false);
-  const [gpsError, setGpsError] = useState('');
-  const [gpsCoords, setGpsCoords] = useState({ lat: null, lng: null });
-  const [scannedCodeToken, setScannedCodeToken] = useState('');
-  const [successDetails, setSuccessDetails] = useState({ status: '', time: '', courseName: '' });
-  const [submitErrorMsg, setSubmitErrorMsg] = useState('');
 
   // Department Branding
   const deptName = localStorage.getItem('dept_name') || 'GCTU Attendance';
   const deptLogo = localStorage.getItem('dept_logo') || '/logo.svg';
-
-  useEffect(() => {
-    fetchActiveSessions();
-    if (isIdentified) {
-      fetchStudentHistory();
-    }
-  }, [isIdentified]);
-
-  const showToast = (message, type = 'error') => {
-    setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast(prev => ({ ...prev, show: false }));
-    }, 3000);
-  };
 
   const fetchActiveSessions = async () => {
     setLoadingActive(true);
@@ -66,7 +73,7 @@ const StudentPortal = () => {
       setActiveSessions(Array.isArray(response.data) ? response.data : response.data ? [response.data] : []);
     } catch (err) {
       console.error('Fetch active sessions error:', err);
-      showToast('Could not load active sessions');
+      toast.error('Could not load active sessions');
     } finally {
       setLoadingActive(false);
     }
@@ -80,17 +87,57 @@ const StudentPortal = () => {
       setHistory(response.data.history || []);
     } catch (err) {
       console.error('Fetch student history error:', err);
-      showToast('Could not load attendance history');
+      toast.error('Could not load attendance history');
     } finally {
       setLoadingHistory(false);
     }
   };
 
+  const fetchStudentGrievances = async () => {
+    if (!indexNumber) return;
+    setLoadingGrievances(true);
+    try {
+      const response = await api.get(`/grievances/student/${indexNumber}`);
+      setGrievances(response.data || []);
+    } catch (err) {
+      console.error('Fetch student grievances error:', err);
+    } finally {
+      setLoadingGrievances(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActiveSessions();
+    if (isIdentified) {
+      fetchStudentHistory();
+      fetchStudentGrievances();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isIdentified]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast.success('Network connection restored!');
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast.error('You are currently offline.');
+    };
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Student Identification Submission
   const handleIdentifySubmit = (e) => {
     e.preventDefault();
     if (!indexNumber.trim() || !fullName.trim()) {
-      showToast('Please fill in both fields');
+      toast.error('Please fill in both fields');
       return;
     }
 
@@ -103,153 +150,33 @@ const StudentPortal = () => {
     }
 
     setIsIdentified(true);
-    showToast('Signed in successfully!', 'success');
+    toast.success('Signed in successfully!');
   };
 
   // Log Out / Reset Data
   const handleClearData = () => {
-    if (window.confirm('This will sign you out and clear all local data. Continue?')) {
-      localStorage.removeItem('studentIndex');
-      localStorage.removeItem('studentName');
-      localStorage.removeItem('remember_student');
-      setIndexNumber('');
-      setFullName('');
-      setHistory([]);
-      setIsIdentified(false);
-      setActiveTab('home');
-      showToast('Data cleared.', 'success');
-    }
-  };
-
-  // Generate unique device fingerprint
-  const getDeviceFingerprint = () => {
-    const fingerprintString = `${navigator.userAgent}_${window.screen.width}_${window.screen.height}`;
-    return btoa(fingerprintString).substring(0, 32);
+    setConfirmState({
+      open: true,
+      message: 'This will sign you out and clear all local data. Continue?',
+      onConfirm: () => {
+        localStorage.removeItem('studentIndex');
+        localStorage.removeItem('studentName');
+        localStorage.removeItem('remember_student');
+        setIndexNumber('');
+        setFullName('');
+        setHistory([]);
+        setIsIdentified(false);
+        setActiveTab('home');
+        toast.success('Data cleared.');
+        setConfirmState({ open: false, message: '', onConfirm: null });
+      }
+    });
   };
 
   // Trigger mark attendance sheet
   const handleStartCheckIn = (session) => {
     setSelectedSession(session);
-    setCheckInStep(1);
-    setManualCode('');
-    setShowManualInput(false);
-    setScannedCodeToken('');
-    setGpsVerified(false);
-    setGpsError('');
-    setGpsCoords({ lat: null, lng: null });
-    setSubmitErrorMsg('');
     setShowBottomSheet(true);
-  };
-
-  // QR Code scanned successfully
-  const handleQRScanSuccess = (scannedToken) => {
-    setScannedCodeToken(scannedToken);
-    showToast('QR code scanned!', 'success');
-    advanceToLocation(scannedToken);
-  };
-
-  // Manual code confirm submit
-  const handleManualCodeSubmit = (e) => {
-    e.preventDefault();
-    if (!manualCode.trim()) {
-      showToast('Please enter a valid token');
-      return;
-    }
-    setScannedCodeToken(manualCode);
-    advanceToLocation(manualCode);
-  };
-
-  // Transition to Location Step (Step 2)
-  const advanceToLocation = (codeToken, isLocationOnly = false) => {
-    setCheckInStep(2);
-    triggerGPSLocation(codeToken, isLocationOnly);
-  };
-
-  // Geolocation trigger
-  const triggerGPSLocation = (codeToken, isLocationOnly = false) => {
-    setGpsVerified(false);
-    setGpsError('');
-
-    if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your device');
-      setCheckInStep(4);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setGpsCoords({ lat: latitude, lng: longitude });
-        setGpsVerified(true);
-        submitAttendanceCheckIn(codeToken, latitude, longitude, isLocationOnly);
-      },
-      (err) => {
-        console.error('Location capture error:', err);
-        setGpsError('Could not verify location. Make sure GPS location is enabled.');
-        submitAttendanceCheckIn(codeToken, null, null, isLocationOnly);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  // Perform backend submit API
-  const submitAttendanceCheckIn = async (codeToken, lat, lng, isLocationOnly = false) => {
-    setSubmitting(true);
-    const fingerprint = getDeviceFingerprint();
-    const deviceInfo = `${navigator.platform} (${navigator.language})`;
-
-    try {
-      const payload = {
-        indexNumber,
-        name: fullName,
-        deviceFingerprint: fingerprint,
-        latitude: lat,
-        longitude: lng,
-        deviceInfo
-      };
-
-      if (isLocationOnly) {
-        payload.sessionId = selectedSession?.id;
-      } else {
-        payload.qrCode = codeToken;
-      }
-
-      const response = await api.post('/attendance/mark', payload);
-
-      setSuccessDetails({
-        status: response.data.attendance?.status || 'PRESENT',
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        courseName: selectedSession?.courseName || 'Class'
-      });
-
-      setCheckInStep(3); // Success Screen
-      fetchActiveSessions();
-      fetchStudentHistory();
-    } catch (err) {
-      console.error('Submit check-in error:', err);
-      const errMsg = err.response?.data?.error || 'Check-in failed. Please check your location/QR code.';
-      setSubmitErrorMsg(errMsg);
-      setCheckInStep(4); // Error Screen
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const getInitials = (name) => {
-    const parts = name.trim().split(' ');
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return parts[0] ? parts[0][0].toUpperCase() : 'S';
-  };
-
-  const getTimeDiffText = (startTime) => {
-    const diffMs = Date.now() - new Date(startTime).getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 1) return 'Started just now';
-    if (diffMins < 60) return `Started ${diffMins} mins ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    return `Started ${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
   };
 
   const totalClasses = history.length;
@@ -287,14 +214,6 @@ const StudentPortal = () => {
 
         {/* Background Mesh decoration */}
         <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[50%] rounded-full bg-[#D4A017]/5 blur-[120px] pointer-events-none"></div>
-
-        {/* Dynamic Toast */}
-        {toast.show && (
-          <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-[380px] bg-[#001c44] border border-rose-500/20 text-rose-400 p-4 rounded-xl shadow-xl flex items-center gap-2 animate-bounce">
-            <span className="w-2 h-2 rounded-full bg-rose-500 inline-block"></span>
-            <span className="text-xs font-semibold">{toast.message}</span>
-          </div>
-        )}
 
         <div className="max-w-[380px] w-full mx-auto space-y-8 relative z-10">
           <div className="text-center">
@@ -368,22 +287,24 @@ const StudentPortal = () => {
     );
   }
 
+  // Pre-calculate unique courses from student history
+  const uniqueCourses = (() => {
+    const codes = Array.from(new Set(history.map(h => h.session?.courseCode).filter(Boolean)));
+    return codes.map(code => {
+      const match = history.find(h => h.session?.courseCode === code);
+      return {
+        code,
+        name: match?.session?.course?.name || code
+      };
+    });
+  })();
+
   return (
     <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col max-w-[430px] mx-auto shadow-2xl border-x border-[#002a63] relative">
       {/* Subtle Watermark School Crest */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-        <img src="/logo.jfif" alt="School Crest Watermark" className="w-[300px] h-[300px] object-contain filter grayscale" />
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+        <img src="/logo2.png" alt="School Crest Watermark" className="w-[300px] h-[300px] object-contain" />
       </div>
-
-      {/* Toast Overlay */}
-      {toast.show && (
-        <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-[90%] max-w-[380px] p-4 rounded-xl border shadow-2xl flex items-center gap-2 transition-all ${
-          toast.type === 'success' ? 'bg-[#001c44] border-[#D4A017]/20 text-[#D4A017]' : 'bg-[#001c44] border-rose-500/20 text-rose-400'
-        }`}>
-          <span className={`w-2 h-2 rounded-full inline-block ${toast.type === 'success' ? 'bg-[#D4A017]' : 'bg-rose-500'}`}></span>
-          <span className="text-xs font-semibold">{toast.message}</span>
-        </div>
-      )}
 
       {/* Top Header Bar */}
       <header className="bg-[#000a18]/80 backdrop-blur-md border-b border-[#002a63] sticky top-0 z-30 px-4 py-3 flex justify-between items-center">
@@ -391,6 +312,14 @@ const StudentPortal = () => {
           <img src={deptLogo} alt="Logo" className="w-8 h-8 object-contain bg-[#000a18]/40 rounded border border-[#002a63] p-0.5" />
           <span className="text-xs font-extrabold text-white truncate max-w-[160px]">{deptName}</span>
         </div>
+        
+        {/* Connection Status Badge */}
+        {!isOnline && (
+          <span className="bg-rose-500/15 border border-rose-500/20 px-2 py-0.5 rounded-full text-[9px] text-rose-400 font-extrabold uppercase animate-pulse">
+            ⚠️ Offline
+          </span>
+        )}
+
         <div className="flex items-center gap-3">
           <NotificationPanel studentIndex={indexNumber} />
           <div className="text-right">
@@ -582,6 +511,117 @@ const StudentPortal = () => {
           </div>
         )}
 
+        {/* TAB: SUPPORT */}
+        {activeTab === 'support' && (
+          <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-black text-white">Support Desk</h2>
+              <button
+                onClick={fetchStudentGrievances}
+                disabled={loadingGrievances}
+                className="p-2 rounded-lg bg-[#000a18] border border-[#002a63] hover:bg-[#001c44] text-slate-400 hover:text-[#D4A017] transition-colors"
+              >
+                <svg className={`w-4 h-4 ${loadingGrievances ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Have issues checking in? Request attendance overrides for sickness/excusable absences, report system/GPS failures, or report academic dishonesty.
+            </p>
+
+            <button
+              onClick={() => {
+                // Pre-calculate unique courses from student history
+                const codes = Array.from(new Set(history.map(h => h.session?.courseCode).filter(Boolean)));
+                const list = codes.map(code => {
+                  const match = history.find(h => h.session?.courseCode === code);
+                  return {
+                    code,
+                    name: match?.session?.course?.name || code
+                  };
+                });
+                // Initialize course selector if options exist
+                if (list.length > 0 && !grievanceCourse) {
+                  setGrievanceCourse(list[0].code);
+                }
+                setShowGrievanceModal(true);
+              }}
+              className="w-full bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-[#D4A017]/10"
+            >
+              <svg className="w-4 h-4 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Submit Support Case / Request
+            </button>
+
+            {/* List of Student Support Tickets */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide">My Grievances & Excuses</h3>
+              {loadingGrievances ? (
+                <div className="h-12 bg-[#001c44] rounded-xl animate-pulse"></div>
+              ) : grievances.length === 0 ? (
+                <div className="text-center py-10 bg-[#001c44]/20 border border-dashed border-[#002a63] rounded-xl text-xs text-slate-500">
+                  No grievances or excused absence requests logged under your name.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {grievances.map((g) => (
+                    <div key={g.id} className="bg-[#001c44] border border-[#002a63] rounded-2xl p-4 space-y-3 shadow-md border-t-2 border-t-[#D4A017]/40">
+                      <div className="flex justify-between items-start">
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${
+                          g.type === 'ABSENCE_EXCUSE' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                          g.type === 'SYSTEM_ISSUE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                          g.type === 'INTEGRITY_REPORT' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
+                          'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                        }`}>
+                          {g.type.replace('_', ' ')}
+                        </span>
+                        
+                        <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded ${
+                          g.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25' :
+                          g.status === 'RESOLVED' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' :
+                          'bg-rose-500/15 text-rose-400 border border-rose-500/25'
+                        }`}>
+                          {g.status}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-extrabold text-sm text-white leading-snug">{g.subject}</h4>
+                        {g.courseCode && <span className="text-[10px] font-mono text-[#D4A017]">{g.courseCode}</span>}
+                        <p className="text-xs text-slate-300 mt-2 whitespace-pre-wrap">{g.message}</p>
+                      </div>
+
+                      {g.evidenceUrl && (
+                        <div className="pt-2 border-t border-[#002a63]/40 flex justify-between items-center text-[10px]">
+                          <span className="text-slate-500">Attachment:</span>
+                          {/* eslint-disable-next-line react/jsx-no-target-blank */}
+                          <a href={`http://localhost:5000${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer" className="text-[#D4A017] underline hover:text-[#b88a14]">
+                            View Evidence Document
+                          </a>
+                        </div>
+                      )}
+
+                      {g.adminResponse && (
+                        <div className="bg-[#000a18]/60 border border-[#002a63]/80 p-3 rounded-xl space-y-1.5">
+                          <span className="block text-[8px] text-[#D4A017] font-bold uppercase tracking-wider">Department Reply</span>
+                          <p className="text-xs text-slate-300 italic">"{g.adminResponse}"</p>
+                        </div>
+                      )}
+                      
+                      <div className="text-[9px] text-slate-500 text-right font-mono">
+                        Submitted: {new Date(g.createdAt).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* TAB 3: PROFILE */}
         {activeTab === 'profile' && (
           <div className="space-y-6 text-center animate-[fadeIn_0.2s_ease-out]">
@@ -662,6 +702,21 @@ const StudentPortal = () => {
         </button>
 
         <button
+          onClick={() => {
+            setActiveTab('support');
+            fetchStudentGrievances();
+          }}
+          className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
+            activeTab === 'support' ? 'text-[#D4A017] font-extrabold' : 'text-slate-500 font-medium'
+          }`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span className="text-[10px] tracking-tight">Support</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('profile')}
           className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
             activeTab === 'profile' ? 'text-[#D4A017] font-extrabold' : 'text-slate-500 font-medium'
@@ -676,213 +731,37 @@ const StudentPortal = () => {
 
       {/* MARK ATTENDANCE BOTTOM SHEET MODAL */}
       {showBottomSheet && selectedSession && (
-        <div className="fixed inset-0 bg-[#000a18]/80 backdrop-blur-sm z-50 flex items-end justify-center">
-          {!submitting && (
-            <div className="absolute inset-0" onClick={() => setShowBottomSheet(false)} />
-          )}
-
-          {/* Sheet */}
-          <div className="w-full max-w-[430px] bg-[#001c44] border-t border-[#002a63] rounded-t-3xl p-6 shadow-2xl relative z-10 space-y-6 animate-[slideUp_0.25s_ease-out]">
-            <div className="w-12 h-1 bg-[#002a63] rounded-full mx-auto" />
-
-            <div className="text-center">
-              <h3 className="font-extrabold text-white text-base leading-snug">{selectedSession.courseName}</h3>
-              <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">
-                {selectedSession.sessionType} Session
-              </p>
-              
-              {(checkInStep === 1 || checkInStep === 2) && (
-                <div className="text-[10px] text-[#D4A017] font-bold uppercase tracking-wider mt-2.5">
-                  Step {checkInStep} of 2
-                </div>
-              )}
-            </div>
-
-            {/* STEP 1: SCAN QR / ENTER MANUAL CODE */}
-            {checkInStep === 1 && (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-xs text-slate-400">
-                    Scan the QR code displayed by your Class Rep
-                  </p>
-                </div>
-
-                {!showManualInput ? (
-                  <div className="space-y-4">
-                    <div className="w-full aspect-square max-w-[240px] mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#D4A017]/40 relative bg-slate-950">
-                      <QRScanner onScan={handleQRScanSuccess} />
-                    </div>
-                    <div className="text-center space-y-3">
-                      <button
-                        onClick={() => setShowManualInput(true)}
-                        className="text-xs text-[#D4A017] hover:text-[#b88a14] font-bold underline block mx-auto"
-                      >
-                        Enter code manually
-                      </button>
-
-                      {selectedSession?.sessionType === 'PHYSICAL' && (
-                        <div className="pt-2 border-t border-[#002a63]">
-                          <button
-                            onClick={() => advanceToLocation('', true)}
-                            className="w-full bg-[#003B8E] hover:bg-[#002a63] text-[#D4A017] border border-[#002a63] font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-[#D4A017]/5"
-                          >
-                            <svg className="w-4 h-4 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            </svg>
-                            Check In via GPS Location (No Scan)
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleManualCodeSubmit} className="space-y-4">
-                    <div>
-                      <label className="block text-slate-400 text-xs font-semibold mb-2">Manual Token Code</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Paste code from representative..."
-                        value={manualCode}
-                        onChange={(e) => setManualCode(e.target.value)}
-                        className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#D4A017] font-mono"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-[#D4A017] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs hover:bg-[#b88a14] transition-colors"
-                    >
-                      Verify Code
-                    </button>
-                    <div className="text-center">
-                      <button
-                        type="button"
-                        onClick={() => setShowManualInput(false)}
-                        className="text-xs text-slate-500 hover:text-slate-400"
-                      >
-                        Switch back to camera scanner
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                <button
-                  onClick={() => setShowBottomSheet(false)}
-                  className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl text-xs transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {/* STEP 2: LOCATION CAPTURE / WAITING SUBMISSION */}
-            {checkInStep === 2 && (
-              <div className="space-y-6 text-center py-6">
-                <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
-                  <div className="absolute inset-0 bg-[#D4A017]/20 rounded-full animate-ping" />
-                  <div className="w-10 h-10 bg-[#D4A017] rounded-full flex items-center justify-center shadow-lg shadow-[#D4A017]/10">
-                    <svg className="w-5 h-5 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="text-sm font-bold text-white">Verifying location...</h4>
-                  <p className="text-xs text-slate-500 px-4">
-                    Fetching your GPS coordinates. Ensure browser location settings are enabled.
-                  </p>
-                </div>
-
-                {submitting && (
-                  <div className="flex justify-center items-center gap-2 text-xs text-slate-400">
-                    <div className="w-4 h-4 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin"></div>
-                    Submitting check-in report...
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* STEP 3: SUCCESS ANIMATION & INFO */}
-            {checkInStep === 3 && (
-              <div className="space-y-6 text-center py-4">
-                <div className="w-16 h-16 bg-[#D4A017]/10 border border-[#D4A017]/20 rounded-full flex items-center justify-center mx-auto">
-                  <svg className="w-9 h-9 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-black text-white">Attendance Marked!</h3>
-                  <p className="text-xs text-slate-400 mt-1">{successDetails.courseName}</p>
-                </div>
-
-                <div className="bg-slate-950/40 p-4 border border-[#002a63] rounded-2xl flex justify-between items-center text-xs">
-                  <div className="text-left space-y-1">
-                    <span className="block text-[10px] text-slate-500 font-bold uppercase">Time Marked</span>
-                    <span className="text-slate-300 font-bold font-mono">{successDetails.time}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className={`px-3 py-1 text-xs font-black rounded-full border ${
-                      successDetails.status === 'PRESENT' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    }`}>
-                      {successDetails.status}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setShowBottomSheet(false)}
-                  className="w-full bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-colors"
-                >
-                  Done
-                </button>
-              </div>
-            )}
-
-            {/* STEP 4: ERROR DISPLAY & RETRY BUTTON */}
-            {checkInStep === 4 && (
-              <div className="space-y-6 text-center py-4">
-                <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <svg className="w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-black text-white">Verification Failed</h3>
-                  <p className="text-xs text-rose-400 bg-rose-500/5 border border-rose-500/10 p-3 rounded-xl max-w-[290px] mx-auto leading-relaxed">
-                    {submitErrorMsg || gpsError || 'Location coordinate check or dynamic QR code validation failed.'}
-                  </p>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      if (scannedCodeToken) {
-                        advanceToLocation(scannedCodeToken);
-                      } else {
-                        setCheckInStep(1);
-                      }
-                    }}
-                    className="flex-1 bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-colors"
-                  >
-                    Try Again
-                  </button>
-                  <button
-                    onClick={() => setShowBottomSheet(false)}
-                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3.5 rounded-xl text-xs transition-colors"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </div>
+        <CheckInSheet
+          session={selectedSession}
+          indexNumber={indexNumber}
+          fullName={fullName}
+          onClose={() => setShowBottomSheet(false)}
+          onSuccess={() => {
+            fetchActiveSessions();
+            fetchStudentHistory();
+          }}
+        />
       )}
 
+      {/* GRIEVANCE SUBMISSION MODAL */}
+      {showGrievanceModal && (
+        <GrievanceModal
+          indexNumber={indexNumber}
+          fullName={fullName}
+          courses={uniqueCourses}
+          onClose={() => setShowGrievanceModal(false)}
+          onSubmitted={fetchStudentGrievances}
+        />
+      )}
+
+      {/* Confirm Modal */}
+      {confirmState.open && (
+        <ConfirmModal
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
+        />
+      )}
     </div>
   );
 };

@@ -246,15 +246,6 @@ router.delete('/:id', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), async (req
   try {
     const { id } = req.params;
 
-    // Check if course is linked to any classes
-    const linkedClasses = await prisma.classCourse.count({
-      where: { courseId: id }
-    });
-
-    if (linkedClasses > 0) {
-      return res.status(400).json({ error: 'Cannot delete course linked to classes' });
-    }
-
     // Check if course is linked to any sessions
     const linkedSessions = await prisma.attendanceSession.count({
       where: { courseId: id }

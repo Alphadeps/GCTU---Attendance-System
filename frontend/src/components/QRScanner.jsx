@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import jsQR from 'jsqr';
 
 const QRScanner = ({ onScan }) => {
@@ -14,9 +14,10 @@ const QRScanner = ({ onScan }) => {
     return () => {
       stopCamera();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startCamera = async () => {
+  async function startCamera() {
     setErrorMsg('');
     setScanning(true);
     try {
@@ -35,9 +36,9 @@ const QRScanner = ({ onScan }) => {
       setErrorMsg('Unable to access camera. Please ensure permissions are granted.');
       setScanning(false);
     }
-  };
+  }
 
-  const stopCamera = () => {
+  function stopCamera() {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
@@ -46,9 +47,9 @@ const QRScanner = ({ onScan }) => {
       streamRef.current = null;
     }
     setScanning(false);
-  };
+  }
 
-  const scanFrame = () => {
+  function scanFrame() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
@@ -76,7 +77,7 @@ const QRScanner = ({ onScan }) => {
     if (streamRef.current) {
       animationFrameRef.current = requestAnimationFrame(scanFrame);
     }
-  };
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-slate-900 rounded-xl border border-slate-800 shadow-xl max-w-sm w-full mx-auto">

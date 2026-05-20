@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 
 const NotificationPanel = ({ studentIndex }) => {
@@ -9,9 +9,22 @@ const NotificationPanel = ({ studentIndex }) => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        let url = '/notifications';
+        if (studentIndex) {
+          url += `?studentIndex=${studentIndex}`;
+        }
+        const response = await api.get(url);
+        setNotifications(response.data || []);
+      } catch (err) {
+        console.error('Fetch notifications error:', err);
+      }
+    };
+
     fetchNotifications();
-    // Poll for new notifications every 5 seconds
-    const interval = setInterval(fetchNotifications, 5000);
+    // Poll for new notifications every 60 seconds to prevent hitting the 429 rate limit
+    const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, [studentIndex]);
 
@@ -25,19 +38,6 @@ const NotificationPanel = ({ studentIndex }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const fetchNotifications = async () => {
-    try {
-      let url = '/notifications';
-      if (studentIndex) {
-        url += `?studentIndex=${studentIndex}`;
-      }
-      const response = await api.get(url);
-      setNotifications(response.data || []);
-    } catch (err) {
-      console.error('Fetch notifications error:', err);
-    }
-  };
 
   const handleMarkAsRead = async (id) => {
     try {
@@ -136,7 +136,7 @@ const NotificationPanel = ({ studentIndex }) => {
 
       {/* Notifications Drawer/Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-[#001c44] border border-[#002a63] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in origin-top-right">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 max-w-[calc(100vw-2rem)] bg-[#001c44] border border-[#002a63] rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in origin-top-right">
           <div className="p-4 border-b border-[#002a63] flex items-center justify-between bg-[#001432]/80">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm text-white">System Notifications</h3>

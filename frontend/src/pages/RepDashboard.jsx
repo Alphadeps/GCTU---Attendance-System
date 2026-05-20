@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import NotificationPanel from '../components/NotificationPanel';
+import { useToast } from '../components/ToastProvider';
+import ConfirmModal from '../components/ConfirmModal';
+import { useAuth } from '../context/AuthContext';
 
 const RepDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -33,24 +36,17 @@ const RepDashboard = () => {
   // Class info (from localStorage — populated at login)
   const [classStudentCount, setClassStudentCount] = useState(0);
 
+  // Confirm modal state
+  const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
+
   const navigate = useNavigate();
-  const role = localStorage.getItem('role');
-  const username = localStorage.getItem('username');
-  const deptName = localStorage.getItem('dept_name') || 'Class Attendance System';
-  const deptLogo = localStorage.getItem('dept_logo') || '/logo.jfif';
+  const toast = useToast();
+  const auth = useAuth();
+  const { role, username, assignedClass, deptName, deptLogo } = auth;
 
-  // Parse assigned class
-  const assignedClassStr = localStorage.getItem('assignedClass');
-  let assignedClass = null;
-  try {
-    assignedClass = assignedClassStr ? JSON.parse(assignedClassStr) : null;
-  } catch (e) {
-    console.error(e);
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Use defaults if not set
+  const displayDeptName = deptName || 'Class Attendance System';
+  const displayDeptLogo = deptLogo || '/logo.jfif';
 
   const fetchData = async () => {
     setLoading(true);
@@ -58,25 +54,21 @@ const RepDashboard = () => {
     try {
       // Always fetch recent sessions
       const statsRes = await api.get('/stats');
-      setSessions(statsRes.data.recentSessions || []);
+      // Filter sessions to only show those belonging to the rep's assigned class
+      setSessions((statsRes.data.recentSessions || []).filter(s => s.classId === assignedClass?.id));
 
       // Fetch courses SCOPED to assigned class
       if (assignedClass?.id) {
-        const courseRes = await api.get(`/admin/classes/${assignedClass.id}/courses`);
+        // Backend scopes this to the rep's assigned class via JWT
+        const courseRes = await api.get(`/courses`);
         const classCourses = courseRes.data || [];
         setCourses(classCourses);
         if (classCourses.length > 0) {
           setSelectedCourseId(classCourses[0].id);
         }
 
-        // Also refresh student count from API (in case it changed after login)
-        try {
-          const studentsRes = await api.get(`/admin/classes/${assignedClass.id}/students`);
-          setClassStudentCount(Array.isArray(studentsRes.data) ? studentsRes.data.length : 0);
-        } catch {
-          // fallback to localStorage count
-          setClassStudentCount(assignedClass.studentCount ?? 0);
-        }
+        // Just use the pre-calculated count from login
+        setClassStudentCount(assignedClass.studentCount ?? 0);
       } else {
         // No class assigned — nothing to load
         setCourses([]);
@@ -84,11 +76,16 @@ const RepDashboard = () => {
       }
     } catch (err) {
       console.error('Fetch dashboard data error:', err);
-      setErrorMsg('Failed to load data. Check your connection.');
+      setErrorMsg(err.response?.data?.error || 'Failed to load data. Check your connection.');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -96,14 +93,14 @@ const RepDashboard = () => {
     } catch (err) {
       console.error('Logout error:', err);
     }
-    localStorage.clear();
+    auth.logout();
     navigate('/');
   };
 
   const getGPSLocation = () => {
     setGpsLoading(true);
     if (!navigator.geolocation) {
-      alert('Geolocation is not supported by your browser');
+      toast.error('Geolocation is not supported by your browser.');
       setGpsLoading(false);
       return;
     }
@@ -115,7 +112,7 @@ const RepDashboard = () => {
       },
       (error) => {
         console.error('GPS error:', error);
-        alert(`Error getting location: ${error.message}`);
+        toast.error(`Error getting location: ${error.message}`, 'GPS Error');
         setGpsLoading(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -126,7 +123,7 @@ const RepDashboard = () => {
     e.preventDefault();
     setErrorMsg('');
     if (!selectedCourseId) {
-      alert('Please select a course first');
+      toast.warning('Please select a course first.', 'No Course Selected');
       return;
     }
     const endTime = new Date(Date.now() + parseInt(durationMinutes) * 60 * 1000).toISOString();
@@ -143,7 +140,21 @@ const RepDashboard = () => {
       navigate(`/rep/session/${response.data.id}`);
     } catch (err) {
       console.error('Create session error:', err);
-      alert(err.response?.data?.error || 'Failed to create session');
+      setErrorMsg(err.response?.data?.error || 'Failed to create session');
+    }
+  };
+
+  const [generatingReportId, setGeneratingReportId] = useState(null);
+  const handleGenerateReport = async (courseId) => {
+    setGeneratingReportId(courseId);
+    try {
+      await api.post('/reports/generate', { courseId });
+      toast.success('Official report generated and sent to lecturers for signature!', 'Report Generated');
+    } catch (err) {
+      console.error('Generate report error:', err);
+      toast.error(err.response?.data?.error || 'Failed to generate report', 'Generation Failed');
+    } finally {
+      setGeneratingReportId(null);
     }
   };
 
@@ -156,27 +167,33 @@ const RepDashboard = () => {
       setAnalyticsData(response.data);
     } catch (err) {
       console.error('Fetch analytics error:', err);
-      alert('Failed to load course analytics.');
+      toast.error('Failed to load course analytics.');
       setShowAnalyticsModal(false);
     } finally {
       setAnalyticsLoading(false);
     }
   };
 
-  const handleSendWarnings = async (courseId) => {
-    if (!window.confirm('Broadcast warning notifications to all students with attendance below 75%?')) return;
-    setBroadcasting(true);
-    try {
-      const response = await api.post(`/courses/${courseId}/warn-at-risk`);
-      alert(`Broadcast successful! Warnings sent to ${response.data.warningsSent} at-risk students.`);
-      const refreshRes = await api.get(`/courses/${courseId}/analytics`);
-      setAnalyticsData(refreshRes.data);
-    } catch (err) {
-      console.error('Broadcast warnings error:', err);
-      alert(err.response?.data?.error || 'Failed to send warnings.');
-    } finally {
-      setBroadcasting(false);
-    }
+  const handleSendWarnings = (courseId) => {
+    setConfirmState({
+      open: true,
+      message: 'Broadcast warning notifications to all students with attendance below 75%?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        setBroadcasting(true);
+        try {
+          const response = await api.post(`/courses/${courseId}/warn-at-risk`);
+          toast.success(`Warnings sent to ${response.data.warningsSent} at-risk students.`, 'Broadcast Sent!');
+          const refreshRes = await api.get(`/courses/${courseId}/analytics`);
+          setAnalyticsData(refreshRes.data);
+        } catch (err) {
+          console.error('Broadcast warnings error:', err);
+          toast.error(err.response?.data?.error || 'Failed to send warnings.');
+        } finally {
+          setBroadcasting(false);
+        }
+      }
+    });
   };
 
   // Setup checks
@@ -189,8 +206,8 @@ const RepDashboard = () => {
       {/* Mesh gradients */}
       <div className="absolute top-[-30%] right-[-10%] w-[70%] h-[70%] rounded-full bg-[#D4A017]/5 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-[-30%] left-[-10%] w-[70%] h-[70%] rounded-full bg-[#003B8E]/10 blur-[150px] pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-        <img src="/logo.jfif" alt="" className="w-[450px] h-[450px] object-contain filter grayscale" />
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+        <img src="/logo2.png" alt="" className="w-[450px] h-[450px] object-contain" />
       </div>
 
       {/* Mobile sidebar overlay */}
@@ -202,12 +219,22 @@ const RepDashboard = () => {
       <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#001c44]/95 border-r border-[#002a63] z-40 transition-transform duration-300 md:translate-x-0 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 space-y-8 flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
-          <div className="flex items-center gap-3">
-            <img src={deptLogo} alt="Logo" className="w-10 h-10 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
-            <div className="truncate">
-              <h2 className="text-sm font-bold text-white truncate">{deptName}</h2>
+          <div className="flex items-center gap-3 relative">
+            <img src={displayDeptLogo} alt="Logo" className="w-10 h-10 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
+            <div className="truncate flex-1">
+              <h2 className="text-sm font-bold text-white truncate">{displayDeptName}</h2>
               <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">Class Representative</span>
             </div>
+            {/* Mobile close button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-[#002a63] rounded-lg transition-colors"
+              aria-label="Close sidebar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
           {/* Class Info card */}
@@ -396,8 +423,8 @@ const RepDashboard = () => {
                 </div>
                 <button
                   onClick={() => {
-                    if (!assignedClass) { alert('You are not assigned to a class yet.'); return; }
-                    if (hasNoCourses) { alert('No courses have been added to your class. Contact your administrator.'); return; }
+                    if (!assignedClass) { toast.warning('You are not assigned to a class yet.'); return; }
+                    if (hasNoCourses) { toast.warning('No courses have been added to your class. Contact your administrator.'); return; }
                     setShowSessionModal(true);
                   }}
                   disabled={!assignedClass || hasNoCourses}
@@ -502,12 +529,21 @@ const RepDashboard = () => {
                           <p className="font-bold text-slate-200 text-sm">{c.name}</p>
                           <p className="font-mono text-xs text-slate-500 mt-1">{c.code}</p>
                         </div>
-                        <button
-                          onClick={() => handleOpenAnalytics(c.id)}
-                          className="bg-[#D4A017]/10 hover:bg-[#D4A017] hover:text-slate-950 text-[#D4A017] font-bold py-1.5 px-3 rounded-lg border border-[#D4A017]/20 transition-all text-[11px]"
-                        >
-                          📊 Analytics
-                        </button>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleGenerateReport(c.id)}
+                            disabled={generatingReportId === c.id}
+                            className="bg-emerald-600/10 hover:bg-emerald-600 hover:text-white text-emerald-500 font-bold py-1.5 px-3 rounded-lg border border-emerald-500/20 transition-all text-[11px] disabled:opacity-50"
+                          >
+                            {generatingReportId === c.id ? 'Generating...' : '📄 Generate Report'}
+                          </button>
+                          <button
+                            onClick={() => handleOpenAnalytics(c.id)}
+                            className="bg-[#D4A017]/10 hover:bg-[#D4A017] hover:text-slate-950 text-[#D4A017] font-bold py-1.5 px-3 rounded-lg border border-[#D4A017]/20 transition-all text-[11px]"
+                          >
+                            📊 Analytics
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -712,7 +748,7 @@ const RepDashboard = () => {
                           s.indexNumber.includes(analyticsSearch)
                         )
                         .map((student) => {
-                          const rate = student.attendanceRate;
+                          const rate = student.attendanceRate ?? 0;
                           const barColor = rate >= 75 ? 'bg-emerald-500' : rate >= 60 ? 'bg-amber-500' : 'bg-rose-500';
                           const textColor = rate >= 75 ? 'text-emerald-400' : rate >= 60 ? 'text-amber-400' : 'text-rose-400';
                           const badgeBg = rate >= 75 ? 'bg-emerald-500/10 border-emerald-500/20' : rate >= 60 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-rose-500/10 border-rose-500/20';
@@ -748,6 +784,15 @@ const RepDashboard = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmState.open && (
+        <ConfirmModal
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
+        />
       )}
     </div>
   );

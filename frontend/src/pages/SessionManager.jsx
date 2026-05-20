@@ -1,17 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import AttendanceTable from '../components/AttendanceTable';
 import SignatureCanvas from '../components/SignatureCanvas';
+import { useToast } from '../components/ToastProvider';
+import ConfirmModal from '../components/ConfirmModal';
+import { useAuth } from '../context/AuthContext';
 
 // Report Generation Imports
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 const SessionManager = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
+  const auth = useAuth();
+  const { deptName, deptLogo } = auth;
+
+  // Use defaults if not set
+  const displayDeptName = deptName || 'Class Attendance System';
+  const displayDeptLogo = deptLogo || '/logo.svg';
 
   const [session, setSession] = useState(null);
   const [attendances, setAttendances] = useState([]);
@@ -21,9 +31,8 @@ const SessionManager = () => {
   const [countdown, setCountdown] = useState(25);
   const [activePanelTab, setActivePanelTab] = useState('logs'); // 'logs' | 'security'
   
-  // Custom Branding
-  const deptName = localStorage.getItem('dept_name') || 'Class Attendance System';
-  const deptLogo = localStorage.getItem('dept_logo') || '/logo.svg';
+  // Confirm modal state
+  const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
 
   // Signature state
   const [signature, setSignature] = useState('');
@@ -31,35 +40,8 @@ const SessionManager = () => {
 
   // Poll timers
   const pollTimerRef = useRef(null);
-
-  useEffect(() => {
-    fetchSessionDetails();
-    
-    // Start polling every 10 seconds for attendance logs
-    pollTimerRef.current = setInterval(fetchSessionDetails, 10000);
-
-    return () => {
-      clearInterval(pollTimerRef.current);
-    };
-  }, [id]);
-
-  useEffect(() => {
-    let interval = null;
-    if (session && session.status === 'OPEN') {
-      interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            refreshQR();
-            return 25;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [session]);
+  // Countdown interval ref — holds the single interval ID to prevent stacking
+  const countdownRef = useRef(null);
 
   const fetchSessionDetails = async () => {
     try {
@@ -72,7 +54,7 @@ const SessionManager = () => {
       }
     } catch (err) {
       console.error('Fetch session details error:', err);
-      setErrorMsg('Failed to load session details');
+      setErrorMsg(err.response?.data?.error || 'Failed to load session details');
     } finally {
       setLoading(false);
     }
@@ -88,33 +70,78 @@ const SessionManager = () => {
     }
   };
 
+  useEffect(() => {
+    fetchSessionDetails();
+    
+    // Start polling every 10 seconds for attendance logs
+    pollTimerRef.current = setInterval(fetchSessionDetails, 10000);
+
+    return () => {
+      clearInterval(pollTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  useEffect(() => {
+    // Clear any existing countdown interval
+    if (countdownRef.current) {
+      clearInterval(countdownRef.current);
+      countdownRef.current = null;
+    }
+
+    // Only start countdown when session is OPEN
+    if (session?.status === 'OPEN') {
+      countdownRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            refreshQR();
+            return 25;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.status, session?.id]);
+
   const handleUpdateStatus = async (attendanceId, newStatus) => {
     try {
       await api.patch(`/attendance/${attendanceId}/status`, { status: newStatus });
       fetchSessionDetails();
     } catch (err) {
       console.error('Update status error:', err);
-      alert(err.response?.data?.error || 'Failed to update status');
+      toast.error(err.response?.data?.error || 'Failed to update status');
     }
   };
 
-  const handleCloseSession = async () => {
-    if (!window.confirm('Are you sure you want to close this attendance session? This will lock check-ins and auto-mark absent students.')) {
-      return;
-    }
-
-    try {
-      await api.patch(`/sessions/${id}/close`);
-      fetchSessionDetails();
-    } catch (err) {
-      console.error('Close session error:', err);
-      alert(err.response?.data?.error || 'Failed to close session');
-    }
+  const handleCloseSession = () => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to close this attendance session? This will lock check-ins and auto-mark absent students.',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.patch(`/sessions/${id}/close`);
+          toast.info('Session closed. All absent students have been marked.', 'Session Closed');
+          fetchSessionDetails();
+        } catch (err) {
+          console.error('Close session error:', err);
+          toast.error(err.response?.data?.error || 'Failed to close session');
+        }
+      }
+    });
   };
 
   const handleApproveSession = async () => {
     if (!signature) {
-      alert('Please provide your signature on the pad before approving.');
+      toast.warning('Please provide your signature on the pad before approving.', 'Signature Required');
       return;
     }
 
@@ -123,11 +150,11 @@ const SessionManager = () => {
       await api.patch(`/sessions/${id}/approve`, {
         lecturerSignature: signature
       });
-      alert('Session approved successfully!');
+      toast.success('Session approved and signed successfully!', 'Approved!');
       fetchSessionDetails();
     } catch (err) {
       console.error('Approve session error:', err);
-      alert(err.response?.data?.error || 'Failed to approve session');
+      toast.error(err.response?.data?.error || 'Failed to approve session');
     } finally {
       setApproving(false);
     }
@@ -211,7 +238,9 @@ const SessionManager = () => {
             });
           }
         }
-      } catch (e) {}
+      } catch (err) {
+        console.warn('GPS location parsing error:', err);
+      }
     }
 
     if (alerts.length > 0) {
@@ -389,7 +418,7 @@ const SessionManager = () => {
       att.status === 'ABSENT' ? '-' : `Verified IP: ${att.ipAddress || '127.0.0.1'}`
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 84,
       head: [tableColumn],
       body: tableRows,
@@ -398,7 +427,7 @@ const SessionManager = () => {
       styles: { fontSize: 8.5 }
     });
 
-    let finalY = doc.previousAutoTable.finalY + 15;
+    let finalY = doc.lastAutoTable.finalY + 15;
 
     // Signature Pad Box
     doc.setFont('helvetica', 'bold');
@@ -505,8 +534,8 @@ const SessionManager = () => {
   return (
     <div className="min-h-screen bg-[#00122c] text-slate-100 p-6 relative overflow-hidden">
       {/* Background logo watermark */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-        <img src="/logo.jfif" alt="GCTU Crest Watermark" className="w-[450px] h-[450px] object-contain filter grayscale" />
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+        <img src="/logo2.png" alt="GCTU Crest Watermark" className="w-[450px] h-[450px] object-contain" />
       </div>
 
       <div className="absolute top-[-30%] left-[-10%] w-[70%] h-[70%] rounded-full bg-[#D4A017]/5 blur-[150px] pointer-events-none"></div>
@@ -514,13 +543,13 @@ const SessionManager = () => {
       {/* Header */}
       <div className="max-w-6xl mx-auto flex justify-between items-center mb-8 pb-4 border-b border-[#002a63] relative z-10">
         <div className="flex items-center gap-3">
-          <img src={deptLogo} alt="Logo" className="w-12 h-12 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
+          <img src={displayDeptLogo} alt="Logo" className="w-12 h-12 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
           <div>
             <button
               onClick={() => navigate('/rep/dashboard')}
               className="text-xs text-[#D4A017] hover:text-[#b88a14] font-semibold mb-1.5 inline-flex items-center gap-1.5 transition-colors"
             >
-              ← Back to {deptName}
+              ← Back to {displayDeptName}
             </button>
             <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2.5">
               {session.course.name} ({session.course.code})
@@ -647,7 +676,7 @@ const SessionManager = () => {
             <div className="bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] p-6 rounded-2xl shadow-xl space-y-6">
               <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide">Lecturer Approval Required</h3>
               
-              <SignatureCanvas onSave={setSignature} />
+              <SignatureCanvas onSave={setSignature} label="Class Rep Sign-off" />
 
               <button
                 onClick={handleApproveSession}
@@ -821,6 +850,15 @@ const SessionManager = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      {confirmState.open && (
+        <ConfirmModal
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
+        />
+      )}
     </div>
   );
 };

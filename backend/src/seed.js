@@ -135,6 +135,26 @@ async function seed() {
     }
     console.log(`Created ${studentsList.length} students and linked to BIT Group B.`);
 
+    // Create Lecturer Assignments for lecturer1
+    const lecturer = await prisma.user.findFirst({ where: { username: 'lecturer1' } });
+    if (lecturer) {
+      await prisma.lecturerAssignment.create({
+        data: {
+          lecturerId: lecturer.id,
+          classId: classB.id,
+          courseId: course1.id
+        }
+      });
+      await prisma.lecturerAssignment.create({
+        data: {
+          lecturerId: lecturer.id,
+          classId: classB.id,
+          courseId: course3.id
+        }
+      });
+      console.log('Linked lecturer1 to Software Engineering and Mobile App Dev courses for BIT Group B.');
+    }
+
     console.log('\n=== SEEDING COMPLETE ===');
     console.log('Super Admin Login: superadmin / admin123');
     console.log('Rep Login: rep1 / password123');

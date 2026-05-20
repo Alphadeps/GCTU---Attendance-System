@@ -30,7 +30,7 @@ const AttendanceTable = ({ attendances }) => {
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-md shadow-lg">
-      <table className="w-full text-left border-collapse">
+      <table className="w-full text-left border-collapse min-w-[600px]">
         <thead>
           <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-300 text-sm font-semibold">
             <th className="p-4">Name</th>

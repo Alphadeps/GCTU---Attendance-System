@@ -1,9 +1,53 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import AdminGrievancePanel from '../../components/AdminGrievancePanel';
+import ReportSettings from '../../components/admin/ReportSettings';
+import OfficialArchives from '../../components/admin/OfficialArchives';
+import ConfirmModal from '../../components/ConfirmModal';
+import NotificationPanel from '../../components/NotificationPanel';
+import { useAuth } from '../../context/AuthContext';
+import AddProgrammeModal from '../../components/admin/modals/AddProgrammeModal';
+import AddCourseModal from '../../components/admin/modals/AddCourseModal';
+
+const MENU_GROUPS = [
+  {
+    title: 'Dashboard',
+    items: [
+      { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
+    ]
+  },
+  {
+    title: 'Academic Structure',
+    items: [
+      { id: 'programmes', label: 'Programmes', icon: 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' },
+      { id: 'classes', label: 'Classes Control', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+      { id: 'courses', label: 'Global Courses', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+    ]
+  },
+  {
+    title: 'User Management',
+    items: [
+      { id: 'reps', label: 'Class Reps', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+      { id: 'lecturers', label: 'Lecturer Allocations', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+      { id: 'grievances', label: 'Grievance Desk', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    ]
+  },
+  {
+    title: 'System Archives & Settings',
+    items: [
+      { id: 'reports', label: 'Official Archives', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
+      { id: 'settings', label: 'Thresholds & Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+      { id: 'report_settings', label: 'Report Settings', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    ]
+  }
+];
 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
+  const auth = useAuth();
+  const { role, needsPasswordChange: authNeedsPasswordChange } = auth;
+  
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -28,7 +72,6 @@ export default function SuperAdminDashboard() {
     coursesCount: 0,
     activeSessionsCount: 0,
   });
-  const [recentActivities, setRecentActivities] = useState([]);
 
   // Data lists
   const [programmes, setProgrammes] = useState([]);
@@ -36,9 +79,15 @@ export default function SuperAdminDashboard() {
   const [reps, setReps] = useState([]);
   const [courses, setCourses] = useState([]);
 
+  // Lecturer allocations
+  const [lecturerAssignments, setLecturerAssignments] = useState([]);
+  const [lecturerSearchQuery, setLecturerSearchQuery] = useState('');
+  const [uploadingLecturers, setUploadingLecturers] = useState(false);
+  const [lecturerUploadResults, setLecturerUploadResults] = useState(null);
+  const [lecturerFile, setLecturerFile] = useState(null);
+
   // Modals state
   const [showProgModal, setShowProgModal] = useState(false);
-  const [progName, setProgName] = useState('');
 
   const [showClassModal, setShowClassModal] = useState(false);
   const [classStep, setClassStep] = useState(1);
@@ -63,7 +112,6 @@ export default function SuperAdminDashboard() {
   const [newPassword, setNewPassword] = useState('');
 
   const [showCourseModal, setShowCourseModal] = useState(false);
-  const [newCourse, setNewCourse] = useState({ name: '', code: '' });
 
   // Class action modals
   const [selectedClassForRep, setSelectedClassForRep] = useState(null);
@@ -76,7 +124,6 @@ export default function SuperAdminDashboard() {
   const [studentSearch, setStudentSearch] = useState('');
   const [studentAddTab, setStudentAddTab] = useState('manual'); // 'manual' or 'csv'
   const [manualStudents, setManualStudents] = useState([{ name: '', indexNumber: '', email: '' }]);
-  const [csvFile, setCsvFile] = useState(null);
   const [csvPreview, setCsvPreview] = useState([]);
 
   const [selectedClassForCourses, setSelectedClassForCourses] = useState(null);
@@ -93,9 +140,9 @@ export default function SuperAdminDashboard() {
   });
 
   // Force password change overlay
-  const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
+  const [needsPasswordChange, setNeedsPasswordChange] = useState(authNeedsPasswordChange);
   const [pwdChangeForm, setPwdChangeForm] = useState({
-    currentPassword: 'admin123',
+    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
@@ -103,24 +150,21 @@ export default function SuperAdminDashboard() {
   // Logo input ref
   const logoInputRef = useRef(null);
 
+  // Confirm modal state
+  const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
+
   useEffect(() => {
     // Check if user is SUPERADMIN
-    const role = localStorage.getItem('role');
     if (role !== 'SUPERADMIN') {
-      navigate('/login');
+      navigate('/');
       return;
     }
 
-    // Check force password change
-    const forceChange = localStorage.getItem('needsPasswordChange');
-    if (forceChange === 'true') {
-      setNeedsPasswordChange(true);
-    }
-
     fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
-  const fetchInitialData = async () => {
+  async function fetchInitialData() {
     setLoading(true);
     try {
       // Get settings
@@ -162,12 +206,11 @@ export default function SuperAdminDashboard() {
         setCourses(courseRes.data);
       }
 
-      // Mock some recent activities
-      setRecentActivities([
-        { id: 1, action: 'System settings updated', time: 'Just now', type: 'system' },
-        { id: 2, action: 'Class Rep account created', time: '10 mins ago', type: 'user' },
-        { id: 3, action: 'Bulk imported 45 students to BIT 300 Evening', time: '1 hour ago', type: 'class' },
-      ]);
+      // Get lecturer assignments
+      const lecturerRes = await api.get('/lecturer/assignments').catch(() => null);
+      if (lecturerRes && lecturerRes.data) {
+        setLecturerAssignments(lecturerRes.data);
+      }
     } catch (err) {
       console.error(err);
       showNotification('Failed to load dashboard data', 'error');
@@ -241,32 +284,28 @@ export default function SuperAdminDashboard() {
   };
 
   // 3. Programmes Handlers
-  const handleAddProgramme = async (e) => {
-    e.preventDefault();
-    if (!progName.trim()) return;
-    try {
-      const res = await api.post('/admin/programmes', { name: progName });
-      setProgrammes(prev => [...prev, res.data]);
-      setProgName('');
-      setShowProgModal(false);
-      showNotification('Programme added successfully');
-      // refresh stats
-      fetchInitialData();
-    } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to add programme', 'error');
-    }
+  const handleProgrammeSaved = (newProgramme) => {
+    setProgrammes(prev => [...prev, newProgramme]);
+    showNotification('Programme added successfully');
+    fetchInitialData();
   };
 
-  const handleDeleteProgramme = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this programme? This may affect associated classes.')) return;
-    try {
-      await api.delete(`/admin/programmes/${id}`);
-      setProgrammes(prev => prev.filter(p => p.id !== id));
-      showNotification('Programme deleted successfully');
-      fetchInitialData();
-    } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to delete programme', 'error');
-    }
+  const handleDeleteProgramme = (id) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to delete this programme? This may affect associated classes.',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/admin/programmes/${id}`);
+          setProgrammes(prev => prev.filter(p => p.id !== id));
+          showNotification('Programme deleted successfully');
+          fetchInitialData();
+        } catch (err) {
+          showNotification(err.response?.data?.error || 'Failed to delete programme', 'error');
+        }
+      }
+    });
   };
 
   // 4. Multi-Step Class Creation Handlers
@@ -292,7 +331,7 @@ export default function SuperAdminDashboard() {
 
     try {
       // Post class creation
-      const res = await api.post('/admin/classes', {
+      await api.post('/admin/classes', {
         programmeId: newClass.programmeId,
         level: parseInt(newClass.level),
         type: newClass.type,
@@ -368,16 +407,22 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleDeleteRep = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this representative account? This action is permanent.')) return;
-    try {
-      await api.delete(`/admin/reps/${id}`);
-      setReps(prev => prev.filter(r => r.id !== id));
-      showNotification('Representative deleted successfully');
-      fetchInitialData();
-    } catch (err) {
-      showNotification('Failed to delete representative', 'error');
-    }
+  const handleDeleteRep = (id) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to delete this representative account? This action is permanent.',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/admin/reps/${id}`);
+          setReps(prev => prev.filter(r => r.id !== id));
+          showNotification('Representative deleted successfully');
+          fetchInitialData();
+        } catch (err) {
+          showNotification('Failed to delete representative', 'error');
+        }
+      }
+    });
   };
 
   // 6. Assign/Unassign Rep to Class
@@ -394,15 +439,21 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleRemoveRepFromClass = async (classId) => {
-    if (!window.confirm('Are you sure you want to remove the representative from this class?')) return;
-    try {
-      await api.post(`/admin/classes/${classId}/remove-rep`);
-      showNotification('Representative unassigned from class');
-      fetchInitialData();
-    } catch (err) {
-      showNotification('Failed to remove representative', 'error');
-    }
+  const handleRemoveRepFromClass = (classId) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to remove the representative from this class?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.post(`/admin/classes/${classId}/remove-rep`);
+          showNotification('Representative unassigned from class');
+          fetchInitialData();
+        } catch (err) {
+          showNotification('Failed to remove representative', 'error');
+        }
+      }
+    });
   };
 
   // 7. Student Management for Classes
@@ -453,72 +504,72 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleCsvFileDrop = (e) => {
+  const handleCsvFileDrop = async (e) => {
     e.preventDefault();
     const file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
-    if (file && file.name.endsWith('.csv')) {
-      setCsvFile(file);
-      parseCsv(file);
+    if (!file) return;
+
+    const lowerName = file.name.toLowerCase();
+    if (
+      lowerName.endsWith('.csv') ||
+      lowerName.endsWith('.xlsx') ||
+      lowerName.endsWith('.xls') ||
+      lowerName.endsWith('.pdf')
+    ) {
+      await parseFileOnBackend(file);
     } else {
-      showNotification('Only CSV files are supported', 'error');
+      showNotification('Unsupported file type. Please upload a CSV, Excel (.xlsx, .xls) or PDF (.pdf) file.', 'error');
     }
   };
 
-  const parseCsv = (file) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target.result;
-      const lines = text.split('\n');
-      const results = [];
-      // Skip header row
-      for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line) {
-          const parts = line.split(',');
-          // indexNumber, name, email
-          if (parts.length >= 2) {
-            results.push({
-              indexNumber: parts[0]?.trim(),
-              name: parts[1]?.trim(),
-              email: parts[2]?.trim() || '',
-            });
-          }
-        }
-      }
-      setCsvPreview(results);
-    };
-    reader.readAsText(file);
+  const parseFileOnBackend = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      showNotification('Uploading and parsing document...', 'info');
+      const res = await api.post('/admin/classes/parse-file', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setCsvPreview(res.data.students || []);
+      showNotification(`Successfully parsed ${res.data.students?.length || 0} student records.`, 'success');
+    } catch (err) {
+      showNotification(err.response?.data?.error || 'Failed to parse file.', 'error');
+      setCsvPreview([]);
+    }
   };
 
   const handleImportCsv = async () => {
-    if (!csvFile || csvPreview.length === 0) return;
-    const formData = new FormData();
-    formData.append('file', csvFile);
-
+    if (csvPreview.length === 0) return;
     try {
-      await api.post(`/admin/classes/${selectedClassForStudents.id}/students/bulk-import`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      showNotification('Enrolling parsed student database...', 'info');
+      await api.post(`/admin/classes/${selectedClassForStudents.id}/students`, {
+        students: csvPreview
       });
-      showNotification(`Successfully imported ${csvPreview.length} students`);
-      setCsvFile(null);
+      showNotification(`Successfully imported ${csvPreview.length} students into class.`);
       setCsvPreview([]);
       handleOpenStudentsModal(selectedClassForStudents);
       fetchInitialData();
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to import CSV file', 'error');
+      showNotification(err.response?.data?.error || 'Failed to import student list.', 'error');
     }
   };
 
-  const handleRemoveStudentFromClass = async (studentId) => {
-    if (!window.confirm('Are you sure you want to remove this student from this class?')) return;
-    try {
-      await api.delete(`/admin/classes/${selectedClassForStudents.id}/students/${studentId}`);
-      showNotification('Student removed from class');
-      handleOpenStudentsModal(selectedClassForStudents);
-      fetchInitialData();
-    } catch (err) {
-      showNotification('Failed to remove student', 'error');
-    }
+  const handleRemoveStudentFromClass = (studentId) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to remove this student from this class?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/admin/classes/${selectedClassForStudents.id}/students/${studentId}`);
+          showNotification('Student removed from class');
+          handleOpenStudentsModal(selectedClassForStudents);
+          fetchInitialData();
+        } catch (err) {
+          showNotification('Failed to remove student', 'error');
+        }
+      }
+    });
   };
 
   // 8. Class Courses Handlers
@@ -546,44 +597,106 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleUnlinkCourseFromClass = async (courseId) => {
-    if (!window.confirm('Are you sure you want to unlink this course from this class?')) return;
-    try {
-      await api.delete(`/admin/classes/${selectedClassForCourses.id}/courses/${courseId}`);
-      showNotification('Course unlinked from class');
-      handleOpenCoursesModal(selectedClassForCourses);
-    } catch (err) {
-      showNotification('Failed to unlink course', 'error');
-    }
+  const handleUnlinkCourseFromClass = (courseId) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to unlink this course from this class?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/admin/classes/${selectedClassForCourses.id}/courses/${courseId}`);
+          showNotification('Course unlinked from class');
+          handleOpenCoursesModal(selectedClassForCourses);
+        } catch (err) {
+          showNotification('Failed to unlink course', 'error');
+        }
+      }
+    });
   };
 
   // 9. Global Courses Handlers
-  const handleAddGlobalCourse = async (e) => {
-    e.preventDefault();
-    if (!newCourse.name.trim() || !newCourse.code.trim()) return;
+  const handleCourseSaved = (newCourse) => {
+    setCourses(prev => [...prev, newCourse]);
+    showNotification('Course added to global database');
+    fetchInitialData();
+  };
 
+  const handleDeleteGlobalCourse = (id) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to delete this course from the database? It cannot be linked or active.',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/courses/${id}`);
+          setCourses(prev => prev.filter(c => c.id !== id));
+          showNotification('Course deleted successfully');
+          fetchInitialData();
+        } catch (err) {
+          showNotification(err.response?.data?.error || 'Failed to delete course', 'error');
+        }
+      }
+    });
+  };
+
+  // 10. Lecturer Assignment Handlers
+  const fetchLecturerAssignments = async () => {
     try {
-      const res = await api.post('/courses', newCourse);
-      setCourses(prev => [...prev, res.data]);
-      setShowCourseModal(false);
-      setNewCourse({ name: '', code: '' });
-      showNotification('Course added to global database');
-      fetchInitialData();
+      const res = await api.get('/lecturer/assignments');
+      setLecturerAssignments(res.data || []);
     } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to create course', 'error');
+      console.error('Fetch lecturer assignments error:', err);
     }
   };
 
-  const handleDeleteGlobalCourse = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this course from the database? It cannot be linked or active.')) return;
-    try {
-      await api.delete(`/courses/${id}`);
-      setCourses(prev => prev.filter(c => c.id !== id));
-      showNotification('Course deleted successfully');
-      fetchInitialData();
-    } catch (err) {
-      showNotification(err.response?.data?.error || 'Failed to delete course', 'error');
+  const handleLecturerFileUpload = async (e) => {
+    e.preventDefault();
+    const file = e.target.files?.[0] || lecturerFile;
+    if (!file) {
+      showNotification('Please select a file to upload.', 'error');
+      return;
     }
+
+    setUploadingLecturers(true);
+    setLecturerUploadResults(null);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      showNotification('Uploading and parsing allocations...', 'info');
+      const res = await api.post('/lecturer/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      showNotification(res.data.message || 'Spreadsheet uploaded successfully.');
+      setLecturerUploadResults(res.data.results);
+      setLecturerFile(null);
+      fetchLecturerAssignments();
+      fetchInitialData(); // Refresh other stats
+    } catch (err) {
+      console.error(err);
+      showNotification(err.response?.data?.error || 'Failed to upload spreadsheet.', 'error');
+    } finally {
+      setUploadingLecturers(false);
+    }
+  };
+
+  const handleDeleteAssignment = (id) => {
+    setConfirmState({
+      open: true,
+      message: 'Are you sure you want to remove this lecturer allocation?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.delete(`/lecturer/assignments/${id}`);
+          showNotification('Lecturer allocation removed successfully');
+          setLecturerAssignments(prev => prev.filter(a => a.id !== id));
+          fetchInitialData();
+        } catch (err) {
+          console.error(err);
+          showNotification('Failed to remove lecturer allocation', 'error');
+        }
+      }
+    });
   };
 
   const handleLogout = async () => {
@@ -592,8 +705,8 @@ export default function SuperAdminDashboard() {
     } catch (err) {
       console.error('Logout error:', err);
     }
-    localStorage.clear();
-    navigate('/login');
+    auth.logout();
+    navigate('/');
   };
 
   // Filter Logic
@@ -650,9 +763,11 @@ export default function SuperAdminDashboard() {
                 <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Current Password</label>
                 <input
                   type="password"
+                  required
+                  placeholder="Enter your current password"
                   value={pwdChangeForm.currentPassword}
-                  readOnly
-                  className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-slate-400 focus:outline-none cursor-not-allowed"
+                  onChange={(e) => setPwdChangeForm(p => ({ ...p, currentPassword: e.target.value }))}
+                  className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
                 />
               </div>
 
@@ -701,7 +816,7 @@ export default function SuperAdminDashboard() {
       )}
 
       {/* 1. LEFT SIDEBAR */}
-      <aside className="w-[260px] bg-[#090d16] border-r border-slate-800 flex flex-col shrink-0">
+      <aside className="w-[260px] bg-[#090d16] border-r border-slate-800 flex flex-col shrink-0 h-screen sticky top-0">
         {/* Header / Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
           <img
@@ -717,42 +832,45 @@ export default function SuperAdminDashboard() {
         </div>
 
         {/* Navigation items */}
-        <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
-          {[
-            { id: 'overview', label: 'Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
-            { id: 'programmes', label: 'Programmes', icon: 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z' },
-            { id: 'classes', label: 'Classes Control', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
-            { id: 'reps', label: 'Class Reps', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-            { id: 'courses', label: 'Global Courses', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-            { id: 'settings', label: 'Thresholds & Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
-          ].map(item => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
-                activeTab === item.id
-                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/10'
-                  : 'text-slate-400 hover:bg-[#111827] hover:text-white'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-              </svg>
-              <span>{item.label}</span>
-            </button>
+        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+          {MENU_GROUPS.map((group, groupIdx) => (
+            <div key={groupIdx} className="space-y-1">
+              <span className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
+                {group.title}
+              </span>
+              {group.items.map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center space-x-3.5 px-4 py-2.5 rounded-xl font-semibold text-[13px] transition-all duration-200 ${
+                    activeTab === item.id
+                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/10'
+                      : 'text-slate-400 hover:bg-[#111827] hover:text-white'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                  </svg>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
 
         {/* Footer info & Logout */}
         <div className="p-4 border-t border-slate-800 space-y-3">
-          <div className="flex items-center space-x-3 px-2">
-            <div className="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center text-indigo-400 font-bold border border-slate-700">
-              SA
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center space-x-3">
+              <div className="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center text-indigo-400 font-bold border border-slate-700">
+                SA
+              </div>
+              <div className="overflow-hidden">
+                <p className="text-xs font-semibold text-white truncate">Administrator</p>
+                <span className="text-[10px] text-slate-400">superadmin</span>
+              </div>
             </div>
-            <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-white truncate">Administrator</p>
-              <span className="text-[10px] text-slate-400">superadmin</span>
-            </div>
+            <NotificationPanel />
           </div>
           <button
             onClick={handleLogout}
@@ -890,22 +1008,6 @@ export default function SuperAdminDashboard() {
                         {settings.geofenceRadiusMeters} Meters
                       </span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Recent Activities */}
-                <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4">
-                  <h3 className="font-bold text-white text-base">Recent Logs</h3>
-                  <div className="space-y-4">
-                    {recentActivities.map(act => (
-                      <div key={act.id} className="flex items-start space-x-3">
-                        <span className="h-2 w-2 mt-1.5 rounded-full bg-indigo-500 shrink-0"></span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-white truncate">{act.action}</p>
-                          <span className="text-[9px] text-slate-400 block">{act.time}</span>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -1162,16 +1264,21 @@ export default function SuperAdminDashboard() {
                                   📚 Manage Courses
                                 </button>
                                 <button
-                                  onClick={async () => {
-                                    if (window.confirm('Delete this class group? Enrollment records will be affected.')) {
-                                      try {
-                                        await api.delete(`/admin/classes/${cls.id}`);
-                                        showNotification('Class deleted successfully');
-                                        fetchInitialData();
-                                      } catch (err) {
-                                        showNotification('Failed to delete class', 'error');
+                                  onClick={() => {
+                                    setConfirmState({
+                                      open: true,
+                                      message: 'Delete this class group? Enrollment records will be affected.',
+                                      onConfirm: async () => {
+                                        setConfirmState({ open: false, message: '', onConfirm: null });
+                                        try {
+                                          await api.delete(`/admin/classes/${cls.id}`);
+                                          showNotification('Class deleted successfully');
+                                          fetchInitialData();
+                                        } catch (err) {
+                                          showNotification('Failed to delete class', 'error');
+                                        }
                                       }
-                                    }
+                                    });
                                   }}
                                   className="text-[10px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2.5 py-1.5 rounded-lg border border-red-500/20 hover:border-red-500/40 transition-all ml-auto"
                                 >
@@ -1273,6 +1380,287 @@ export default function SuperAdminDashboard() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* LECTURER ALLOCATIONS PANEL */}
+          {activeTab === 'lecturers' && !loading && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="font-bold text-white text-base">Lecturer Course & Class Allocations</h3>
+                  <p className="text-xs text-slate-400">Map lecturers to their specific course-class assignments using Excel sheets</p>
+                </div>
+                <button
+                  onClick={() => {
+                    const headers = ["Lecturer Name", "Course Code", "Course Name", "Programme", "Level", "Type", "Group", "Session"];
+                    const sampleRow = ["Dr. Kofi Mensah", "BIT 102", "Software Engineering", "BIT", "100", "REGULAR", "A", "MORNING"];
+                    const csvContent = "data:text/csv;charset=utf-8," 
+                      + [headers.join(","), sampleRow.join(",")].join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "gctu_lecturer_allocations_template.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showNotification("Template CSV downloaded. Edit and re-upload.");
+                  }}
+                  className="bg-slate-800 hover:bg-slate-700 active:scale-95 text-indigo-400 border border-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Allocation Template
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left Side: Upload Panel */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
+                    <h4 className="font-bold text-sm text-white">Upload Allocation Spreadsheets</h4>
+                    
+                    <form onSubmit={handleLecturerFileUpload} className="space-y-4">
+                      {/* Drag & Drop zone */}
+                      <div 
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const file = e.dataTransfer?.files[0];
+                          if (file) {
+                            const name = file.name.toLowerCase();
+                            if (name.endsWith('.xlsx') || name.endsWith('.xls') || name.endsWith('.csv')) {
+                              setLecturerFile(file);
+                            } else {
+                              showNotification("Unsupported file type. Please upload Excel or CSV.", "error");
+                            }
+                          }
+                        }}
+                        className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[160px] ${
+                          lecturerFile 
+                            ? 'border-emerald-500 bg-emerald-500/5' 
+                            : 'border-slate-700 hover:border-indigo-500 bg-slate-900/50'
+                        }`}
+                      >
+                        <input
+                          type="file"
+                          accept=".xlsx,.xls,.csv"
+                          id="lecturer-file-upload"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) setLecturerFile(file);
+                          }}
+                        />
+                        <label htmlFor="lecturer-file-upload" className="cursor-pointer w-full flex flex-col items-center justify-center">
+                          <svg className={`w-10 h-10 mb-3 transition-colors ${lecturerFile ? 'text-emerald-400' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                          </svg>
+                          {lecturerFile ? (
+                            <div>
+                              <p className="text-xs font-bold text-emerald-400 break-all">{lecturerFile.name}</p>
+                              <p className="text-[10px] text-slate-500 mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                          ) : (
+                            <div>
+                              <p className="text-xs font-bold text-slate-300">Drag & drop sheet here, or <span className="text-indigo-400 hover:underline">browse</span></p>
+                              <p className="text-[10px] text-slate-500 mt-1.5">Supports Excel (.xlsx, .xls) and CSV files</p>
+                            </div>
+                          )}
+                        </label>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {lecturerFile && (
+                          <button
+                            type="button"
+                            onClick={() => setLecturerFile(null)}
+                            className="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition"
+                          >
+                            Clear
+                          </button>
+                        )}
+                        <button
+                          type="submit"
+                          disabled={uploadingLecturers || !lecturerFile}
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 active:scale-95 text-white text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
+                        >
+                          {uploadingLecturers ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                              Processing...
+                            </>
+                          ) : (
+                            'Process Allocation Sheet'
+                          )}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Guide Panel */}
+                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4">
+                    <h5 className="font-bold text-xs uppercase tracking-wider text-[#D4A017] flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Allocations Mapping Guide
+                    </h5>
+                    <p className="text-[11px] leading-relaxed text-slate-400">
+                      When mapping sheets are uploaded, the GCTU Attendance System automates administrative registration:
+                    </p>
+                    <ul className="text-[10px] space-y-2 text-slate-300 list-disc list-inside">
+                      <li>Matches and registers missing <span className="font-bold text-indigo-400">Courses</span> & <span className="font-bold text-indigo-400">Programmes</span>.</li>
+                      <li>Ensures exact <span className="font-bold text-indigo-400">Classes</span> are constructed and linked.</li>
+                      <li>Auto-creates <span className="font-bold text-[#D4A017]">Lecturer Accounts</span> using names as usernames (Role: <code className="text-indigo-400">LECTURER</code>).</li>
+                      <li>Default temp password: <code className="bg-[#0f172a] px-1 py-0.5 rounded text-emerald-400 font-mono font-bold">gctuLecturer123!</code>.</li>
+                      <li>Accounts can immediately log in and will see customized portals.</li>
+                    </ul>
+                  </div>
+
+                  {/* Parse Results Log */}
+                  {lecturerUploadResults && (
+                    <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4 animate-fade-in">
+                      <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+                        <h4 className="font-bold text-xs uppercase text-slate-400">Processing Summary</h4>
+                        <button 
+                          onClick={() => setLecturerUploadResults(null)}
+                          className="text-[10px] text-slate-500 hover:text-slate-300 font-semibold"
+                        >
+                          Dismiss
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-[#0f172a] rounded-xl p-3 border border-emerald-500/10">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase">Linked Rows</p>
+                          <p className="text-2xl font-black text-emerald-400">{lecturerUploadResults.successCount}</p>
+                        </div>
+                        <div className="bg-[#0f172a] rounded-xl p-3 border border-red-500/10">
+                          <p className="text-[10px] text-slate-500 font-bold uppercase">Skipped Rows</p>
+                          <p className="text-2xl font-black text-red-400">{lecturerUploadResults.failedCount}</p>
+                        </div>
+                      </div>
+                      
+                      {lecturerUploadResults.createdLecturers?.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
+                          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto bg-[#0f172a] p-2 rounded-xl border border-slate-800">
+                            {lecturerUploadResults.createdLecturers.map((name, i) => (
+                              <span key={i} className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold">
+                                {name}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {lecturerUploadResults.errors?.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase text-red-400 mb-1.5">Error Log</p>
+                          <div className="bg-[#0f172a] p-2.5 rounded-xl border border-red-500/10 text-[9px] font-mono text-red-300 space-y-1 max-h-36 overflow-y-auto">
+                            {lecturerUploadResults.errors.map((err, i) => (
+                              <p key={i} className="leading-tight border-b border-red-500/5 pb-1">{err}</p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Side: Active Allocations Database Registry */}
+                <div className="lg:col-span-8 space-y-6">
+                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <h4 className="font-bold text-sm text-white">Active Allocation Registry</h4>
+                        <p className="text-xs text-slate-400">Search and prune lecturer distribution assignments</p>
+                      </div>
+                      
+                      <div className="relative w-full sm:w-64">
+                        <input
+                          type="text"
+                          placeholder="Search Lecturer or Course..."
+                          value={lecturerSearchQuery}
+                          onChange={(e) => setLecturerSearchQuery(e.target.value)}
+                          className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-9"
+                        />
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Filter Allocations */}
+                    {(() => {
+                      const filtered = lecturerAssignments.filter(a => {
+                        const query = lecturerSearchQuery.toLowerCase();
+                        return (
+                          a.lecturerName.toLowerCase().includes(query) ||
+                          a.courseName.toLowerCase().includes(query) ||
+                          a.courseCode.toLowerCase().includes(query) ||
+                          a.classDisplayName.toLowerCase().includes(query)
+                        );
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="text-center py-12 text-slate-400 border border-dashed border-slate-800 rounded-xl">
+                            {lecturerSearchQuery ? 'No matching allocations found.' : 'No active lecturer allocations found. Parse spreadsheet to populate.'}
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="overflow-hidden border border-slate-800 rounded-xl">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="bg-[#0f172a] text-slate-400 text-[10px] uppercase font-bold border-b border-slate-800">
+                                <th className="p-4">Lecturer</th>
+                                <th className="p-4">Taught Course</th>
+                                <th className="p-4">Assigned Class / Level</th>
+                                <th className="p-4 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800">
+                              {filtered.map(assignment => (
+                                <tr key={assignment.id} className="hover:bg-[#162238]/60 transition-colors text-slate-200 text-xs">
+                                  <td className="p-4">
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-6 w-6 rounded-full bg-indigo-500/10 text-indigo-400 font-bold text-[9px] flex items-center justify-center border border-indigo-500/20">
+                                        {assignment.lecturerName.charAt(0).toUpperCase()}
+                                      </div>
+                                      <span className="font-bold text-white text-sm block">{assignment.lecturerName}</span>
+                                    </div>
+                                  </td>
+                                  <td className="p-4">
+                                    <span className="font-bold block text-slate-300">{assignment.courseName}</span>
+                                    <span className="text-[9px] text-slate-500 font-mono mt-0.5 block">{assignment.courseCode}</span>
+                                  </td>
+                                  <td className="p-4">
+                                    <span className="text-indigo-400 font-bold block">{assignment.classDisplayName}</span>
+                                  </td>
+                                  <td className="p-4 text-right">
+                                    <button
+                                      onClick={() => handleDeleteAssignment(assignment.id)}
+                                      className="text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/10 font-bold px-3 py-1.5 rounded-lg border border-transparent hover:border-red-500/20 transition-all duration-200"
+                                    >
+                                      Remove Link
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1458,6 +1846,27 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* GRIEVANCES PANEL */}
+          {activeTab === 'grievances' && !loading && (
+            <div className="animate-fade-in">
+              <AdminGrievancePanel />
+            </div>
+          )}
+
+          {/* ARCHIVES PANEL */}
+          {activeTab === 'reports' && !loading && (
+            <div className="animate-fade-in">
+              <OfficialArchives />
+            </div>
+          )}
+
+          {/* REPORT SETTINGS PANEL */}
+          {activeTab === 'report_settings' && !loading && (
+            <div className="animate-fade-in">
+              <ReportSettings />
+            </div>
+          )}
         </div>
       </main>
 
@@ -1465,39 +1874,10 @@ export default function SuperAdminDashboard() {
 
       {/* ADD PROGRAMME MODAL */}
       {showProgModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-bold text-white mb-4">Add Academic Programme</h3>
-            <form onSubmit={handleAddProgramme} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Programme Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. BSc Computer Science"
-                  value={progName}
-                  onChange={(e) => setProgName(e.target.value)}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => setShowProgModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
-                >
-                  Save Programme
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddProgrammeModal
+          onClose={() => setShowProgModal(false)}
+          onSaved={handleProgrammeSaved}
+        />
       )}
 
       {/* ADD CLASS MODAL (MULTI-STEP) */}
@@ -1803,52 +2183,10 @@ export default function SuperAdminDashboard() {
 
       {/* ADD COURSE MODAL */}
       {showCourseModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-bold text-white mb-4">Add Global Course</h3>
-            <form onSubmit={handleAddGlobalCourse} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Course Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Web Development"
-                  value={newCourse.name}
-                  onChange={(e) => setNewCourse(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Course Code</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. BIT 302"
-                  value={newCourse.code}
-                  onChange={(e) => setNewCourse(prev => ({ ...prev, code: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 font-mono"
-                />
-              </div>
-
-              <div className="flex justify-end space-x-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCourseModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
-                >
-                  Save Course
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <AddCourseModal
+          onClose={() => setShowCourseModal(false)}
+          onSaved={handleCourseSaved}
+        />
       )}
 
       {/* ASSIGN REPRESENTATIVE MODAL */}
@@ -1918,7 +2256,6 @@ export default function SuperAdminDashboard() {
                   setShowStudentsModal(false);
                   setSelectedClassForStudents(null);
                   setManualStudents([{ name: '', indexNumber: '', email: '' }]);
-                  setCsvFile(null);
                   setCsvPreview([]);
                 }}
                 className="text-slate-400 hover:text-white"
@@ -1995,7 +2332,7 @@ export default function SuperAdminDashboard() {
                       studentAddTab === 'csv' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-400 hover:text-white'
                     }`}
                   >
-                    📂 Bulk CSV Import
+                    📂 Bulk Import (CSV/Excel/PDF)
                   </button>
                 </div>
 
@@ -2069,7 +2406,7 @@ export default function SuperAdminDashboard() {
                 {studentAddTab === 'csv' && (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center text-xs text-slate-400">
-                      <span>Import student database using a comma-separated values file (.csv).</span>
+                      <span>Import student database using CSV (.csv), Excel (.xlsx, .xls) or PDF (.pdf) files.</span>
                       <a
                         href="/students_template.csv"
                         download
@@ -2087,20 +2424,20 @@ export default function SuperAdminDashboard() {
                       <input
                         type="file"
                         onChange={handleCsvFileDrop}
-                        accept=".csv"
+                        accept=".csv,.xlsx,.xls,.pdf"
                         className="hidden"
                         id="csv-file-selector"
                       />
                       <label htmlFor="csv-file-selector" className="cursor-pointer">
                         <span className="block text-slate-300 font-bold text-sm">Drag and drop file here, or click to browse</span>
-                        <span className="block text-[10px] text-slate-500 mt-1">Only .csv files containing (indexNumber, name, email) fields</span>
+                        <span className="block text-[10px] text-slate-500 mt-1">Supports CSV, Excel sheets, and class registers in PDF format</span>
                       </label>
                     </div>
 
                     {csvPreview.length > 0 && (
                       <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-emerald-400 font-bold">Previewing parsed CSV ({csvPreview.length} students):</span>
+                          <span className="text-xs text-emerald-400 font-bold">Previewing parsed records ({csvPreview.length} students):</span>
                           <button
                             onClick={handleImportCsv}
                             className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl"
@@ -2166,10 +2503,10 @@ export default function SuperAdminDashboard() {
                 ) : (
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {classCourses.map(cc => (
-                      <div key={cc.courseId} className="flex justify-between items-center p-2.5 bg-[#0f172a] rounded-lg border border-slate-800 text-xs">
-                        <span className="text-slate-200 font-semibold">{cc.course?.name} ({cc.course?.code})</span>
+                      <div key={cc.id} className="flex justify-between items-center p-2.5 bg-[#0f172a] rounded-lg border border-slate-800 text-xs">
+                        <span className="text-slate-200 font-semibold">{cc.name} ({cc.code})</span>
                         <button
-                          onClick={() => handleUnlinkCourseFromClass(cc.courseId)}
+                          onClick={() => handleUnlinkCourseFromClass(cc.id)}
                           className="text-red-400 hover:text-red-300 font-bold text-[10px] uppercase"
                         >
                           Unlink
@@ -2205,6 +2542,15 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Confirm Modal */}
+      {confirmState.open && (
+        <ConfirmModal
+          message={confirmState.message}
+          onConfirm={confirmState.onConfirm}
+          onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
+        />
       )}
     </div>
   );

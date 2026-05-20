@@ -59,6 +59,7 @@ router.get('/classes/:id/students', superadminGuard, adminController.getClassStu
 router.post('/classes/:id/students', superadminGuard, adminController.addStudentsToClass);
 router.delete('/classes/:id/students/:studentId', superadminGuard, adminController.removeStudentFromClass);
 router.post('/classes/:id/students/bulk-import', [...superadminGuard, uploadCSV.single('file')], adminController.bulkImportClassStudents);
+router.post('/classes/parse-file', [...superadminGuard, uploadCSV.single('file')], adminController.parseImportFile);
 
 // Course Management Per Class
 router.get('/classes/:id/courses', superadminGuard, adminController.getClassCourses);

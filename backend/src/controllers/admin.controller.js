@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
+const xlsx = require('xlsx');
+const { PDFParse } = require('pdf-parse');
 
 // ==========================================
 // PROGRAMME MANAGEMENT
@@ -807,6 +809,127 @@ const uploadLogo = async (req, res) => {
 };
 
 // ==========================================
+const parseImportFile = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const filename = req.file.originalname.toLowerCase();
+    const parsedStudents = [];
+
+    if (filename.endsWith('.pdf')) {
+      // PDF text extraction
+      const parser = new PDFParse({ data: req.file.buffer });
+      const data = await parser.getText();
+      const text = data.text;
+      const lines = text.split(/\r?\n/);
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+
+        // Regex for Email and Index Number (7 to 12 digits)
+        const emailMatch = trimmed.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        const indexMatch = trimmed.match(/\b\d{7,12}\b/);
+
+        if (indexMatch) {
+          const indexNumber = indexMatch[0];
+          const email = emailMatch ? emailMatch[0] : `${indexNumber}@student.gctu.edu.gh`;
+
+          // Extract name: clean line from index number and email
+          let namePart = trimmed
+            .replace(emailMatch ? emailMatch[0] : '', '')
+            .replace(indexNumber, '')
+            .trim();
+
+          // Remove prefixes like "1.", "12.", "03 -", etc.
+          namePart = namePart.replace(/^\s*\d+[\s.)-]*|^\s*[-•]\s*/g, '').trim();
+
+          // Remove redundant multiple spaces
+          namePart = namePart.replace(/\s+/g, ' ');
+
+          // Validate name length to avoid junk matches
+          if (namePart && namePart.length >= 2) {
+            parsedStudents.push({
+              indexNumber,
+              name: namePart,
+              email
+            });
+          }
+        }
+      }
+    } else if (filename.endsWith('.xlsx') || filename.endsWith('.xls') || filename.endsWith('.csv')) {
+      // Excel/CSV parsing via sheetJS
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        return res.status(400).json({ error: 'Uploaded spreadsheet is empty' });
+      }
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 }); // read as array of arrays
+
+      if (rows.length === 0) {
+        return res.status(400).json({ error: 'No data rows found in sheet' });
+      }
+
+      // Check header row for index, name, and email column positions
+      let headerRow = rows[0] || [];
+      let indexColIdx = -1;
+      let nameColIdx = -1;
+      let emailColIdx = -1;
+
+      for (let i = 0; i < headerRow.length; i++) {
+        const val = String(headerRow[i] || '').toLowerCase().trim();
+        if (val.includes('index')) indexColIdx = i;
+        else if (val.includes('name')) nameColIdx = i;
+        else if (val.includes('email')) emailColIdx = i;
+      }
+
+      // Fallback default mapping: 1st col = index, 2nd col = name, 3rd col = email
+      if (indexColIdx === -1) indexColIdx = 0;
+      if (nameColIdx === -1) nameColIdx = 1;
+      if (emailColIdx === -1) emailColIdx = 2;
+
+      // Extract rows starting from index 1 (skip headers if matched)
+      let startIdx = 1;
+      const firstRowVal = String(headerRow[indexColIdx] || '').toLowerCase();
+      if (!firstRowVal.includes('index') && !firstRowVal.includes('id') && !firstRowVal.includes('number')) {
+        startIdx = 0;
+      }
+
+      for (let r = startIdx; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || row.length === 0) continue;
+
+        const indexNumber = String(row[indexColIdx] || '').trim();
+        const name = String(row[nameColIdx] || '').trim();
+        const email = String(row[emailColIdx] || '').trim();
+
+        if (indexNumber && name) {
+          parsedStudents.push({
+            indexNumber,
+            name,
+            email: email || `${indexNumber}@student.gctu.edu.gh`
+          });
+        }
+      }
+    } else {
+      return res.status(400).json({ error: 'Unsupported file format. Use CSV, Excel, or PDF.' });
+    }
+
+    res.json({
+      message: `Parsed file successfully. Found ${parsedStudents.length} student records.`,
+      students: parsedStudents
+    });
+  } catch (err) {
+    console.error('File parsing error:', err);
+    res.status(500).json({ error: 'Failed to parse file: ' + err.message });
+  }
+};
+
+// ==========================================
 // SUPERADMIN STATS
 // ==========================================
 
@@ -861,5 +984,6 @@ module.exports = {
   getSettings,
   updateSettings,
   uploadLogo,
-  getAdminStats
+  getAdminStats,
+  parseImportFile
 };

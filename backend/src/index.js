@@ -11,6 +11,9 @@ const attendanceRoutes = require('./routes/attendance.routes');
 const studentRoutes = require('./routes/student.routes');
 const courseRoutes = require('./routes/course.routes');
 const notificationRoutes = require('./routes/notification.routes');
+const grievanceRoutes = require('./routes/grievance.routes');
+const reportRoutes = require('./routes/report.routes');
+const lecturerRoutes = require('./routes/lecturer.routes');
 
 const prisma = require('./lib/prisma');
 const { protect } = require('./middleware/auth');
@@ -19,8 +22,23 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Enable CORS with credentials support
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  process.env.FRONTEND_URL // Add your deployed frontend URL as environment variable
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -52,6 +70,17 @@ app.get('/api/stats', protect, async (req, res) => {
       } else {
         whereClause = { id: 'none' };
       }
+    } else if (req.user.role === 'LECTURER') {
+      const assignments = await prisma.lecturerAssignment.findMany({
+        where: { lecturerId: req.user.id }
+      });
+      const classIds = assignments.map(a => a.classId);
+      const courseIds = assignments.map(a => a.courseId);
+
+      whereClause = {
+        classId: { in: classIds },
+        courseId: { in: courseIds }
+      };
     }
 
     const sessions = await prisma.attendanceSession.findMany({
@@ -60,6 +89,7 @@ app.get('/api/stats', protect, async (req, res) => {
       take: 20,
       include: {
         course: true,
+        class: true,
         rep: { select: { username: true } }
       }
     });
@@ -68,6 +98,8 @@ app.get('/api/stats', protect, async (req, res) => {
       id: s.id,
       courseName: s.course.name,
       courseCode: s.course.code,
+      classId: s.classId,
+      classDisplayName: s.class?.displayName || 'N/A',
       startTime: s.startTime,
       sessionType: s.sessionType,
       status: s.status
@@ -88,7 +120,10 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/courses', courseRoutes);
-app.use('/api/notifications', notificationRoutes);
+app.use('/api/notifications', protect, notificationRoutes);
+app.use('/api/grievances', grievanceRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/lecturer', lecturerRoutes);
 app.use('/api/admin', require('./routes/admin.routes'));
 
 // Serve uploaded files (logos etc.)
@@ -101,9 +136,72 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong on the server!' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Class Attendance API running on port ${PORT}`);
-  console.log('Active handles:', process._getActiveHandles().map(h => h.constructor.name));
+let server;
+
+// Verify Prisma database connection on boot with automatic retry support
+const connectWithRetry = async (attempts = 5, delay = 5000) => {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      console.log('Prisma client connection verified successfully.');
+      return;
+    } catch (err) {
+      console.error(`[Resilience] Database connection attempt ${i} of ${attempts} failed:`, err.message);
+      if (i === attempts) {
+        console.error('Fatal: All database connection retries exhausted. Shutting down server...');
+        process.exit(1);
+      }
+      console.log(`Waiting ${delay / 1000} seconds before next database retry...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
+
+// Graceful shutdown function to close active connections cleanly
+const gracefulShutdown = async (originSignal) => {
+  console.log(`[Resilience] Clean shutdown triggered via: ${originSignal}`);
+  
+  if (server) {
+    server.close(async () => {
+      console.log('HTTP connection sockets closed.');
+      try {
+        await prisma.$disconnect();
+        console.log('Prisma client disconnected successfully.');
+        process.exit(originSignal === 'uncaughtException' || originSignal === 'unhandledRejection' ? 1 : 0);
+      } catch (err) {
+        console.error('Error disconnecting database during shutdown:', err);
+        process.exit(1);
+      }
+    });
+  } else {
+    process.exit(0);
+  }
+};
+
+// Bind process signal interrupts
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// Bind process crash events
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Resilience] Fatal Unhandled Rejection at:', promise, 'Reason:', reason);
+  gracefulShutdown('unhandledRejection');
 });
+
+process.on('uncaughtException', (err) => {
+  console.error('[Resilience] Fatal Uncaught Exception thrown:', err.message, err.stack);
+  gracefulShutdown('uncaughtException');
+});
+
+// Bootstrapped server startup
+const bootstrap = async () => {
+  await connectWithRetry();
+  server = app.listen(PORT, () => {
+    console.log(`Class Attendance API running on port ${PORT}`);
+    console.log('Active handles:', process._getActiveHandles().map(h => h.constructor.name));
+  });
+};
+
+bootstrap();
 
 // Force nodemon reload to pick up newly generated prisma client: 2

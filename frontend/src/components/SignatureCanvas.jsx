@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
-const SignatureCanvas = ({ onSave }) => {
+const SignatureCanvas = ({ onSave, label = 'Signature Pad' }) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
@@ -17,6 +17,7 @@ const SignatureCanvas = ({ onSave }) => {
     
     // Clear canvas with white background
     clearCanvas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getCoordinates = (e) => {
@@ -66,8 +67,9 @@ const SignatureCanvas = ({ onSave }) => {
     saveSignature();
   };
 
-  const clearCanvas = () => {
+  function clearCanvas() {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0f172a'; // Match card background
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -101,7 +103,7 @@ const SignatureCanvas = ({ onSave }) => {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
-        <label className="text-sm font-semibold text-slate-300">Lecturer Signature Pad</label>
+        <label className="text-sm font-semibold text-slate-300">{label}</label>
         <button
           type="button"
           onClick={clearCanvas}

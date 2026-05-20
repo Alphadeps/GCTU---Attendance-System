@@ -46,6 +46,10 @@ model User {
   approvedSessions AttendanceSession[] @relation("LecturerApprovedSessions")
   notifications    Notification[]
   assignedClass    Class?
+  resolvedGrievances Grievance[]
+  generatedReports OfficialReport[] @relation("RepGeneratedReports")
+  signedReports    OfficialReport[] @relation("LecturerSignedReports")
+  lecturerAssignments LecturerAssignment[] @relation("LecturerAssignments")
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 }
@@ -68,6 +72,8 @@ model Course {
   code      String         @unique
   sessions  AttendanceSession[]
   classes   ClassCourse[]
+  officialReports OfficialReport[]
+  lecturerAssignments LecturerAssignment[]
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 }
@@ -147,6 +153,8 @@ model Class {
   students     ClassStudent[]
   courses      ClassCourse[]
   sessions     AttendanceSession[]
+  officialReports OfficialReport[]
+  lecturerAssignments LecturerAssignment[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -183,4 +191,62 @@ model SystemSettings {
   qrExpirySeconds       Int      @default(30)
   geofenceRadiusMeters  Int      @default(100)
   updatedAt             DateTime @updatedAt
+}
+
+model Grievance {
+  id            String    @id @default(uuid())
+  studentIndex  String?   // Store index if not anonymous
+  studentName   String?   // Store name if not anonymous
+  anonymous     Boolean   @default(false)
+  type          String    // "ABSENCE_EXCUSE" | "SYSTEM_ISSUE" | "INTEGRITY_REPORT" | "GENERAL_COMPLAINT"
+  subject       String
+  message       String
+  evidenceUrl   String?   // path to uploaded file
+  status        String    @default("PENDING") // "PENDING" | "RESOLVED" | "REJECTED"
+  adminResponse String?   // feedback from HOD/Admin
+  resolvedById  String?
+  resolvedBy    User?     @relation(fields: [resolvedById], references: [id])
+  courseCode    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ReportTemplate {
+  id        String   @id @default(uuid())
+  name      String   @default("Master Template")
+  fileUrl   String   // path to the uploaded .docx file
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OfficialReport {
+  id            String    @id @default(uuid())
+  classId       String
+  class         Class     @relation(fields: [classId], references: [id])
+  courseId      String
+  course        Course    @relation(fields: [courseId], references: [id])
+  generatedById String
+  generatedBy   User      @relation("RepGeneratedReports", fields: [generatedById], references: [id])
+  fileUrl       String    // Path to the generated .docx
+  status        String    @default("PENDING_SIGNATURE") // PENDING_SIGNATURE, SIGNED
+  signedById    String?
+  signedBy      User?     @relation("LecturerSignedReports", fields: [signedById], references: [id])
+  signedAt      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model LecturerAssignment {
+  id         String   @id @default(uuid())
+  lecturerId String
+  lecturer   User     @relation("LecturerAssignments", fields: [lecturerId], references: [id], onDelete: Cascade)
+  classId    String
+  class      Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([lecturerId, classId, courseId])
 }

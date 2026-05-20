@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 
 // Import Pages
 import LoginPage from './pages/LoginPage';
@@ -11,11 +12,30 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const { token, role } = useAuth();
 
   if (!token) return <Navigate to="/" replace />;
-  if (allowedRoles && !allowedRoles.includes(role)) return <Navigate to="/" replace />;
+  if (allowedRoles && !allowedRoles.includes(role)) {
+    return <Navigate to="/" replace state={{ accessDenied: true }} />;
+  }
+
+  return children;
+};
+
+// Public Route Component - redirects authenticated users to their dashboard
+const PublicRoute = ({ children }) => {
+  const { token, role } = useAuth();
+
+  if (token && role) {
+    // Redirect authenticated users to appropriate dashboard
+    if (role === 'SUPERADMIN') {
+      return <Navigate to="/admin" replace />;
+    } else if (role === 'LECTURER') {
+      return <Navigate to="/lecturer" replace />;
+    } else if (role === 'REP' || role === 'ADMIN') {
+      return <Navigate to="/rep/dashboard" replace />;
+    }
+  }
 
   return children;
 };
@@ -24,7 +44,14 @@ function App() {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path="/" element={<LoginPage />} />
+      <Route
+        path="/"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
       <Route path="/student" element={<StudentPortal />} />
 
       {/* SUPERADMIN Routes */}
