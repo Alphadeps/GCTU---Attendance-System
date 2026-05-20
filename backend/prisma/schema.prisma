@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+  REP
+  LECTURER
+}
+
+enum SessionType {
+  PHYSICAL
+  ONLINE
+}
+
+enum SessionStatus {
+  OPEN
+  CLOSED
+  APPROVED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+model User {
+  id               String              @id @default(uuid())
+  username         String              @unique
+  password         String
+  role             UserRole
+  isActive         Boolean             @default(true)
+  createdSessions  AttendanceSession[] @relation("RepSessions")
+  approvedSessions AttendanceSession[] @relation("LecturerApprovedSessions")
+  notifications    Notification[]
+  assignedClass    Class?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+}
+
+model Student {
+  id                String         @id @default(uuid())
+  indexNumber       String         @unique
+  name              String
+  email             String         @unique
+  deviceFingerprint String?
+  attendances       Attendance[]
+  classes           ClassStudent[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Course {
+  id        String         @id @default(uuid())
+  name      String         @unique
+  code      String         @unique
+  sessions  AttendanceSession[]
+  classes   ClassCourse[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model AttendanceSession {
+  id                 String            @id @default(uuid())
+  courseId           String
+  course             Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  repId              String
+  rep                User              @relation("RepSessions", fields: [repId], references: [id])
+  classId            String?
+  class              Class?            @relation(fields: [classId], references: [id], onDelete: Cascade)
+  sessionType        SessionType
+  startTime          DateTime
+  endTime            DateTime
+  status             SessionStatus
+  latitude           Float?
+  longitude          Float?
+  qrCode             String?
+  qrCodeExpiry       DateTime?
+  networkSSID        String?
+  attendances        Attendance[]
+  lecturerSignature  String?
+  approvedByLecturerId String?
+  approvedByLecturer   User?             @relation("LecturerApprovedSessions", fields: [approvedByLecturerId], references: [id])
+  approvedAt         DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model Attendance {
+  id           String           @id @default(uuid())
+  sessionId    String
+  session      AttendanceSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  checkInTime  DateTime         @default(now())
+  status       AttendanceStatus
+  ipAddress    String?
+  deviceInfo   String?
+  locationData String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model Notification {
+  id           String   @id @default(uuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentIndex String?  // Specific student targeted by index number
+  title        String
+  message      String
+  type         String   // INFO, SUCCESS, WARNING, DANGER
+  isRead       Boolean  @default(false)
+  createdAt    DateTime @default(now())
+}
+
+model Programme {
+  id          String   @id @default(uuid())
+  name        String   @unique  // e.g. "BIT", "BSc CS"
+  classes     Class[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Class {
+  id           String    @id @default(uuid())
+  programmeId  String
+  programme    Programme @relation(fields: [programmeId], references: [id])
+  level        String    // "100", "200", "300", "400"
+  type         String    // "REGULAR", "TOP-UP"
+  group        String    // "A" through "K"
+  session      String    // "MORNING", "EVENING", "WEEKEND"
+  displayName  String    // Auto-generated: "BIT LEVEL 300 TOP-UP GROUP B (EVENING)"
+  repId        String?   @unique  // One rep per group
+  rep          User?     @relation(fields: [repId], references: [id])
+  students     ClassStudent[]
+  courses      ClassCourse[]
+  sessions     AttendanceSession[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([programmeId, level, type, group, session])
+}
+
+model ClassStudent {
+  id          String   @id @default(uuid())
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  studentId   String
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([classId, studentId])
+}
+
+model ClassCourse {
+  id        String   @id @default(uuid())
+  classId   String
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([classId, courseId])
+}
+
+model SystemSettings {
+  id                    String   @id @default(uuid())
+  deptName              String   @default("Class Attendance System")
+  deptLogoUrl           String?
+  lateWindowMinutes     Int      @default(15)
+  qrExpirySeconds       Int      @default(30)
+  geofenceRadiusMeters  Int      @default(100)
+  updatedAt             DateTime @updatedAt
+}
