@@ -251,6 +251,21 @@ const StudentLoginPage = () => {
             </button>
           </p>
         </div>
+
+        {/* Team Credit */}
+        <div className="mt-4 text-center">
+          <p className="text-slate-600 text-xs">
+            Built with ❤️ by{' '}
+            <a
+              href="https://alphagroupofdevelopers.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#D4A017] hover:text-[#FFD700] font-semibold underline transition-colors"
+            >
+              Alpha Group of Developers
+            </a>
+          </p>
+        </div>
       </div>
 
       <p className="mt-8 text-slate-500 text-xs text-center max-w-md">

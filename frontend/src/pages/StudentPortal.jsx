@@ -762,6 +762,21 @@ const StudentPortal = () => {
           onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
         />
       )}
+
+      {/* Team Credit Footer */}
+      <div className="fixed bottom-4 right-4 z-10">
+        <p className="text-slate-600 text-xs bg-[#001c44]/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-[#002a63]">
+          Built with ❤️ by{' '}
+          <a
+            href="https://alphagroupofdevelopers.github.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#D4A017] hover:text-[#FFD700] font-semibold underline transition-colors"
+          >
+            Alpha Group
+          </a>
+        </p>
+      </div>
     </div>
   );
 };

@@ -149,6 +149,21 @@ const LoginPage = () => {
             </button>
           </p>
         </div>
+
+        {/* Team Credit */}
+        <div className="mt-6 text-center">
+          <p className="text-slate-600 text-xs">
+            Built with ❤️ by{' '}
+            <a
+              href="https://alphagroupofdevelopers.github.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
+            >
+              Alpha Group of Developers
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );
