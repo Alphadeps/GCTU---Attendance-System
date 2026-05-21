@@ -263,4 +263,53 @@ router.delete('/:id', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), async (req
   }
 });
 
+// Update course (ADMIN and SUPERADMIN)
+router.patch('/:id', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, code } = req.body;
+
+    if (!name || !code) {
+      return res.status(400).json({ error: 'Course name and code are required' });
+    }
+
+    // Check if name already exists (excluding current course)
+    const existingName = await prisma.course.findFirst({
+      where: {
+        name: name.trim(),
+        NOT: { id }
+      }
+    });
+
+    if (existingName) {
+      return res.status(400).json({ error: 'Course name already exists' });
+    }
+
+    // Check if code already exists (excluding current course)
+    const existingCode = await prisma.course.findFirst({
+      where: {
+        code: code.trim().toUpperCase(),
+        NOT: { id }
+      }
+    });
+
+    if (existingCode) {
+      return res.status(400).json({ error: 'Course code already exists' });
+    }
+
+    const updated = await prisma.course.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        code: code.trim().toUpperCase()
+      }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Update course error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

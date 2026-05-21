@@ -62,6 +62,39 @@ const deleteProgramme = async (req, res) => {
   }
 };
 
+const updateProgramme = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Programme name is required' });
+    }
+
+    // Check if name already exists (excluding current programme)
+    const existing = await prisma.programme.findFirst({
+      where: {
+        name: name.trim(),
+        NOT: { id }
+      }
+    });
+
+    if (existing) {
+      return res.status(400).json({ error: 'Programme name already exists' });
+    }
+
+    const updated = await prisma.programme.update({
+      where: { id },
+      data: { name: name.trim() }
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error('Update programme error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // ==========================================
 // CLASS MANAGEMENT
 // ==========================================
@@ -1226,6 +1259,7 @@ const getAdminStats = async (req, res) => {
 module.exports = {
   createProgramme,
   getAllProgrammes,
+  updateProgramme,
   deleteProgramme,
   createClass,
   getAllClasses,
