@@ -133,6 +133,7 @@ export default function SuperAdminDashboard() {
   const [showStudentsModal, setShowStudentsModal] = useState(false);
   const [classStudents, setClassStudents] = useState([]);
   const [studentSearch, setStudentSearch] = useState('');
+  const [selectedStudentIds, setSelectedStudentIds] = useState([]); // For bulk delete
   const [studentAddTab, setStudentAddTab] = useState('manual'); // 'manual' or 'csv'
   const [manualStudents, setManualStudents] = useState([{ name: '', indexNumber: '', email: '' }]);
   const [csvPreview, setCsvPreview] = useState([]);
@@ -566,6 +567,7 @@ export default function SuperAdminDashboard() {
   const handleOpenStudentsModal = async (cls) => {
     setSelectedClassForStudents(cls);
     setShowStudentsModal(true);
+    setSelectedStudentIds([]); // Reset selection
     setLoading(true);
     try {
       const res = await api.get(`/admin/classes/${cls.id}/students`);
@@ -676,6 +678,56 @@ export default function SuperAdminDashboard() {
         }
       }
     });
+  };
+
+  // Bulk delete students
+  const handleBulkDeleteStudents = () => {
+    if (selectedStudentIds.length === 0) {
+      showNotification('Please select students to delete', 'error');
+      return;
+    }
+
+    setConfirmState({
+      open: true,
+      message: `Are you sure you want to remove ${selectedStudentIds.length} student(s) from this class? This action cannot be undone.`,
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        try {
+          await api.post(`/admin/classes/${selectedClassForStudents.id}/students/bulk-delete`, {
+            studentIds: selectedStudentIds
+          });
+          showNotification(`${selectedStudentIds.length} student(s) removed from class`);
+          setSelectedStudentIds([]);
+          handleOpenStudentsModal(selectedClassForStudents);
+          fetchInitialData();
+        } catch (err) {
+          showNotification('Failed to remove students', 'error');
+        }
+      }
+    });
+  };
+
+  // Toggle individual student selection
+  const handleToggleStudentSelection = (studentId) => {
+    setSelectedStudentIds(prev =>
+      prev.includes(studentId)
+        ? prev.filter(id => id !== studentId)
+        : [...prev, studentId]
+    );
+  };
+
+  // Toggle all students selection
+  const handleToggleAllStudents = () => {
+    const filteredStudents = classStudents.filter(s =>
+      s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+      s.indexNumber.includes(studentSearch)
+    );
+
+    if (selectedStudentIds.length === filteredStudents.length) {
+      setSelectedStudentIds([]);
+    } else {
+      setSelectedStudentIds(filteredStudents.map(s => s.id));
+    }
   };
 
   // 8. Class Courses Handlers
@@ -2618,13 +2670,26 @@ export default function SuperAdminDashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <h4 className="text-sm font-bold text-white">Enrolled Students ({classStudents.length})</h4>
-                  <input
-                    type="text"
-                    placeholder="Search enrolled..."
-                    value={studentSearch}
-                    onChange={(e) => setStudentSearch(e.target.value)}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"
-                  />
+                  <div className="flex items-center gap-3">
+                    {selectedStudentIds.length > 0 && (
+                      <button
+                        onClick={handleBulkDeleteStudents}
+                        className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete Selected ({selectedStudentIds.length})
+                      </button>
+                    )}
+                    <input
+                      type="text"
+                      placeholder="Search enrolled..."
+                      value={studentSearch}
+                      onChange={(e) => setStudentSearch(e.target.value)}
+                      className="bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
                 </div>
 
                 {classStudents.length === 0 ? (
@@ -2633,7 +2698,25 @@ export default function SuperAdminDashboard() {
                   <div className="overflow-hidden border border-slate-800 rounded-xl max-h-60 overflow-y-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800">
+                        <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800 sticky top-0">
+                          <th className="p-3 w-10">
+                            <input
+                              type="checkbox"
+                              checked={
+                                classStudents.filter(s =>
+                                  s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                                  s.indexNumber.includes(studentSearch)
+                                ).length > 0 &&
+                                selectedStudentIds.length ===
+                                classStudents.filter(s =>
+                                  s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                                  s.indexNumber.includes(studentSearch)
+                                ).length
+                              }
+                              onChange={handleToggleAllStudents}
+                              className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
+                            />
+                          </th>
                           <th className="p-3">Index Number</th>
                           <th className="p-3">Full Name</th>
                           <th className="p-3">Email Address</th>
@@ -2644,7 +2727,15 @@ export default function SuperAdminDashboard() {
                         {classStudents
                           .filter(s => s.name.toLowerCase().includes(studentSearch.toLowerCase()) || s.indexNumber.includes(studentSearch))
                           .map(student => (
-                            <tr key={student.id} className="hover:bg-[#162238] transition-colors text-slate-200">
+                            <tr key={student.id} className={`hover:bg-[#162238] transition-colors ${selectedStudentIds.includes(student.id) ? 'bg-indigo-500/10' : 'text-slate-200'}`}>
+                              <td className="p-3">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedStudentIds.includes(student.id)}
+                                  onChange={() => handleToggleStudentSelection(student.id)}
+                                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
+                                />
+                              </td>
                               <td className="p-3 font-mono text-xs text-indigo-300 font-bold">{student.indexNumber}</td>
                               <td className="p-3 text-xs font-semibold">{student.name}</td>
                               <td className="p-3 text-xs font-semibold text-slate-400">{student.email || 'N/A'}</td>

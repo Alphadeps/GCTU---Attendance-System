@@ -417,6 +417,32 @@ const removeStudentFromClass = async (req, res) => {
   }
 };
 
+const bulkDeleteStudentsFromClass = async (req, res) => {
+  try {
+    const { id } = req.params; // Class ID
+    const { studentIds } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({ error: 'studentIds array is required' });
+    }
+
+    const result = await prisma.classStudent.deleteMany({
+      where: {
+        classId: id,
+        studentId: { in: studentIds }
+      }
+    });
+
+    res.json({
+      message: `${result.count} student(s) removed from class successfully`,
+      count: result.count
+    });
+  } catch (err) {
+    console.error('Bulk delete students error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const getClassStudents = async (req, res) => {
   try {
     const { id } = req.params; // Class ID
@@ -1210,6 +1236,7 @@ module.exports = {
   removeRep,
   addStudentsToClass,
   removeStudentFromClass,
+  bulkDeleteStudentsFromClass,
   getClassStudents,
   bulkImportClassStudents,
   addCourseToClass,

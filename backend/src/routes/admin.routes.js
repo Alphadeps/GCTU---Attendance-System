@@ -58,6 +58,7 @@ router.post('/classes/:id/remove-rep', superadminGuard, adminController.removeRe
 router.get('/classes/:id/students', superadminGuard, adminController.getClassStudents);
 router.post('/classes/:id/students', superadminGuard, adminController.addStudentsToClass);
 router.delete('/classes/:id/students/:studentId', superadminGuard, adminController.removeStudentFromClass);
+router.post('/classes/:id/students/bulk-delete', superadminGuard, adminController.bulkDeleteStudentsFromClass);
 router.post('/classes/:id/students/bulk-import', [...superadminGuard, uploadCSV.single('file')], adminController.bulkImportClassStudents);
 router.post('/classes/parse-file', [...superadminGuard, uploadCSV.single('file')], adminController.parseImportFile);
 
