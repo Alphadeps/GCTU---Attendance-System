@@ -130,13 +130,22 @@ const LoginPage = () => {
         </form>
 
         <div className="mt-8 border-t border-[#002a63] pt-6 text-center">
+          <p className="text-slate-500 text-xs mb-3">
+            Are you a student?{' '}
+            <button
+              onClick={() => navigate('/student-login')}
+              className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
+            >
+              Student Login
+            </button>
+          </p>
           <p className="text-slate-500 text-xs">
-            Student checking in?{' '}
+            Just checking in?{' '}
             <button
               onClick={() => navigate('/student')}
               className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
             >
-              Go to Student Portal
+              Go to Check-In Portal
             </button>
           </p>
         </div>

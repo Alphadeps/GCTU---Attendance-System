@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext';
 
 // Import Pages
 import LoginPage from './pages/LoginPage';
+import StudentLoginPage from './pages/StudentLoginPage';
 import RepDashboard from './pages/RepDashboard';
 import SessionManager from './pages/SessionManager';
 import StudentPortal from './pages/StudentPortal';
@@ -49,6 +50,22 @@ function App() {
         element={
           <PublicRoute>
             <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/student-login"
+        element={
+          <PublicRoute>
+            <StudentLoginPage />
           </PublicRoute>
         }
       />

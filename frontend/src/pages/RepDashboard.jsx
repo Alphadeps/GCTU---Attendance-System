@@ -144,6 +144,18 @@ const RepDashboard = () => {
     }
   };
 
+  const handleRepSelfCheckIn = async (sessionId) => {
+    try {
+      const response = await api.post('/attendance/rep-self-checkin', { sessionId });
+      toast.success(response.data.message || 'Successfully checked in!');
+      // Refresh sessions to update UI
+      fetchData();
+    } catch (err) {
+      console.error('Rep self check-in error:', err);
+      toast.error(err.response?.data?.error || 'Failed to check in');
+    }
+  };
+
   const [generatingReportId, setGeneratingReportId] = useState(null);
   const handleGenerateReport = async (courseId) => {
     setGeneratingReportId(courseId);
@@ -462,30 +474,53 @@ const RepDashboard = () => {
                     {sessions.map((s) => (
                       <div
                         key={s.id}
-                        onClick={() => navigate(`/rep/session/${s.id}`)}
-                        className="p-4 bg-[#000a18]/30 hover:bg-[#000a18]/70 border border-[#002a63]/80 hover:border-[#003b8e] rounded-xl transition-all cursor-pointer flex justify-between items-center group"
+                        className="p-4 bg-[#000a18]/30 border border-[#002a63]/80 rounded-xl transition-all"
                       >
-                        <div>
+                        <div className="flex justify-between items-center">
+                          <div 
+                            onClick={() => navigate(`/rep/session/${s.id}`)}
+                            className="flex-1 cursor-pointer hover:opacity-80 transition-opacity"
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="font-bold text-slate-200 text-sm hover:text-[#D4A017] transition-colors">{s.courseName}</span>
+                              <span className="font-mono text-xs text-slate-500">({s.courseCode})</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-slate-400 mt-2">
+                              <span>{new Date(s.startTime).toLocaleDateString()} {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">{s.sessionType}</span>
+                            </div>
+                          </div>
                           <div className="flex items-center gap-3">
-                            <span className="font-bold text-slate-200 text-sm group-hover:text-[#D4A017] transition-colors">{s.courseName}</span>
-                            <span className="font-mono text-xs text-slate-500">({s.courseCode})</span>
+                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
+                              s.status === 'OPEN' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20 animate-pulse' :
+                              s.status === 'CLOSED' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                              'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                            }`}>
+                              {s.status}
+                            </span>
+                            {s.status === 'OPEN' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRepSelfCheckIn(s.id);
+                                }}
+                                className="bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white font-bold py-1.5 px-3 rounded-lg border border-emerald-500/20 transition-all text-[11px] flex items-center gap-1"
+                              >
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Check In
+                              </button>
+                            )}
+                            <button
+                              onClick={() => navigate(`/rep/session/${s.id}`)}
+                              className="p-2 hover:bg-[#002a63] rounded-lg transition-colors"
+                            >
+                              <svg className="w-4 h-4 text-slate-500 hover:text-[#D4A017] transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                            </button>
                           </div>
-                          <div className="flex items-center gap-4 text-xs text-slate-400 mt-2">
-                            <span>{new Date(s.startTime).toLocaleDateString()} {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                            <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">{s.sessionType}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
-                            s.status === 'OPEN' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20 animate-pulse' :
-                            s.status === 'CLOSED' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                            'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                          }`}>
-                            {s.status}
-                          </span>
-                          <svg className="w-4 h-4 text-slate-500 group-hover:text-[#D4A017] group-hover:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
                         </div>
                       </div>
                     ))}
