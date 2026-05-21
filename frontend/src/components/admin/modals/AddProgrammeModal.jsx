@@ -13,7 +13,7 @@ const AddProgrammeModal = ({ onClose, onSaved }) => {
     setLoading(true);
     setError('');
     try {
-      const res = await api.post('/programmes', { name: progName.trim() });
+      const res = await api.post('/admin/programmes', { name: progName.trim() });
       onSaved(res.data);
       onClose();
     } catch (err) {
