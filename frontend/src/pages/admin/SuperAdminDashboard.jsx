@@ -13,6 +13,7 @@ import EditProgrammeModal from '../../components/admin/modals/EditProgrammeModal
 import EditCourseModal from '../../components/admin/modals/EditCourseModal';
 import EditStudentModal from '../../components/admin/modals/EditStudentModal';
 import EditRepModal from '../../components/admin/modals/EditRepModal';
+import OnboardingTour from '../../components/admin/OnboardingTour';
 
 const MENU_GROUPS = [
   {
@@ -180,11 +181,20 @@ export default function SuperAdminDashboard() {
   // Confirm modal state
   const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
 
+  // Onboarding tour state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   useEffect(() => {
     // Check if user is SUPERADMIN
     if (role !== 'SUPERADMIN') {
       navigate('/');
       return;
+    }
+
+    // Check if this is first login (show onboarding)
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
     }
 
     fetchInitialData();
@@ -906,6 +916,17 @@ export default function SuperAdminDashboard() {
     navigate('/');
   };
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+    showNotification('Welcome! You can restart this tour anytime from the help menu.');
+  };
+
+  const handleOnboardingSkip = () => {
+    localStorage.setItem('hasSeenOnboarding', 'true');
+    setShowOnboarding(false);
+  };
+
   // Filter Logic
   const getFilteredClasses = () => {
     return classes.filter(cls => {
@@ -1089,6 +1110,15 @@ export default function SuperAdminDashboard() {
         <header className="h-[76px] border-b border-slate-800 px-8 flex items-center justify-between shrink-0 bg-[#090d16]">
           <h2 className="text-lg font-bold text-white capitalize">{activeTab.replace('-', ' ')}</h2>
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all border border-transparent hover:border-indigo-500/20"
+              title="Show setup guide"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
             <span className="bg-[#1e293b] border border-slate-700 px-3 py-1 rounded-full text-xs text-indigo-400 font-semibold flex items-center space-x-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>System Live</span>
@@ -3126,6 +3156,14 @@ export default function SuperAdminDashboard() {
           message={confirmState.message}
           onConfirm={confirmState.onConfirm}
           onCancel={() => setConfirmState({ open: false, message: '', onConfirm: null })}
+        />
+      )}
+
+      {/* Onboarding Tour */}
+      {showOnboarding && (
+        <OnboardingTour
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
         />
       )}
     </div>
