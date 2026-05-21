@@ -957,6 +957,15 @@ export default function SuperAdminDashboard() {
       groups[key].items.push(cls);
     });
 
+    // Sort classes within each group alphabetically by group letter (A, B, C, etc.)
+    Object.values(groups).forEach(group => {
+      group.items.sort((a, b) => {
+        const groupA = a.group || '';
+        const groupB = b.group || '';
+        return groupA.localeCompare(groupB);
+      });
+    });
+
     return Object.values(groups);
   };
 
