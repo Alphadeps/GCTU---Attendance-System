@@ -345,7 +345,7 @@ export default function SuperAdminDashboard() {
       // Post class creation
       await api.post('/admin/classes', {
         programmeId: newClass.programmeId,
-        level: parseInt(newClass.level),
+        level: newClass.level, // Keep as string, don't parse to int
         type: newClass.type,
         session: newClass.session,
         groups: newClass.groups,
