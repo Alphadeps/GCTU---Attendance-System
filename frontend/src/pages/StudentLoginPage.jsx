@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const StudentLoginPage = () => {
   const [indexNumber, setIndexNumber] = useState('');
@@ -11,6 +12,7 @@ const StudentLoginPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
+  const auth = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -25,8 +27,17 @@ const StudentLoginPage = () => {
       
       const { token, student } = response.data;
 
-      // Store token and student data
-      localStorage.setItem('token', token);
+      // Use AuthContext login function
+      auth.login({
+        token,
+        role: 'STUDENT',
+        username: student.name,
+        indexNumber: student.indexNumber,
+        email: student.email,
+        classes: student.classes
+      });
+
+      // Store additional student data
       localStorage.setItem('user', JSON.stringify({
         role: 'STUDENT',
         indexNumber: student.indexNumber,

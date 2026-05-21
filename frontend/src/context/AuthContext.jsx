@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('dept_name');
     localStorage.removeItem('dept_logo');
     localStorage.removeItem('needsPasswordChange');
+    localStorage.removeItem('user'); // Clear student user data
 
     setToken(null);
     setRole(null);

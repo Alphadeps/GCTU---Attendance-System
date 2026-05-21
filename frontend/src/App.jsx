@@ -35,6 +35,8 @@ const PublicRoute = ({ children }) => {
       return <Navigate to="/lecturer" replace />;
     } else if (role === 'REP' || role === 'ADMIN') {
       return <Navigate to="/rep/dashboard" replace />;
+    } else if (role === 'STUDENT') {
+      return <Navigate to="/student" replace />;
     }
   }
 
@@ -69,7 +71,14 @@ function App() {
           </PublicRoute>
         }
       />
-      <Route path="/student" element={<StudentPortal />} />
+      <Route
+        path="/student"
+        element={
+          <ProtectedRoute allowedRoles={['STUDENT']}>
+            <StudentPortal />
+          </ProtectedRoute>
+        }
+      />
 
       {/* SUPERADMIN Routes */}
       <Route
