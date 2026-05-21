@@ -162,9 +162,129 @@ const updateAttendanceStatus = async (req, res) => {
   }
 };
 
+/**
+ * Rep Self Check-In
+ * Allows rep to mark their own attendance for sessions in their class
+ */
+const repSelfCheckIn = async (req, res) => {
+  try {
+    // Verify user is a rep
+    if (!req.user || req.user.role !== 'REP') {
+      return res.status(403).json({ error: 'Only class representatives can use this endpoint' });
+    }
+
+    const { sessionId } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID is required' });
+    }
+
+    // Get rep's assigned class
+    const repClass = await prisma.class.findFirst({
+      where: { repId: req.user.id }
+    });
+
+    if (!repClass) {
+      return res.status(403).json({ error: 'You are not assigned to any class' });
+    }
+
+    // Get session and verify it belongs to rep's class
+    const session = await prisma.attendanceSession.findUnique({
+      where: { id: sessionId },
+      include: {
+        course: true
+      }
+    });
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    if (session.classId !== repClass.id) {
+      return res.status(403).json({ error: 'This session does not belong to your class' });
+    }
+
+    if (session.status !== 'OPEN') {
+      return res.status(400).json({ error: 'This session is not open for attendance' });
+    }
+
+    // Get rep's student record (should exist if they have index number)
+    const repUser = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
+
+    if (!repUser.indexNumber) {
+      return res.status(400).json({ error: 'Your account does not have an index number. Please contact admin.' });
+    }
+
+    const repStudent = await prisma.student.findUnique({
+      where: { indexNumber: repUser.indexNumber }
+    });
+
+    if (!repStudent) {
+      return res.status(400).json({ error: 'Student record not found. Please contact admin.' });
+    }
+
+    // Check if already checked in
+    const existingAttendance = await prisma.attendance.findFirst({
+      where: {
+        sessionId: sessionId,
+        studentId: repStudent.id
+      }
+    });
+
+    if (existingAttendance) {
+      return res.status(400).json({ error: 'You have already checked in for this session' });
+    }
+
+    // Determine attendance status based on time
+    const now = new Date();
+    const sessionStart = new Date(session.startTime);
+    const settings = await prisma.systemSettings.findFirst();
+    const lateWindowMinutes = settings?.lateWindowMinutes || 15;
+    const lateThreshold = new Date(sessionStart.getTime() + lateWindowMinutes * 60000);
+
+    let attendanceStatus = 'PRESENT';
+    if (now > lateThreshold) {
+      attendanceStatus = 'LATE';
+    }
+
+    // Create attendance record
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
+    
+    const newAttendance = await prisma.attendance.create({
+      data: {
+        sessionId: session.id,
+        studentId: repStudent.id,
+        status: attendanceStatus,
+        ipAddress,
+        deviceInfo: 'Rep Dashboard',
+        locationData: null
+      }
+    });
+
+    // Create notification
+    await createNotificationHelper({
+      studentIndex: repStudent.indexNumber,
+      title: 'Attendance Checked In',
+      message: `You checked in successfully for ${session.course.name} (${session.course.code}) as ${attendanceStatus}.`,
+      type: 'SUCCESS'
+    });
+
+    res.status(201).json({
+      message: `Check-in successful! Marked as ${attendanceStatus}.`,
+      attendance: newAttendance
+    });
+  } catch (err) {
+    console.error('Rep self check-in error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   markAttendance,
   getSessionAttendance,
   getStudentHistory,
-  updateAttendanceStatus
+  updateAttendanceStatus,
+  repSelfCheckIn
 };

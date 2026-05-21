@@ -266,11 +266,43 @@ const assignRep = async (req, res) => {
       return res.status(400).json({ error: `This representative is already assigned to: ${alreadyAssigned.displayName}` });
     }
 
+    // If rep has an index number, create/update student record and link to class
+    if (repUser.indexNumber) {
+      // Create or update student record for the rep
+      const repStudent = await prisma.student.upsert({
+        where: { indexNumber: repUser.indexNumber },
+        update: {
+          name: repUser.username,
+          email: `${repUser.indexNumber}@rep.gctu.edu.gh`
+        },
+        create: {
+          indexNumber: repUser.indexNumber,
+          name: repUser.username,
+          email: `${repUser.indexNumber}@rep.gctu.edu.gh`
+        }
+      });
+
+      // Link rep as student to the class
+      await prisma.classStudent.upsert({
+        where: {
+          classId_studentId: {
+            classId: id,
+            studentId: repStudent.id
+          }
+        },
+        update: {},
+        create: {
+          classId: id,
+          studentId: repStudent.id
+        }
+      });
+    }
+
     // Update the class with repId
     const updated = await prisma.class.update({
       where: { id },
       data: { repId },
-      include: { rep: { select: { id: true, username: true } } }
+      include: { rep: { select: { id: true, username: true, indexNumber: true } } }
     });
 
     res.json(updated);
@@ -874,11 +906,40 @@ const bulkUploadReps = async (req, res) => {
           }
         });
 
+        // Create student record for the rep (so they can mark attendance)
+        const repStudent = await prisma.student.upsert({
+          where: { indexNumber: indexNumber },
+          update: {
+            name: name,
+            email: email
+          },
+          create: {
+            indexNumber: indexNumber,
+            name: name,
+            email: email
+          }
+        });
+
         // Assign rep to class if class exists and doesn't have a rep
         if (classRecord && !classRecord.repId) {
           await prisma.class.update({
             where: { id: classRecord.id },
             data: { repId: newRep.id }
+          });
+
+          // Link rep as student to the class
+          await prisma.classStudent.upsert({
+            where: {
+              classId_studentId: {
+                classId: classRecord.id,
+                studentId: repStudent.id
+              }
+            },
+            update: {},
+            create: {
+              classId: classRecord.id,
+              studentId: repStudent.id
+            }
           });
         }
 
