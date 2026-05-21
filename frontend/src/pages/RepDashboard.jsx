@@ -92,7 +92,7 @@ const RepDashboard = () => {
     
     setStudentsLoading(true);
     try {
-      const response = await api.get(`/admin/classes/${assignedClass.id}/students`);
+      const response = await api.get('/admin/rep/my-class-students');
       setStudents(response.data || []);
     } catch (err) {
       console.error('Fetch students error:', err);

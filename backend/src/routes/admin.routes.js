@@ -78,4 +78,7 @@ router.patch('/reps/:id/deactivate', superadminGuard, adminController.deactivate
 router.patch('/reps/:id/status', superadminGuard, adminController.deactivateRep); // alias used by frontend
 router.delete('/reps/:id', superadminGuard, adminController.deleteRepAccount);
 
+// Rep-specific routes (accessible by REPs for their own class)
+router.get('/rep/my-class-students', protect, authorizeRoles('REP'), adminController.getRepClassStudents);
+
 module.exports = router;

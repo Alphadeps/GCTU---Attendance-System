@@ -540,6 +540,48 @@ const getClassStudents = async (req, res) => {
   }
 };
 
+// Rep-specific endpoint to get their own class students
+const getRepClassStudents = async (req, res) => {
+  try {
+    // Find the class assigned to this rep
+    const repClass = await prisma.class.findFirst({
+      where: { repId: req.user.id }
+    });
+
+    if (!repClass) {
+      return res.status(404).json({ error: 'You are not assigned to any class' });
+    }
+
+    // Get all students linked to this class
+    const classStudents = await prisma.classStudent.findMany({
+      where: { classId: repClass.id },
+      include: { 
+        student: {
+          select: {
+            id: true,
+            name: true,
+            indexNumber: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        student: {
+          indexNumber: 'asc'
+        }
+      }
+    });
+
+    // Return simplified student data
+    const studentsData = classStudents.map(cs => cs.student);
+
+    res.json(studentsData);
+  } catch (err) {
+    console.error('Get rep class students error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const bulkImportClassStudents = async (req, res) => {
   try {
     const { id } = req.params;
@@ -1385,6 +1427,7 @@ module.exports = {
   removeStudentFromClass,
   bulkDeleteStudentsFromClass,
   getClassStudents,
+  getRepClassStudents,
   bulkImportClassStudents,
   addCourseToClass,
   removeCourseFromClass,
