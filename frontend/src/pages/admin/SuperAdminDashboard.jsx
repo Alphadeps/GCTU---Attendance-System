@@ -854,10 +854,12 @@ export default function SuperAdminDashboard() {
 
       {/* Global alert notification */}
       {message.text && (
-        <div className={`fixed top-4 right-4 z-40 px-5 py-3.5 rounded-xl shadow-xl flex items-center space-x-3 border animate-fade-in ${
-          message.type === 'error' ? 'bg-red-500/20 text-red-200 border-red-500/30' : 'bg-green-500/20 text-green-200 border-green-500/30'
+        <div className={`fixed top-6 right-6 z-[9999] px-5 py-3.5 rounded-xl shadow-2xl flex items-center space-x-3 border animate-fade-in backdrop-blur-sm ${
+          message.type === 'error' ? 'bg-red-500/90 text-white border-red-600' : 
+          message.type === 'info' ? 'bg-blue-500/90 text-white border-blue-600' :
+          'bg-green-500/90 text-white border-green-600'
         }`}>
-          <span>{message.text}</span>
+          <span className="font-medium text-sm">{message.text}</span>
         </div>
       )}
 
