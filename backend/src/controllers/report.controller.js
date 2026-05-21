@@ -260,7 +260,11 @@ const getArchivedReports = async (req, res) => {
     const reports = await prisma.officialReport.findMany({
       where: { status: 'SIGNED' },
       include: {
-        class: true,
+        class: {
+          include: {
+            programme: true
+          }
+        },
         course: true,
         signedBy: { select: { username: true } },
         generatedBy: { select: { username: true } }
@@ -268,15 +272,17 @@ const getArchivedReports = async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
 
-    // Grouping by level -> group
+    // Grouping by programme -> level -> group
     const grouped = {};
     for (const r of reports) {
+      const programmeName = r.class.programme.name;
       const level = r.class.level;
-      const group = r.class.group;
+      const groupKey = `${r.class.group} - ${r.class.session}`; // e.g., "A - MORNING"
 
-      if (!grouped[level]) grouped[level] = {};
-      if (!grouped[level][group]) grouped[level][group] = [];
-      grouped[level][group].push(r);
+      if (!grouped[programmeName]) grouped[programmeName] = {};
+      if (!grouped[programmeName][level]) grouped[programmeName][level] = {};
+      if (!grouped[programmeName][level][groupKey]) grouped[programmeName][level][groupKey] = [];
+      grouped[programmeName][level][groupKey].push(r);
     }
 
     res.json(grouped);
