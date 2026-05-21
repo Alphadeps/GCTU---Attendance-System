@@ -451,9 +451,6 @@ export default function SuperAdminDashboard() {
     } finally {
       setBulkUploadLoading(false);
     }
-  };    } catch (err) {
-      showNotification('Failed to toggle status', 'error');
-    }
   };
 
   const handleDeleteRep = (id) => {
