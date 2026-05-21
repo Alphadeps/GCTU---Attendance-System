@@ -36,6 +36,7 @@ const MENU_GROUPS = [
   {
     title: 'System Archives & Settings',
     items: [
+      { id: 'notifications', label: 'Notifications', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
       { id: 'reports', label: 'Official Archives', icon: 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4' },
       { id: 'settings', label: 'Thresholds & Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z' },
       { id: 'report_settings', label: 'Report Settings', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
@@ -123,6 +124,10 @@ export default function SuperAdminDashboard() {
   const [bulkUploadFile, setBulkUploadFile] = useState(null);
   const [bulkUploadLoading, setBulkUploadLoading] = useState(false);
   const [bulkUploadResult, setBulkUploadResult] = useState(null);
+
+  // Notifications state
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
 
   const [selectedClassForStudents, setSelectedClassForStudents] = useState(null);
   const [showStudentsModal, setShowStudentsModal] = useState(false);
@@ -223,7 +228,7 @@ export default function SuperAdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const showNotification = (text, type = 'success') => {
     setMessage({ text, type });
@@ -452,6 +457,61 @@ export default function SuperAdminDashboard() {
       setBulkUploadLoading(false);
     }
   };
+
+  // Notifications handlers
+  const fetchNotifications = async () => {
+    setNotificationsLoading(true);
+    try {
+      const response = await api.get('/notifications');
+      setNotifications(response.data || []);
+    } catch (err) {
+      console.error('Fetch notifications error:', err);
+      showNotification('Failed to load notifications', 'error');
+    } finally {
+      setNotificationsLoading(false);
+    }
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
+      );
+    } catch (err) {
+      console.error('Mark read error:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
+      await Promise.all(unreadIds.map(id => api.patch(`/notifications/${id}/read`)));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      showNotification('All notifications marked as read');
+    } catch (err) {
+      console.error('Mark all read error:', err);
+      showNotification('Failed to mark all as read', 'error');
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await api.delete('/notifications/clear');
+      setNotifications([]);
+      showNotification('All notifications cleared');
+    } catch (err) {
+      console.error('Clear notifications error:', err);
+      showNotification('Failed to clear notifications', 'error');
+    }
+  };
+
+  // Fetch notifications when tab changes to notifications
+  useEffect(() => {
+    if (activeTab === 'notifications') {
+      fetchNotifications();
+    }
+  }, [activeTab]);
 
   const handleDeleteRep = (id) => {
     setConfirmState({
@@ -1924,6 +1984,152 @@ export default function SuperAdminDashboard() {
           {activeTab === 'report_settings' && !loading && (
             <div className="animate-fade-in">
               <ReportSettings />
+            </div>
+          )}
+
+          {/* NOTIFICATIONS PANEL */}
+          {activeTab === 'notifications' && (
+            <div className="animate-fade-in space-y-6">
+              <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h3 className="font-bold text-white text-lg">System Notifications</h3>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {notifications.filter(n => !n.isRead).length} unread • {notifications.length} total
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    {notifications.some(n => !n.isRead) && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Mark All Read
+                      </button>
+                    )}
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={handleClearAll}
+                        className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Clear All
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {notificationsLoading ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="text-center py-20 space-y-4">
+                    <div className="inline-flex p-4 bg-slate-800/50 rounded-2xl">
+                      <svg className="w-12 h-12 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0L12 17l-8-4" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-bold text-slate-400">All caught up!</p>
+                    <p className="text-xs text-slate-500">No notifications to display</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {notifications.map((notification) => {
+                      const getIcon = (type) => {
+                        switch (type) {
+                          case 'SUCCESS':
+                            return (
+                              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            );
+                          case 'WARNING':
+                            return (
+                              <div className="p-3 bg-[#D4A017]/10 text-[#D4A017] rounded-xl border border-[#D4A017]/20">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                              </div>
+                            );
+                          case 'DANGER':
+                            return (
+                              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            );
+                          default:
+                            return (
+                              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                              </div>
+                            );
+                        }
+                      };
+
+                      const formatTime = (dateString) => {
+                        const date = new Date(dateString);
+                        const now = new Date();
+                        const diffMs = now - date;
+                        const diffMins = Math.floor(diffMs / 60000);
+
+                        if (diffMins < 1) return 'Just now';
+                        if (diffMins < 60) return `${diffMins}m ago`;
+                        
+                        const diffHours = Math.floor(diffMins / 60);
+                        if (diffHours < 24) return `${diffHours}h ago`;
+
+                        return date.toLocaleDateString(undefined, { 
+                          month: 'short', 
+                          day: 'numeric', 
+                          year: 'numeric',
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        });
+                      };
+
+                      return (
+                        <div
+                          key={notification.id}
+                          onClick={() => handleMarkAsRead(notification.id)}
+                          className={`p-5 rounded-xl border transition-all cursor-pointer flex gap-4 relative ${
+                            !notification.isRead 
+                              ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' 
+                              : 'bg-slate-800/30 border-slate-800 hover:bg-slate-800/50'
+                          }`}
+                        >
+                          {!notification.isRead && (
+                            <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-[#D4A017] animate-pulse" />
+                          )}
+                          {getIcon(notification.type)}
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm font-bold mb-1 ${!notification.isRead ? 'text-white' : 'text-slate-300'}`}>
+                              {notification.title}
+                            </p>
+                            <p className="text-sm text-slate-400 leading-relaxed mb-2">
+                              {notification.message}
+                            </p>
+                            <span className="text-xs text-slate-500 font-medium">
+                              {formatTime(notification.createdAt)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
