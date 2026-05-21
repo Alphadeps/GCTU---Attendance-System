@@ -69,6 +69,7 @@ router.delete('/classes/:id/courses/:courseId', superadminGuard, adminController
 // Rep Account Management
 router.post('/reps', superadminGuard, adminController.createRepAccount);
 router.get('/reps', superadminGuard, adminController.getAllReps);
+router.post('/reps/bulk-upload', [...superadminGuard, uploadCSV.single('file')], adminController.bulkUploadReps);
 router.patch('/reps/:id/reset-password', superadminGuard, adminController.resetRepPassword);
 router.patch('/reps/:id/deactivate', superadminGuard, adminController.deactivateRep);
 router.patch('/reps/:id/status', superadminGuard, adminController.deactivateRep); // alias used by frontend

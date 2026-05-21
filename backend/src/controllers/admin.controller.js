@@ -723,6 +723,184 @@ const deleteRepAccount = async (req, res) => {
   }
 };
 
+/**
+ * Bulk Upload Reps from Excel/CSV
+ * Expected columns: indexNumber, name, email, programme, level, type, group, session
+ */
+const bulkUploadReps = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const filename = req.file.originalname.toLowerCase();
+    if (!filename.endsWith('.xlsx') && !filename.endsWith('.xls') && !filename.endsWith('.csv')) {
+      return res.status(400).json({ error: 'Only Excel (.xlsx, .xls) or CSV files are supported' });
+    }
+
+    // Parse Excel/CSV
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) {
+      return res.status(400).json({ error: 'Uploaded spreadsheet is empty' });
+    }
+
+    const sheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'No data rows found in sheet' });
+    }
+
+    // Detect header row
+    const headerRow = rows[0] || [];
+    let indexColIdx = -1;
+    let nameColIdx = -1;
+    let emailColIdx = -1;
+    let programmeColIdx = -1;
+    let levelColIdx = -1;
+    let typeColIdx = -1;
+    let groupColIdx = -1;
+    let sessionColIdx = -1;
+
+    for (let i = 0; i < headerRow.length; i++) {
+      const val = String(headerRow[i] || '').toLowerCase().trim();
+      if (val.includes('index')) indexColIdx = i;
+      else if (val.includes('name')) nameColIdx = i;
+      else if (val.includes('email')) emailColIdx = i;
+      else if (val.includes('programme') || val.includes('program')) programmeColIdx = i;
+      else if (val.includes('level')) levelColIdx = i;
+      else if (val.includes('type')) typeColIdx = i;
+      else if (val.includes('group')) groupColIdx = i;
+      else if (val.includes('session')) sessionColIdx = i;
+    }
+
+    // Fallback defaults
+    if (indexColIdx === -1) indexColIdx = 0;
+    if (nameColIdx === -1) nameColIdx = 1;
+    if (emailColIdx === -1) emailColIdx = 2;
+    if (programmeColIdx === -1) programmeColIdx = 3;
+    if (levelColIdx === -1) levelColIdx = 4;
+    if (typeColIdx === -1) typeColIdx = 5;
+    if (groupColIdx === -1) groupColIdx = 6;
+    if (sessionColIdx === -1) sessionColIdx = 7;
+
+    let createdCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+
+    // Process rows (skip header)
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (!row || row.length === 0) continue;
+
+      try {
+        const indexNumber = String(row[indexColIdx] || '').trim();
+        const name = String(row[nameColIdx] || '').trim();
+        const email = String(row[emailColIdx] || '').trim() || `${indexNumber}@rep.gctu.edu.gh`;
+        const programmeName = String(row[programmeColIdx] || '').trim();
+        const level = String(row[levelColIdx] || '').trim();
+        const type = String(row[typeColIdx] || '').trim().toUpperCase();
+        const group = String(row[groupColIdx] || '').trim().toUpperCase();
+        const session = String(row[sessionColIdx] || '').trim().toUpperCase();
+
+        if (!indexNumber || !name) {
+          skippedCount++;
+          errors.push(`Row ${r + 1}: Missing index number or name`);
+          continue;
+        }
+
+        // Check if rep already exists
+        const existingUser = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { username: indexNumber },
+              { indexNumber: indexNumber }
+            ]
+          }
+        });
+
+        if (existingUser) {
+          skippedCount++;
+          errors.push(`Row ${r + 1}: Rep with index ${indexNumber} already exists`);
+          continue;
+        }
+
+        // Find or create programme
+        let programme = await prisma.programme.findUnique({ where: { name: programmeName } });
+        if (!programme && programmeName) {
+          programme = await prisma.programme.create({ data: { name: programmeName } });
+        }
+
+        // Find or create class
+        let classRecord = null;
+        if (programme && level && type && group && session) {
+          const displayName = `${programmeName} LEVEL ${level} ${type} GROUP ${group} (${session})`;
+          
+          classRecord = await prisma.class.findFirst({
+            where: {
+              programmeId: programme.id,
+              level,
+              type,
+              group,
+              session
+            }
+          });
+
+          if (!classRecord) {
+            classRecord = await prisma.class.create({
+              data: {
+                programmeId: programme.id,
+                level,
+                type,
+                group,
+                session,
+                displayName
+              }
+            });
+          }
+        }
+
+        // Create rep user with default password "rep123"
+        const hashedPassword = await bcrypt.hash('rep123', 10);
+        
+        const newRep = await prisma.user.create({
+          data: {
+            username: indexNumber, // Use index number as username
+            indexNumber: indexNumber,
+            password: hashedPassword,
+            role: 'REP',
+            isActive: true
+          }
+        });
+
+        // Assign rep to class if class exists and doesn't have a rep
+        if (classRecord && !classRecord.repId) {
+          await prisma.class.update({
+            where: { id: classRecord.id },
+            data: { repId: newRep.id }
+          });
+        }
+
+        createdCount++;
+      } catch (e) {
+        skippedCount++;
+        errors.push(`Row ${r + 1}: ${e.message}`);
+      }
+    }
+
+    res.json({
+      message: `Bulk upload completed. Created ${createdCount} reps, skipped ${skippedCount}.`,
+      createdCount,
+      skippedCount,
+      errors: errors.slice(0, 20) // Limit error messages
+    });
+  } catch (err) {
+    console.error('Bulk upload reps error:', err);
+    res.status(500).json({ error: 'Internal server error: ' + err.message });
+  }
+};
+
 // ==========================================
 // SYSTEM SETTINGS
 // ==========================================
@@ -981,6 +1159,7 @@ module.exports = {
   resetRepPassword,
   deactivateRep,
   deleteRepAccount,
+  bulkUploadReps,
   getSettings,
   updateSettings,
   uploadLogo,

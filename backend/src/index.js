@@ -6,6 +6,7 @@ const { apiLimiter } = require('./middleware/rateLimiter');
 
 // Nodemon reload trigger
 const authRoutes = require('./routes/auth.routes');
+const studentAuthRoutes = require('./routes/student-auth.routes');
 const sessionRoutes = require('./routes/session.routes');
 const attendanceRoutes = require('./routes/attendance.routes');
 const studentRoutes = require('./routes/student.routes');
@@ -132,6 +133,7 @@ app.get('/api/stats', protect, async (req, res) => {
 
 // Route mount points
 app.use('/api/auth', authRoutes);
+app.use('/api/student-auth', studentAuthRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/students', studentRoutes);

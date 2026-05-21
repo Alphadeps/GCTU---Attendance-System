@@ -39,6 +39,7 @@ enum AttendanceStatus {
 model User {
   id               String              @id @default(uuid())
   username         String              @unique
+  indexNumber      String?             @unique // For REPs who login with index number
   password         String
   role             UserRole
   isActive         Boolean             @default(true)
@@ -59,6 +60,8 @@ model Student {
   indexNumber       String         @unique
   name              String
   email             String         @unique
+  password          String?        // Null until first login
+  isFirstLogin      Boolean        @default(true)
   deviceFingerprint String?
   attendances       Attendance[]
   classes           ClassStudent[]
