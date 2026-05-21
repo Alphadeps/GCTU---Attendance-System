@@ -9,6 +9,9 @@ import NotificationPanel from '../../components/NotificationPanel';
 import { useAuth } from '../../context/AuthContext';
 import AddProgrammeModal from '../../components/admin/modals/AddProgrammeModal';
 import AddCourseModal from '../../components/admin/modals/AddCourseModal';
+import EditProgrammeModal from '../../components/admin/modals/EditProgrammeModal';
+import EditCourseModal from '../../components/admin/modals/EditCourseModal';
+import EditStudentModal from '../../components/admin/modals/EditStudentModal';
 
 const MENU_GROUPS = [
   {
@@ -89,6 +92,15 @@ export default function SuperAdminDashboard() {
 
   // Modals state
   const [showProgModal, setShowProgModal] = useState(false);
+  const [showEditProgModal, setShowEditProgModal] = useState(false);
+  const [editingProgramme, setEditingProgramme] = useState(null);
+
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showEditCourseModal, setShowEditCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+
+  const [showEditStudentModal, setShowEditStudentModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
 
   const [showClassModal, setShowClassModal] = useState(false);
   const [classStep, setClassStep] = useState(1);
@@ -111,8 +123,6 @@ export default function SuperAdminDashboard() {
   const [showResetPwdModal, setShowResetPwdModal] = useState(false);
   const [resetPwdRepId, setResetPwdRepId] = useState(null);
   const [newPassword, setNewPassword] = useState('');
-
-  const [showCourseModal, setShowCourseModal] = useState(false);
 
   // Class action modals
   const [selectedClassForRep, setSelectedClassForRep] = useState(null);
@@ -299,6 +309,12 @@ export default function SuperAdminDashboard() {
   const handleProgrammeSaved = (newProgramme) => {
     setProgrammes(prev => [...prev, newProgramme]);
     showNotification('Programme added successfully');
+    fetchInitialData();
+  };
+
+  const handleProgrammeUpdated = (updatedProgramme) => {
+    setProgrammes(prev => prev.map(p => p.id === updatedProgramme.id ? updatedProgramme : p));
+    showNotification('Programme updated successfully');
     fetchInitialData();
   };
 
@@ -680,6 +696,11 @@ export default function SuperAdminDashboard() {
     });
   };
 
+  const handleStudentUpdated = (updatedStudent) => {
+    setClassStudents(prev => prev.map(s => s.id === updatedStudent.id ? { ...s, ...updatedStudent } : s));
+    showNotification('Student information updated successfully');
+  };
+
   // Bulk delete students
   const handleBulkDeleteStudents = () => {
     if (selectedStudentIds.length === 0) {
@@ -776,6 +797,12 @@ export default function SuperAdminDashboard() {
   const handleCourseSaved = (newCourse) => {
     setCourses(prev => [...prev, newCourse]);
     showNotification('Course added to global database');
+    fetchInitialData();
+  };
+
+  const handleCourseUpdated = (updatedCourse) => {
+    setCourses(prev => prev.map(c => c.id === updatedCourse.id ? updatedCourse : c));
+    showNotification('Course updated successfully');
     fetchInitialData();
   };
 
@@ -1209,7 +1236,16 @@ export default function SuperAdminDashboard() {
                         <tr key={prog.id} className="hover:bg-[#162238] transition-colors text-slate-200">
                           <td className="p-4 font-bold text-white text-sm">{prog.name}</td>
                           <td className="p-4 text-xs font-semibold">{prog._count?.classes || 0} Class(es)</td>
-                          <td className="p-4 text-right">
+                          <td className="p-4 text-right space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditingProgramme(prog);
+                                setShowEditProgModal(true);
+                              }}
+                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-3 py-1.5 rounded-lg transition"
+                            >
+                              Edit
+                            </button>
                             <button
                               onClick={() => handleDeleteProgramme(prog.id)}
                               className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition"
@@ -1870,7 +1906,16 @@ export default function SuperAdminDashboard() {
                         <tr key={course.id} className="hover:bg-[#162238] transition-colors text-slate-200">
                           <td className="p-4 font-bold text-white text-sm">{course.name}</td>
                           <td className="p-4 font-mono text-xs text-indigo-300">{course.code}</td>
-                          <td className="p-4 text-right">
+                          <td className="p-4 text-right space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditingCourse(course);
+                                setShowEditCourseModal(true);
+                              }}
+                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-3 py-1.5 rounded-lg transition"
+                            >
+                              Edit
+                            </button>
                             <button
                               onClick={() => handleDeleteGlobalCourse(course.id)}
                               className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition"
@@ -2194,6 +2239,18 @@ export default function SuperAdminDashboard() {
         <AddProgrammeModal
           onClose={() => setShowProgModal(false)}
           onSaved={handleProgrammeSaved}
+        />
+      )}
+
+      {/* EDIT PROGRAMME MODAL */}
+      {showEditProgModal && editingProgramme && (
+        <EditProgrammeModal
+          programme={editingProgramme}
+          onClose={() => {
+            setShowEditProgModal(false);
+            setEditingProgramme(null);
+          }}
+          onSaved={handleProgrammeUpdated}
         />
       )}
 
@@ -2590,6 +2647,30 @@ export default function SuperAdminDashboard() {
         />
       )}
 
+      {/* EDIT COURSE MODAL */}
+      {showEditCourseModal && editingCourse && (
+        <EditCourseModal
+          course={editingCourse}
+          onClose={() => {
+            setShowEditCourseModal(false);
+            setEditingCourse(null);
+          }}
+          onSaved={handleCourseUpdated}
+        />
+      )}
+
+      {/* EDIT STUDENT MODAL */}
+      {showEditStudentModal && editingStudent && (
+        <EditStudentModal
+          student={editingStudent}
+          onClose={() => {
+            setShowEditStudentModal(false);
+            setEditingStudent(null);
+          }}
+          onSaved={handleStudentUpdated}
+        />
+      )}
+
       {/* ASSIGN REPRESENTATIVE MODAL */}
       {showAssignRepModal && selectedClassForRep && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
@@ -2739,7 +2820,16 @@ export default function SuperAdminDashboard() {
                               <td className="p-3 font-mono text-xs text-indigo-300 font-bold">{student.indexNumber}</td>
                               <td className="p-3 text-xs font-semibold">{student.name}</td>
                               <td className="p-3 text-xs font-semibold text-slate-400">{student.email || 'N/A'}</td>
-                              <td className="p-3 text-right">
+                              <td className="p-3 text-right space-x-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingStudent(student);
+                                    setShowEditStudentModal(true);
+                                  }}
+                                  className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-2.5 py-1 rounded-md transition"
+                                >
+                                  Edit
+                                </button>
                                 <button
                                   onClick={() => handleRemoveStudentFromClass(student.id)}
                                   className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-2.5 py-1 rounded-md transition"
