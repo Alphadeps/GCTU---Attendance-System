@@ -12,6 +12,7 @@ import AddCourseModal from '../../components/admin/modals/AddCourseModal';
 import EditProgrammeModal from '../../components/admin/modals/EditProgrammeModal';
 import EditCourseModal from '../../components/admin/modals/EditCourseModal';
 import EditStudentModal from '../../components/admin/modals/EditStudentModal';
+import EditRepModal from '../../components/admin/modals/EditRepModal';
 
 const MENU_GROUPS = [
   {
@@ -124,6 +125,9 @@ export default function SuperAdminDashboard() {
   const [showResetPwdModal, setShowResetPwdModal] = useState(false);
   const [resetPwdRepId, setResetPwdRepId] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+
+  const [showEditRepModal, setShowEditRepModal] = useState(false);
+  const [editingRep, setEditingRep] = useState(null);
 
   // Class action modals
   const [selectedClassForRep, setSelectedClassForRep] = useState(null);
@@ -435,6 +439,11 @@ export default function SuperAdminDashboard() {
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to toggle status', 'error');
     }
+  };
+
+  const handleRepUpdated = (updatedRep) => {
+    setReps(prev => prev.map(r => r.id === updatedRep.id ? { ...r, ...updatedRep } : r));
+    showNotification('Representative updated successfully');
   };
 
   const handleBulkUploadReps = async (e) => {
@@ -1563,6 +1572,15 @@ export default function SuperAdminDashboard() {
                           <td className="p-4 text-right space-x-2">
                             <button
                               onClick={() => {
+                                setEditingRep(rep);
+                                setShowEditRepModal(true);
+                              }}
+                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-2.5 py-1.5 rounded-lg transition"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
                                 setResetPwdRepId(rep.id);
                                 setShowResetPwdModal(true);
                               }}
@@ -2684,6 +2702,18 @@ export default function SuperAdminDashboard() {
             setEditingStudent(null);
           }}
           onSaved={handleStudentUpdated}
+        />
+      )}
+
+      {/* EDIT REP MODAL */}
+      {showEditRepModal && editingRep && (
+        <EditRepModal
+          rep={editingRep}
+          onClose={() => {
+            setShowEditRepModal(false);
+            setEditingRep(null);
+          }}
+          onSaved={handleRepUpdated}
         />
       )}
 

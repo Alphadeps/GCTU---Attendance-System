@@ -36,6 +36,11 @@ const RepDashboard = () => {
   // Class info (from localStorage — populated at login)
   const [classStudentCount, setClassStudentCount] = useState(0);
 
+  // Students list
+  const [students, setStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(false);
+  const [studentSearch, setStudentSearch] = useState('');
+
   // Confirm modal state
   const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
 
@@ -82,10 +87,32 @@ const RepDashboard = () => {
     }
   };
 
+  const fetchStudents = async () => {
+    if (!assignedClass?.id) return;
+    
+    setStudentsLoading(true);
+    try {
+      const response = await api.get(`/admin/classes/${assignedClass.id}/students`);
+      setStudents(response.data || []);
+    } catch (err) {
+      console.error('Fetch students error:', err);
+      toast.error('Failed to load students list');
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'students') {
+      fetchStudents();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const handleLogout = async () => {
     try {
@@ -281,6 +308,7 @@ const RepDashboard = () => {
             {[
               { id: 'dashboard', label: 'Dashboard & Sessions', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
               { id: 'courses', label: 'My Class Courses', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+              { id: 'students', label: 'Class Students', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
             ].map(item => (
               <button
                 key={item.id}
@@ -337,6 +365,7 @@ const RepDashboard = () => {
               <h1 className="text-lg font-bold text-white leading-tight">
                 {activeTab === 'dashboard' && 'Dashboard & Sessions'}
                 {activeTab === 'courses' && 'My Class Courses'}
+                {activeTab === 'students' && 'Class Students'}
               </h1>
               {assignedClass && (
                 <span className="text-xs text-[#D4A017] font-bold">{assignedClass.displayName}</span>
@@ -581,6 +610,88 @@ const RepDashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: CLASS STUDENTS */}
+          {activeTab === 'students' && (
+            <div className="space-y-6">
+              <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex justify-between items-center">
+                <div>
+                  <h3 className="font-bold text-white text-sm">Class Students</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Complete list of students enrolled in your class.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    placeholder="Search by name or index..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4A017] w-64"
+                  />
+                  <span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full">
+                    {students.length} student{students.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              </div>
+
+              <div className="bg-[#001c44]/55 border border-[#002a63] rounded-2xl shadow-xl overflow-hidden">
+                {studentsLoading ? (
+                  <div className="flex justify-center items-center py-16">
+                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : students.length === 0 ? (
+                  <div className="text-center py-16 space-y-3 p-6">
+                    <svg className="w-12 h-12 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <p className="text-sm font-bold text-slate-400">No students enrolled yet</p>
+                    <p className="text-xs text-slate-500 max-w-xs mx-auto">Your administrator needs to add students to your class.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-[#000a18] border-b border-[#002a63]">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">#</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Index Number</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Name</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Email</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#002a63]">
+                        {students
+                          .filter(student => 
+                            student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                            student.indexNumber.includes(studentSearch)
+                          )
+                          .map((student, index) => (
+                            <tr key={student.id} className="hover:bg-[#002a63]/30 transition-colors">
+                              <td className="px-6 py-4 text-sm text-slate-400">{index + 1}</td>
+                              <td className="px-6 py-4">
+                                <span className="font-mono text-sm font-bold text-[#D4A017]">{student.indexNumber}</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="text-sm font-semibold text-white">{student.name}</span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className="text-sm text-slate-400">{student.email || 'N/A'}</span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                    {students.filter(student => 
+                      student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                      student.indexNumber.includes(studentSearch)
+                    ).length === 0 && (
+                      <div className="text-center py-8 text-slate-400 text-sm">
+                        No students match your search criteria
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

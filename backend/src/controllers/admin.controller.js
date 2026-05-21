@@ -800,6 +800,91 @@ const resetRepPassword = async (req, res) => {
   }
 };
 
+const updateRep = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { username, indexNumber } = req.body;
+
+    if (!username && !indexNumber) {
+      return res.status(400).json({ error: 'At least one field (username or indexNumber) is required' });
+    }
+
+    const rep = await prisma.user.findUnique({ where: { id } });
+    if (!rep || rep.role !== 'REP') {
+      return res.status(404).json({ error: 'Representative account not found' });
+    }
+
+    // Check for duplicate username (excluding current rep)
+    if (username && username !== rep.username) {
+      const existingUsername = await prisma.user.findUnique({ where: { username } });
+      if (existingUsername) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+    }
+
+    // Check for duplicate index number (excluding current rep)
+    if (indexNumber && indexNumber !== rep.indexNumber) {
+      const existingIndex = await prisma.user.findUnique({ where: { indexNumber } });
+      if (existingIndex) {
+        return res.status(400).json({ error: 'Index number already exists' });
+      }
+    }
+
+    // Update user record
+    const updateData = {};
+    if (username) updateData.username = username;
+    if (indexNumber) updateData.indexNumber = indexNumber;
+
+    const updated = await prisma.user.update({
+      where: { id },
+      data: updateData
+    });
+
+    // If index number is being added/updated, ensure student record exists
+    if (indexNumber) {
+      try {
+        const existingStudent = await prisma.student.findUnique({
+          where: { indexNumber }
+        });
+
+        if (!existingStudent) {
+          // Create student record for the rep
+          await prisma.student.create({
+            data: {
+              indexNumber: indexNumber,
+              name: username || rep.username,
+              email: `${indexNumber}@student.edu`,
+              password: rep.password, // Use same password hash
+              isFirstLogin: false
+            }
+          });
+        } else {
+          // Update existing student record name if username changed
+          if (username) {
+            await prisma.student.update({
+              where: { indexNumber },
+              data: { name: username }
+            });
+          }
+        }
+      } catch (studentErr) {
+        console.log('Student record handling:', studentErr.message);
+      }
+    }
+
+    res.json({
+      id: updated.id,
+      username: updated.username,
+      indexNumber: updated.indexNumber,
+      role: updated.role,
+      isActive: updated.isActive
+    });
+  } catch (err) {
+    console.error('Update rep error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const deactivateRep = async (req, res) => {
   try {
     const { id } = req.params;
@@ -1306,6 +1391,7 @@ module.exports = {
   getClassCourses,
   createRepAccount,
   getAllReps,
+  updateRep,
   resetRepPassword,
   deactivateRep,
   deleteRepAccount,
