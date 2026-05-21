@@ -689,10 +689,14 @@ const getClassCourses = async (req, res) => {
 
 const createRepAccount = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, indexNumber } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    if (!indexNumber) {
+      return res.status(400).json({ error: 'Index number is required for rep accounts' });
     }
 
     const existing = await prisma.user.findUnique({ where: { username } });
@@ -700,20 +704,44 @@ const createRepAccount = async (req, res) => {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
+    // Check if index number is already taken
+    const existingIndex = await prisma.user.findUnique({ where: { indexNumber } });
+    if (existingIndex) {
+      return res.status(400).json({ error: 'Index number already exists' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await prisma.user.create({
       data: {
         username,
+        indexNumber,
         password: hashedPassword,
         role: 'REP',
         isActive: true
       }
     });
 
+    // Also create a student record for the rep so they can check in
+    try {
+      await prisma.student.create({
+        data: {
+          indexNumber: indexNumber,
+          name: username, // Use username as name initially
+          email: `${indexNumber}@student.edu`, // Generate a default email
+          password: hashedPassword, // Same password as user account
+          isFirstLogin: false // Rep already has password
+        }
+      });
+    } catch (studentErr) {
+      // If student already exists, that's okay - they might have been added to a class already
+      console.log('Student record already exists for rep:', indexNumber);
+    }
+
     res.status(201).json({
       id: newUser.id,
       username: newUser.username,
+      indexNumber: newUser.indexNumber,
       role: newUser.role,
       isActive: newUser.isActive
     });

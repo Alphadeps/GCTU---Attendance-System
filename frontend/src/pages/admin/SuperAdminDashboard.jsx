@@ -116,6 +116,7 @@ export default function SuperAdminDashboard() {
   const [newRep, setNewRep] = useState({
     fullName: '',
     username: '',
+    indexNumber: '',
     password: '',
     confirmPassword: '',
   });
@@ -309,13 +310,11 @@ export default function SuperAdminDashboard() {
   const handleProgrammeSaved = (newProgramme) => {
     setProgrammes(prev => [...prev, newProgramme]);
     showNotification('Programme added successfully');
-    fetchInitialData();
   };
 
   const handleProgrammeUpdated = (updatedProgramme) => {
     setProgrammes(prev => prev.map(p => p.id === updatedProgramme.id ? updatedProgramme : p));
     showNotification('Programme updated successfully');
-    fetchInitialData();
   };
 
   const handleDeleteProgramme = (id) => {
@@ -328,7 +327,6 @@ export default function SuperAdminDashboard() {
           await api.delete(`/admin/programmes/${id}`);
           setProgrammes(prev => prev.filter(p => p.id !== id));
           showNotification('Programme deleted successfully');
-          fetchInitialData();
         } catch (err) {
           showNotification(err.response?.data?.error || 'Failed to delete programme', 'error');
         }
@@ -369,7 +367,11 @@ export default function SuperAdminDashboard() {
 
       setClassStep(3); // Success step
       showNotification(`${newClass.groups.length} class(es) created successfully`);
-      fetchInitialData();
+      // Refresh classes list
+      const classRes = await api.get('/admin/classes');
+      if (classRes && classRes.data) {
+        setClasses(classRes.data);
+      }
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to create classes', 'error');
     }
@@ -399,13 +401,13 @@ export default function SuperAdminDashboard() {
       const res = await api.post('/admin/reps', {
         fullName: newRep.fullName,
         username: newRep.username,
+        indexNumber: newRep.indexNumber,
         password: newRep.password,
       });
       setReps(prev => [...prev, res.data]);
       setShowRepModal(false);
-      setNewRep({ fullName: '', username: '', password: '', confirmPassword: '' });
+      setNewRep({ fullName: '', username: '', indexNumber: '', password: '', confirmPassword: '' });
       showNotification('Representative account created successfully');
-      fetchInitialData();
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to create representative', 'error');
     }
@@ -458,8 +460,11 @@ export default function SuperAdminDashboard() {
       setBulkUploadResult(response.data);
       showNotification(response.data.message || 'Bulk upload completed successfully');
       
-      // Refresh data
-      fetchInitialData();
+      // Refresh reps list only
+      const repsRes = await api.get('/admin/reps');
+      if (repsRes && repsRes.data) {
+        setReps(repsRes.data);
+      }
       
       // Reset file input after a delay
       setTimeout(() => {
@@ -540,7 +545,6 @@ export default function SuperAdminDashboard() {
           await api.delete(`/admin/reps/${id}`);
           setReps(prev => prev.filter(r => r.id !== id));
           showNotification('Representative deleted successfully');
-          fetchInitialData();
         } catch (err) {
           showNotification('Failed to delete representative', 'error');
         }
@@ -556,7 +560,11 @@ export default function SuperAdminDashboard() {
       showNotification('Class representative assigned successfully');
       setShowAssignRepModal(false);
       setSelectedClassForRep(null);
-      fetchInitialData();
+      // Update classes state to reflect rep assignment
+      const classRes = await api.get('/admin/classes');
+      if (classRes && classRes.data) {
+        setClasses(classRes.data);
+      }
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to assign representative', 'error');
     }
@@ -571,7 +579,11 @@ export default function SuperAdminDashboard() {
         try {
           await api.post(`/admin/classes/${classId}/remove-rep`);
           showNotification('Representative unassigned from class');
-          fetchInitialData();
+          // Update classes state to reflect rep removal
+          const classRes = await api.get('/admin/classes');
+          if (classRes && classRes.data) {
+            setClasses(classRes.data);
+          }
         } catch (err) {
           showNotification('Failed to remove representative', 'error');
         }
@@ -622,7 +634,6 @@ export default function SuperAdminDashboard() {
       setManualStudents([{ name: '', indexNumber: '', email: '' }]);
       // reload student list
       handleOpenStudentsModal(selectedClassForStudents);
-      fetchInitialData();
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to add students', 'error');
     }
@@ -672,7 +683,6 @@ export default function SuperAdminDashboard() {
       showNotification(`Successfully imported ${csvPreview.length} students into class.`);
       setCsvPreview([]);
       handleOpenStudentsModal(selectedClassForStudents);
-      fetchInitialData();
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to import student list.', 'error');
     }
@@ -688,7 +698,6 @@ export default function SuperAdminDashboard() {
           await api.delete(`/admin/classes/${selectedClassForStudents.id}/students/${studentId}`);
           showNotification('Student removed from class');
           handleOpenStudentsModal(selectedClassForStudents);
-          fetchInitialData();
         } catch (err) {
           showNotification('Failed to remove student', 'error');
         }
@@ -720,7 +729,6 @@ export default function SuperAdminDashboard() {
           showNotification(`${selectedStudentIds.length} student(s) removed from class`);
           setSelectedStudentIds([]);
           handleOpenStudentsModal(selectedClassForStudents);
-          fetchInitialData();
         } catch (err) {
           showNotification('Failed to remove students', 'error');
         }
@@ -797,13 +805,11 @@ export default function SuperAdminDashboard() {
   const handleCourseSaved = (newCourse) => {
     setCourses(prev => [...prev, newCourse]);
     showNotification('Course added to global database');
-    fetchInitialData();
   };
 
   const handleCourseUpdated = (updatedCourse) => {
     setCourses(prev => prev.map(c => c.id === updatedCourse.id ? updatedCourse : c));
     showNotification('Course updated successfully');
-    fetchInitialData();
   };
 
   const handleDeleteGlobalCourse = (id) => {
@@ -816,7 +822,6 @@ export default function SuperAdminDashboard() {
           await api.delete(`/courses/${id}`);
           setCourses(prev => prev.filter(c => c.id !== id));
           showNotification('Course deleted successfully');
-          fetchInitialData();
         } catch (err) {
           showNotification(err.response?.data?.error || 'Failed to delete course', 'error');
         }
@@ -856,7 +861,6 @@ export default function SuperAdminDashboard() {
       setLecturerUploadResults(res.data.results);
       setLecturerFile(null);
       fetchLecturerAssignments();
-      fetchInitialData(); // Refresh other stats
     } catch (err) {
       console.error(err);
       showNotification(err.response?.data?.error || 'Failed to upload spreadsheet.', 'error');
@@ -875,7 +879,6 @@ export default function SuperAdminDashboard() {
           await api.delete(`/lecturer/assignments/${id}`);
           showNotification('Lecturer allocation removed successfully');
           setLecturerAssignments(prev => prev.filter(a => a.id !== id));
-          fetchInitialData();
         } catch (err) {
           console.error(err);
           showNotification('Failed to remove lecturer allocation', 'error');
@@ -1469,7 +1472,8 @@ export default function SuperAdminDashboard() {
                                         try {
                                           await api.delete(`/admin/classes/${cls.id}`);
                                           showNotification('Class deleted successfully');
-                                          fetchInitialData();
+                                          // Update classes state directly
+                                          setClasses(prev => prev.filter(c => c.id !== cls.id));
                                         } catch (err) {
                                           showNotification('Failed to delete class', 'error');
                                         }
@@ -2458,6 +2462,18 @@ export default function SuperAdminDashboard() {
                   placeholder="e.g. John Doe"
                   value={newRep.fullName}
                   onChange={(e) => setNewRep(prev => ({ ...prev, fullName: e.target.value }))}
+                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Index Number</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 10912345"
+                  value={newRep.indexNumber}
+                  onChange={(e) => setNewRep(prev => ({ ...prev, indexNumber: e.target.value }))}
                   className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
