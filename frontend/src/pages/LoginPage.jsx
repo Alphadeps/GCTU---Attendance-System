@@ -55,7 +55,15 @@ const LoginPage = () => {
     <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col justify-center items-center p-6 relative overflow-hidden">
       {/* Background logo watermark */}
       <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
-        <img src="/logo2.png" alt="GCTU Crest Watermark" className="w-[380px] h-[380px] object-contain" onError={(e) => console.error('Logo failed to load:', e)} />
+        <img 
+          src="/logo2.png" 
+          alt="GCTU Crest Watermark" 
+          className="w-[380px] h-[380px] object-contain" 
+          onError={(e) => {
+            console.error('Logo failed to load');
+            e.target.style.display = 'none';
+          }} 
+        />
       </div>
 
       {/* Background mesh/gradients */}
