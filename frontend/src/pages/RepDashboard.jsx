@@ -51,7 +51,7 @@ const RepDashboard = () => {
 
   // Use defaults if not set
   const displayDeptName = deptName || 'Class Attendance System';
-  const displayDeptLogo = deptLogo || '/logo.jfif';
+  const displayDeptLogo = deptLogo || '/logo2.png';
 
   const fetchData = async () => {
     setLoading(true);

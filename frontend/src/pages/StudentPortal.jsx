@@ -208,8 +208,8 @@ const StudentPortal = () => {
     return (
       <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col justify-center px-6 py-12 relative overflow-hidden">
         {/* Subtle Watermark School Crest */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-          <img src="/logo.jfif" alt="School Crest Watermark" className="w-[300px] h-[300px] object-contain filter grayscale" />
+        <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+          <img src="/logo2.png" alt="School Crest Watermark" className="w-[450px] h-[450px] object-contain" />
         </div>
 
         {/* Background Mesh decoration */}
