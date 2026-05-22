@@ -1426,6 +1426,48 @@ const getAdminStats = async (req, res) => {
 };
 
 /**
+ * Diagnose programme names - shows what will happen during cleanup
+ */
+const diagnoseProgrammes = async (req, res) => {
+  try {
+    const { normalizeProgrammeName, getOfficialProgrammes, getSuggestions } = require('../lib/programmeMapper');
+    
+    const allProgrammes = await prisma.programme.findMany({
+      include: {
+        _count: { select: { classes: true } }
+      },
+      orderBy: { name: 'asc' }
+    });
+
+    const diagnosis = allProgrammes.map(prog => {
+      const normalized = normalizeProgrammeName(prog.name);
+      const suggestions = getSuggestions(prog.name);
+      const isOfficial = getOfficialProgrammes().includes(prog.name);
+      
+      return {
+        id: prog.id,
+        currentName: prog.name,
+        classCount: prog._count.classes,
+        isOfficial,
+        canNormalize: !!normalized,
+        normalizedTo: normalized,
+        suggestions: suggestions.length > 0 ? suggestions : ['No suggestions - manual mapping needed'],
+        action: isOfficial ? 'KEEP' : (normalized ? `MERGE into "${normalized}"` : 'ERROR - Cannot normalize')
+      };
+    });
+
+    res.json({
+      totalProgrammes: allProgrammes.length,
+      officialProgrammes: getOfficialProgrammes(),
+      diagnosis
+    });
+  } catch (err) {
+    console.error('Diagnose programmes error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+};
+
+/**
  * Clean up duplicate programmes by merging them into official names
  * This will:
  * 1. Find all programmes that can be normalized to official names
@@ -1606,5 +1648,6 @@ module.exports = {
   uploadLogo,
   getAdminStats,
   parseImportFile,
+  diagnoseProgrammes,
   cleanupDuplicateProgrammes
 };
