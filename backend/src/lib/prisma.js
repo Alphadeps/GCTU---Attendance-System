@@ -5,13 +5,22 @@ const { withAccelerate } = require('@prisma/extension-accelerate');
 
 let prisma;
 
-if (process.env.DIRECT_URL) {
-  console.log('Database Connection: Using direct PostgreSQL connection via pg driver adapter.');
+// Determine if we should use the driver adapter or Accelerate
+const databaseUrl = process.env.DATABASE_URL || '';
+const directUrl = process.env.DIRECT_URL;
+const isAccelerate = databaseUrl.startsWith('prisma://');
+
+if (directUrl || !isAccelerate) {
+  console.log(`Database Connection: Using PostgreSQL connection via pg driver adapter.`);
   
-  // Parse and fix SSL mode in connection string to avoid deprecation warning
-  let connectionString = process.env.DIRECT_URL;
+  // Use directUrl if available, otherwise fall back to databaseUrl
+  let connectionString = directUrl || databaseUrl;
   
-  // Replace deprecated SSL modes with verify-full
+  if (!connectionString) {
+    throw new Error('DATABASE_URL or DIRECT_URL must be provided');
+  }
+
+  // Replace deprecated SSL modes with verify-full in connection string to avoid deprecation warning
   if (connectionString.includes('sslmode=require') || 
       connectionString.includes('sslmode=prefer') || 
       connectionString.includes('sslmode=verify-ca')) {
@@ -43,11 +52,6 @@ if (process.env.DIRECT_URL) {
 } else {
   console.log('Database Connection: Using Prisma Accelerate.');
   prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL
-      }
-    },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   }).$extends(withAccelerate());
 }

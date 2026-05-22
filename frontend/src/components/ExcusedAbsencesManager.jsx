@@ -13,10 +13,6 @@ const ExcusedAbsencesManager = () => {
   const [processing, setProcessing] = useState(false);
   const toast = useToast();
 
-  useEffect(() => {
-    fetchExcusedRequests();
-  }, [filter]);
-
   const fetchExcusedRequests = async () => {
     setLoading(true);
     try {
@@ -37,6 +33,10 @@ const ExcusedAbsencesManager = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchExcusedRequests();
+  }, [filter]);
 
   const handleApprove = async (request) => {
     if (!adminResponse.trim()) {

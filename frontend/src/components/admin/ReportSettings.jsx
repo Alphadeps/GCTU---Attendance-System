@@ -7,10 +7,6 @@ export default function ReportSettings() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    fetchActiveTemplate();
-  }, []);
-
   const fetchActiveTemplate = async () => {
     try {
       const res = await api.get('/reports/template');
@@ -19,6 +15,10 @@ export default function ReportSettings() {
       console.error('Failed to fetch template', err);
     }
   };
+
+  useEffect(() => {
+    fetchActiveTemplate();
+  }, []);
 
   const handleUpload = async (e) => {
     e.preventDefault();

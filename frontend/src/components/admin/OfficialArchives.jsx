@@ -10,10 +10,6 @@ export default function OfficialArchives() {
   const [filterProgramme, setFilterProgramme] = useState('');
   const [filterLevel, setFilterLevel] = useState('');
 
-  useEffect(() => {
-    fetchArchives();
-  }, []);
-
   const fetchArchives = async () => {
     try {
       const res = await api.get('/reports/archived');
@@ -29,6 +25,10 @@ export default function OfficialArchives() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchArchives();
+  }, []);
 
   const toggleProgramme = (programme) => {
     setExpandedProgrammes(prev => ({ ...prev, [programme]: !prev[programme] }));

@@ -57,6 +57,7 @@ const StudentPortal = () => {
   const [grievances, setGrievances] = useState([]);
   const [loadingGrievances, setLoadingGrievances] = useState(false);
   const [showGrievanceModal, setShowGrievanceModal] = useState(false);
+  const [grievanceCourse, setGrievanceCourse] = useState('');
 
   // Check-in Bottom Sheet States
   const [showBottomSheet, setShowBottomSheet] = useState(false);
@@ -597,13 +598,11 @@ const StudentPortal = () => {
                       {g.evidenceUrl && (
                         <div className="pt-2 border-t border-[#002a63]/40 flex justify-between items-center text-[10px]">
                           <span className="text-slate-500">Attachment:</span>
-                          {/* eslint-disable-next-line react/jsx-no-target-blank */}
                           <a href={`http://localhost:5000${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer" className="text-[#D4A017] underline hover:text-[#b88a14]">
                             View Evidence Document
                           </a>
                         </div>
                       )}
-
                       {g.adminResponse && (
                         <div className="bg-[#000a18]/60 border border-[#002a63]/80 p-3 rounded-xl space-y-1.5">
                           <span className="block text-[8px] text-[#D4A017] font-bold uppercase tracking-wider">Department Reply</span>

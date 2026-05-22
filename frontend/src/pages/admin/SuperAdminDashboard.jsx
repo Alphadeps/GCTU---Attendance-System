@@ -192,22 +192,12 @@ export default function SuperAdminDashboard() {
   // Onboarding tour state
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  useEffect(() => {
-    // Check if user is SUPERADMIN
-    if (role !== 'SUPERADMIN') {
-      navigate('/');
-      return;
-    }
-
-    // Check if this is first login (show onboarding)
-    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
-    if (!hasSeenOnboarding) {
-      setShowOnboarding(true);
-    }
-
-    fetchInitialData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate]);
+  const showNotification = (text, type = 'success') => {
+    setMessage({ text, type });
+    setTimeout(() => {
+      setMessage({ text: '', type: '' });
+    }, 4000);
+  };
 
   async function fetchInitialData() {
     setLoading(true);
@@ -256,20 +246,30 @@ export default function SuperAdminDashboard() {
       if (lecturerRes && lecturerRes.data) {
         setLecturerAssignments(lecturerRes.data);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       showNotification('Failed to load dashboard data', 'error');
     } finally {
       setLoading(false);
     }
   }
 
-  const showNotification = (text, type = 'success') => {
-    setMessage({ text, type });
-    setTimeout(() => {
-      setMessage({ text: '', type: '' });
-    }, 4000);
-  };
+  useEffect(() => {
+    // Check if user is SUPERADMIN
+    if (role !== 'SUPERADMIN') {
+      navigate('/');
+      return;
+    }
+
+    // Check if this is first login (show onboarding)
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate]);
 
   // 1. Force Password Change Handler
   const handleForcePasswordChange = async (e) => {
@@ -291,9 +291,9 @@ export default function SuperAdminDashboard() {
       showNotification('Password changed successfully. Access granted.');
       localStorage.setItem('needsPasswordChange', 'false');
       setNeedsPasswordChange(false);
-    } catch (err) {
-      console.error(err);
-      showNotification(err.response?.data?.error || 'Failed to change password. Ensure current password is correct.', 'error');
+    } catch (error) {
+      console.error(error);
+      showNotification(error.response?.data?.error || 'Failed to change password. Ensure current password is correct.', 'error');
     }
   };
 
@@ -303,8 +303,8 @@ export default function SuperAdminDashboard() {
     try {
       await api.patch('/admin/settings', settings);
       showNotification('System thresholds updated successfully');
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       showNotification('Failed to update system thresholds', 'error');
     }
   };
@@ -322,8 +322,8 @@ export default function SuperAdminDashboard() {
       setSettings(prev => ({ ...prev, deptLogoUrl: res.data.logoUrl }));
       setLogoPreview(res.data.logoUrl);
       setLogoFile(null);
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       showNotification('Failed to upload logo', 'error');
     }
   };
@@ -946,9 +946,9 @@ export default function SuperAdminDashboard() {
       setLecturerUploadResults(res.data.results);
       setLecturerFile(null);
       fetchLecturerAssignments();
-    } catch (err) {
-      console.error(err);
-      showNotification(err.response?.data?.error || 'Failed to upload spreadsheet.', 'error');
+    } catch (error) {
+      console.error(error);
+      showNotification(error.response?.data?.error || 'Failed to upload spreadsheet.', 'error');
     } finally {
       setUploadingLecturers(false);
     }

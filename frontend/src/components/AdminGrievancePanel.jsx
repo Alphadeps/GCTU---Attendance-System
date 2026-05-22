@@ -236,14 +236,12 @@ const AdminGrievancePanel = () => {
                     <span className="truncate text-slate-400 font-mono pr-4 text-[10px]">
                       {selectedGrievance.evidenceUrl.split('/').pop()}
                     </span>
-                    {/* eslint-disable-next-line react/jsx-no-target-blank */}
                     <a
                       href={`http://localhost:5000${selectedGrievance.evidenceUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold px-3 py-1.5 rounded-lg text-[10px] transition-colors"
-                    >
-                      View Link
+                    >                      View Link
                     </a>
                   </div>
                 </div>

@@ -428,6 +428,35 @@ const securityAuditLog = (req, res, next) => {
   next();
 };
 
+/**
+ * Safe MongoDB Sanitization Middleware
+ * Prevents NoSQL injection while respecting Express 5 read-only request properties
+ */
+const mongoSanitizeMiddleware = (req, res, next) => {
+  ['body', 'params', 'headers', 'query'].forEach((key) => {
+    if (req[key] && typeof req[key] === 'object') {
+      try {
+        // Try direct assignment (Express 4)
+        const sanitized = mongoSanitize.sanitize(req[key]);
+        req[key] = sanitized;
+      } catch (e) {
+        // Fallback for Express 5 (getter only)
+        try {
+          const sanitized = mongoSanitize.sanitize(req[key]);
+          // Clear and re-populate the existing object
+          Object.keys(req[key]).forEach(k => {
+            try { delete req[key][k]; } catch (err) {}
+          });
+          Object.assign(req[key], sanitized);
+        } catch (err) {
+          console.warn(`Security: Could not sanitize req.${key} for MongoDB (read-only)`);
+        }
+      }
+    }
+  });
+  next();
+};
+
 module.exports = {
   // Middleware
   securityHeaders,
@@ -440,7 +469,7 @@ module.exports = {
   securityAuditLog,
   
   // MongoDB sanitization (prevents NoSQL injection)
-  mongoSanitize: mongoSanitize(),
+  mongoSanitize: mongoSanitizeMiddleware,
   
   // HTTP Parameter Pollution protection
   hpp: hpp(),
