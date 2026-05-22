@@ -46,9 +46,15 @@ const { logger, requestLogger } = require('./lib/logger');
 const seed = require('./seed');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+// Render provides PORT dynamically - don't override it
+const PORT = process.env.PORT || 10000;
 
 console.log(`📌 PORT configuration: ${PORT} (from ${process.env.PORT ? 'environment' : 'default'})`);
+console.log(`📌 All environment check:`, {
+  PORT: process.env.PORT,
+  RENDER: process.env.RENDER,
+  NODE_ENV: process.env.NODE_ENV
+});
 
 // Trust proxy (required for rate limiting and security behind reverse proxy)
 app.set('trust proxy', 1);
