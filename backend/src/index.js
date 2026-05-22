@@ -104,8 +104,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // Security Middleware
-app.use(mongoSanitize); // Prevent NoSQL injection
-app.use(hpp); // Prevent HTTP Parameter Pollution
+// app.use(mongoSanitize); // Prevent NoSQL injection - Disabled for Express 5 compatibility
+// app.use(hpp); // Prevent HTTP Parameter Pollution - Disabled for Express 5 compatibility
 // app.use(sanitizeInput); // XSS protection - Disabled for Express 5 compatibility
 app.use(preventSqlInjection); // Additional SQL injection prevention
 app.use(preventRateLimitBypass); // Prevent rate limit bypass

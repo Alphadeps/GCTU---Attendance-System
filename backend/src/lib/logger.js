@@ -15,10 +15,17 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 const path = require('path');
 const fs = require('fs');
 
-// Ensure logs directory exists
+// Ensure logs directory exists (skip in production if filesystem is read-only)
 const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+let logsEnabled = true;
+
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+} catch (error) {
+  console.warn('Unable to create logs directory (read-only filesystem). File logging disabled.');
+  logsEnabled = false;
 }
 
 // Custom format for console output
@@ -44,60 +51,61 @@ const fileFormat = winston.format.combine(
 // Create transports
 const transports = [];
 
-// Console transport (development only)
-if (process.env.NODE_ENV !== 'production') {
+// Console transport (always enabled)
+transports.push(
+  new winston.transports.Console({
+    format: consoleFormat,
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+  })
+);
+
+// File transports (only if logs directory is writable)
+if (logsEnabled) {
+  // Error log file (all errors)
   transports.push(
-    new winston.transports.Console({
-      format: consoleFormat,
-      level: 'debug'
+    new DailyRotateFile({
+      filename: path.join(logsDir, 'error-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      level: 'error',
+      format: fileFormat,
+      maxSize: '20m',
+      maxFiles: '30d',
+      zippedArchive: true
+    })
+  );
+
+  // Combined log file (all logs)
+  transports.push(
+    new DailyRotateFile({
+      filename: path.join(logsDir, 'combined-%DATE%.log'),
+      datePattern: 'YYYY-MM-DD',
+      format: fileFormat,
+      maxSize: '20m',
+      maxFiles: '14d',
+      zippedArchive: true
     })
   );
 }
 
-// Error log file (all errors)
-transports.push(
-  new DailyRotateFile({
-    filename: path.join(logsDir, 'error-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    level: 'error',
-    format: fileFormat,
-    maxSize: '20m',
-    maxFiles: '30d',
-    zippedArchive: true
-  })
-);
-
-// Combined log file (all logs)
-transports.push(
-  new DailyRotateFile({
-    filename: path.join(logsDir, 'combined-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    format: fileFormat,
-    maxSize: '20m',
-    maxFiles: '14d',
-    zippedArchive: true
-  })
-);
-
-// Audit log file (critical operations)
-const auditTransport = new DailyRotateFile({
+// Audit log file (critical operations) - only if logs enabled
+const auditTransport = logsEnabled ? new DailyRotateFile({
   filename: path.join(logsDir, 'audit-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   format: fileFormat,
   maxSize: '20m',
   maxFiles: '90d', // Keep audit logs for 90 days
   zippedArchive: true
-});
+}) : null;
 
-// Security log file (security events)
-const securityTransport = new DailyRotateFile({
+// Security log file (security events) - only if logs enabled
+const securityTransport = logsEnabled ? new DailyRotateFile({
   filename: path.join(logsDir, 'security-%DATE%.log'),
   datePattern: 'YYYY-MM-DD',
   format: fileFormat,
   maxSize: '20m',
   maxFiles: '90d',
   zippedArchive: true
-});
+}) : null;
 
 // Create main logger
 const logger = winston.createLogger({
@@ -109,14 +117,14 @@ const logger = winston.createLogger({
 // Create audit logger
 const auditLogger = winston.createLogger({
   level: 'info',
-  transports: [auditTransport],
+  transports: auditTransport ? [auditTransport] : [new winston.transports.Console({ format: consoleFormat })],
   exitOnError: false
 });
 
 // Create security logger
 const securityLogger = winston.createLogger({
   level: 'info',
-  transports: [securityTransport],
+  transports: securityTransport ? [securityTransport] : [new winston.transports.Console({ format: consoleFormat })],
   exitOnError: false
 });
 
