@@ -268,7 +268,12 @@ const adminLimiter = rateLimit({
   store: new RedisStore({ prefix: 'rl:admin:' }),
   
   keyGenerator: (req) => {
-    return req.user?.id || req.ip;
+    // Use user ID if authenticated, otherwise let express-rate-limit handle IP
+    if (req.user?.id) {
+      return `user:${req.user.id}`;
+    }
+    // Return undefined to use default IP-based key generation
+    return undefined;
   },
   
   message: {
@@ -288,7 +293,11 @@ const uploadLimiter = rateLimit({
   store: new RedisStore({ prefix: 'rl:upload:' }),
   
   keyGenerator: (req) => {
-    return req.user?.id || req.ip;
+    // Use user ID if authenticated, otherwise let express-rate-limit handle IP
+    if (req.user?.id) {
+      return `user:${req.user.id}`;
+    }
+    return undefined;
   },
   
   handler: (req, res) => {
@@ -311,7 +320,11 @@ const reportLimiter = rateLimit({
   store: new RedisStore({ prefix: 'rl:report:' }),
   
   keyGenerator: (req) => {
-    return req.user?.id || req.ip;
+    // Use user ID if authenticated, otherwise let express-rate-limit handle IP
+    if (req.user?.id) {
+      return `user:${req.user.id}`;
+    }
+    return undefined;
   },
   
   message: {
