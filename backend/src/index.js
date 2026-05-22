@@ -289,19 +289,36 @@ const gracefulShutdown = async (originSignal) => {
   }
 };
 
-// Bind process signal interrupts
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-
 // Bind process crash events
 process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ FATAL: Unhandled Promise Rejection:', reason);
+  console.error('Promise:', promise);
   logger.error('Fatal Unhandled Rejection', { reason, promise });
-  gracefulShutdown('unhandledRejection');
+  // Don't exit immediately - log and continue
+  // gracefulShutdown('unhandledRejection');
 });
 
 process.on('uncaughtException', (err) => {
+  console.error('❌ FATAL: Uncaught Exception:', err);
+  console.error('Stack:', err.stack);
   logger.error('Fatal Uncaught Exception', { message: err.message, stack: err.stack });
-  gracefulShutdown('uncaughtException');
+  // Don't exit immediately - log and continue
+  // gracefulShutdown('uncaughtException');
+});
+
+process.on('exit', (code) => {
+  console.log(`🛑 Process exiting with code: ${code}`);
+});
+
+// Bind process signal interrupts (single registration)
+process.on('SIGTERM', () => {
+  console.log('📡 SIGTERM received');
+  gracefulShutdown('SIGTERM');
+});
+
+process.on('SIGINT', () => {
+  console.log('📡 SIGINT received');
+  gracefulShutdown('SIGINT');
 });
 
 // Bootstrapped server startup
@@ -332,6 +349,7 @@ const bootstrap = async () => {
     server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server is listening on 0.0.0.0:${PORT}`);
       console.log(`✅ Server address:`, server.address());
+      console.log('✅ Bootstrap complete, server is running and ready to accept connections');
       logger.info(`Class Attendance API running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`Database: Connected`);
@@ -347,8 +365,6 @@ const bootstrap = async () => {
       }
       process.exit(1);
     });
-    
-    console.log('✅ Bootstrap complete, server should be running...');
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     logger.error('Failed to start server:', error);

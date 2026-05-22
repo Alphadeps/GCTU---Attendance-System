@@ -41,9 +41,4 @@ if (process.env.DIRECT_URL) {
   }).$extends(withAccelerate());
 }
 
-// Graceful shutdown
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
-});
-
 module.exports = prisma;
