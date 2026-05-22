@@ -83,55 +83,77 @@ const register = async (req, res) => {
  */
 const login = async (req, res) => {
   try {
+    console.log('Login attempt:', { username: req.body?.username, hasPassword: !!req.body?.password });
+    
     // Validate inputs
     const validation = loginSchema.safeParse(req.body);
     if (!validation.success) {
       const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      console.error('Login validation failed:', errorMsg);
       return res.status(400).json({ error: errorMsg });
     }
 
     const { username, password } = validation.data;
+    console.log('Finding user:', username);
 
     const user = await prisma.user.findUnique({
       where: { username }
     });
 
     if (!user) {
+      console.log('User not found:', username);
       // Log failed login attempt
-      logAuthEvent('LOGIN_FAILED', {
-        username,
-        ip: req.ip,
-        reason: 'User not found',
-        userAgent: req.headers['user-agent']
-      });
+      try {
+        logAuthEvent('LOGIN_FAILED', {
+          username,
+          ip: req.ip,
+          reason: 'User not found',
+          userAgent: req.headers['user-agent']
+        });
+      } catch (logError) {
+        console.error('Logging error:', logError);
+      }
       return res.status(401).json({ error: 'Invalid username or password' });
     }
+
+    console.log('User found:', { id: user.id, role: user.role, isActive: user.isActive });
 
     if (!user.isActive) {
       // Log blocked login attempt
-      logAuthEvent('LOGIN_BLOCKED', {
-        username,
-        userId: user.id,
-        ip: req.ip,
-        reason: 'Account deactivated',
-        userAgent: req.headers['user-agent']
-      });
+      try {
+        logAuthEvent('LOGIN_BLOCKED', {
+          username,
+          userId: user.id,
+          ip: req.ip,
+          reason: 'Account deactivated',
+          userAgent: req.headers['user-agent']
+        });
+      } catch (logError) {
+        console.error('Logging error:', logError);
+      }
       return res.status(403).json({ error: 'Your account has been deactivated. Please contact the administrator.' });
     }
 
+    console.log('Comparing password...');
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log('Password mismatch');
       // Log failed login attempt
-      logAuthEvent('LOGIN_FAILED', {
-        username,
-        userId: user.id,
-        ip: req.ip,
-        reason: 'Invalid password',
-        userAgent: req.headers['user-agent']
-      });
+      try {
+        logAuthEvent('LOGIN_FAILED', {
+          username,
+          userId: user.id,
+          ip: req.ip,
+          reason: 'Invalid password',
+          userAgent: req.headers['user-agent']
+        });
+      } catch (logError) {
+        console.error('Logging error:', logError);
+      }
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
+    console.log('Password matched, fetching assigned class...');
     // For REPs, fetch their assigned class
     let assignedClass = null;
     if (user.role === 'REP') {
@@ -141,8 +163,10 @@ const login = async (req, res) => {
           _count: { select: { courses: true, students: true } }
         }
       });
+      console.log('Assigned class:', assignedClass?.id);
     }
 
+    console.log('Generating tokens...');
     // Sign Short Access Token (15 mins)
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
@@ -157,6 +181,7 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
+    console.log('Setting cookie...');
     // Set Refresh Token in secure HttpOnly cookie
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -167,15 +192,21 @@ const login = async (req, res) => {
 
     const needsPasswordChange = user.role === 'SUPERADMIN' && password === 'admin123';
 
+    console.log('Logging success event...');
     // Log successful login
-    logAuthEvent('LOGIN_SUCCESS', {
-      username: user.username,
-      userId: user.id,
-      role: user.role,
-      ip: req.ip,
-      userAgent: req.headers['user-agent']
-    });
+    try {
+      logAuthEvent('LOGIN_SUCCESS', {
+        username: user.username,
+        userId: user.id,
+        role: user.role,
+        ip: req.ip,
+        userAgent: req.headers['user-agent']
+      });
+    } catch (logError) {
+      console.error('Logging error:', logError);
+    }
 
+    console.log('Sending response...');
     res.json({
       token,
       user: {
@@ -193,9 +224,11 @@ const login = async (req, res) => {
         needsPasswordChange
       }
     });
+    console.log('Login successful for:', username);
   } catch (err) {
     console.error('Login controller error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error stack:', err.stack);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 };
 
