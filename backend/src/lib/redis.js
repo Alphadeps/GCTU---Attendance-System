@@ -16,8 +16,9 @@ function initRedis() {
   const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    console.warn('⚠️  WARNING: REDIS_URL not configured. Caching disabled.');
-    console.warn('   System will work but will be slower without caching.');
+    if (process.env.NODE_ENV === 'production') {
+      console.log('ℹ️  Redis caching not configured (optional). System running without cache layer.');
+    }
     return null;
   }
 

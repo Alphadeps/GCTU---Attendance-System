@@ -8,9 +8,20 @@ let prisma;
 if (process.env.DIRECT_URL) {
   console.log('Database Connection: Using direct PostgreSQL connection via pg driver adapter.');
   
+  // Parse and fix SSL mode in connection string to avoid deprecation warning
+  let connectionString = process.env.DIRECT_URL;
+  
+  // Replace deprecated SSL modes with verify-full
+  if (connectionString.includes('sslmode=require') || 
+      connectionString.includes('sslmode=prefer') || 
+      connectionString.includes('sslmode=verify-ca')) {
+    connectionString = connectionString.replace(/sslmode=(require|prefer|verify-ca)/, 'sslmode=verify-full');
+    console.log('✓ SSL mode updated to verify-full for enhanced security');
+  }
+  
   // Configure connection pool with limits
   const pool = new Pool({ 
-    connectionString: process.env.DIRECT_URL,
+    connectionString,
     max: 20, // Maximum number of clients in the pool
     min: 5,  // Minimum number of clients in the pool
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
