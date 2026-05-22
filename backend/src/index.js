@@ -48,6 +48,8 @@ const seed = require('./seed');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+console.log(`📌 PORT configuration: ${PORT} (from ${process.env.PORT ? 'environment' : 'default'})`);
+
 // Trust proxy (required for rate limiting and security behind reverse proxy)
 app.set('trust proxy', 1);
 
@@ -318,8 +320,12 @@ const bootstrap = async () => {
     }
 
     console.log(`🌐 Starting HTTP server on port ${PORT}...`);
+    console.log(`🌐 Host: 0.0.0.0 (listening on all interfaces)`);
+    console.log(`🌐 Environment PORT: ${process.env.PORT || 'not set, using default 5000'}`);
+    
     server = app.listen(PORT, '0.0.0.0', () => {
-      console.log(`✅ Server is listening on port ${PORT}`);
+      console.log(`✅ Server is listening on 0.0.0.0:${PORT}`);
+      console.log(`✅ Server address:`, server.address());
       logger.info(`Class Attendance API running on port ${PORT}`);
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`Database: Connected`);
