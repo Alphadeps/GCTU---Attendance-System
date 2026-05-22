@@ -941,7 +941,7 @@ export default function SuperAdminDashboard() {
     });
   };
 
-  // Group classes by structural keys (Programme + Level + Type + Session)
+  // Group classes by Programme + Level + Type + Session
   const getGroupedClasses = () => {
     const filtered = getFilteredClasses();
     const groups = {};
