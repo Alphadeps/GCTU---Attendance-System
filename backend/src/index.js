@@ -151,6 +151,24 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Class Attendance System API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      sessions: '/api/sessions',
+      attendance: '/api/attendance',
+      students: '/api/students',
+      courses: '/api/courses'
+    },
+    timestamp: new Date()
+  });
+});
+
 // Stats for dashboard views
 app.get('/api/stats', protect, async (req, res) => {
   try {
