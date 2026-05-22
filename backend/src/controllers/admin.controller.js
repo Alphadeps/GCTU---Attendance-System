@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
 const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
+const { normalizeProgrammeName, isValidProgramme, getSuggestions } = require('../lib/programmeMapper');
 
 // ==========================================
 // PROGRAMME MANAGEMENT
@@ -1072,16 +1073,29 @@ const bulkUploadReps = async (req, res) => {
           continue;
         }
 
-        // Find or create programme
-        let programme = await prisma.programme.findUnique({ where: { name: programmeName } });
-        if (!programme && programmeName) {
-          programme = await prisma.programme.create({ data: { name: programmeName } });
+        // Normalize and validate programme name
+        const normalizedProgrammeName = normalizeProgrammeName(programmeName);
+        
+        if (!normalizedProgrammeName) {
+          skippedCount++;
+          const suggestions = getSuggestions(programmeName);
+          const suggestionText = suggestions.length > 0 
+            ? ` Did you mean: ${suggestions.join(', ')}?` 
+            : '';
+          errors.push(`Row ${r + 1}: Invalid programme "${programmeName}".${suggestionText}`);
+          continue;
+        }
+
+        // Find or create programme using normalized name
+        let programme = await prisma.programme.findUnique({ where: { name: normalizedProgrammeName } });
+        if (!programme) {
+          programme = await prisma.programme.create({ data: { name: normalizedProgrammeName } });
         }
 
         // Find or create class
         let classRecord = null;
         if (programme && level && type && group && session) {
-          const displayName = `${programmeName} LEVEL ${level} ${type} GROUP ${group} (${session})`;
+          const displayName = `${normalizedProgrammeName} LEVEL ${level} ${type} GROUP ${group} (${session})`;
           
           classRecord = await prisma.class.findFirst({
             where: {
@@ -1411,6 +1425,154 @@ const getAdminStats = async (req, res) => {
   }
 };
 
+/**
+ * Clean up duplicate programmes by merging them into official names
+ * This will:
+ * 1. Find all programmes that can be normalized to official names
+ * 2. Merge duplicate programmes (reassign classes and update references)
+ * 3. Delete the duplicate programme records
+ */
+const cleanupDuplicateProgrammes = async (req, res) => {
+  try {
+    const { normalizeProgrammeName, getOfficialProgrammes } = require('../lib/programmeMapper');
+    
+    // Get all programmes
+    const allProgrammes = await prisma.programme.findMany({
+      include: {
+        classes: true,
+        _count: { select: { classes: true } }
+      }
+    });
+
+    const officialProgrammes = getOfficialProgrammes();
+    const mergeMap = {}; // Maps duplicate programme IDs to official programme IDs
+    const toDelete = []; // Programme IDs to delete after merging
+    const report = {
+      totalProgrammes: allProgrammes.length,
+      officialProgrammes: [],
+      duplicates: [],
+      merged: [],
+      errors: []
+    };
+
+    // Step 1: Identify official programmes and duplicates
+    for (const prog of allProgrammes) {
+      const normalized = normalizeProgrammeName(prog.name);
+      
+      if (!normalized) {
+        report.errors.push(`Programme "${prog.name}" cannot be normalized - manual review needed`);
+        continue;
+      }
+
+      // Check if this is an official programme
+      if (officialProgrammes.includes(prog.name)) {
+        report.officialProgrammes.push({
+          id: prog.id,
+          name: prog.name,
+          classCount: prog._count.classes
+        });
+      } else {
+        // This is a duplicate/variation
+        report.duplicates.push({
+          id: prog.id,
+          name: prog.name,
+          normalizedTo: normalized,
+          classCount: prog._count.classes
+        });
+      }
+    }
+
+    // Step 2: Create official programmes if they don't exist
+    for (const officialName of officialProgrammes) {
+      let official = await prisma.programme.findUnique({ where: { name: officialName } });
+      if (!official) {
+        official = await prisma.programme.create({ data: { name: officialName } });
+        report.officialProgrammes.push({
+          id: official.id,
+          name: official.name,
+          classCount: 0,
+          created: true
+        });
+      }
+    }
+
+    // Step 3: Build merge map (duplicate ID -> official ID)
+    for (const dup of report.duplicates) {
+      const officialProg = await prisma.programme.findUnique({ 
+        where: { name: dup.normalizedTo } 
+      });
+      
+      if (officialProg) {
+        mergeMap[dup.id] = officialProg.id;
+        toDelete.push(dup.id);
+      }
+    }
+
+    // Step 4: Merge classes from duplicates to official programmes
+    for (const [dupId, officialId] of Object.entries(mergeMap)) {
+      try {
+        // Update all classes to point to the official programme
+        const updateResult = await prisma.class.updateMany({
+          where: { programmeId: dupId },
+          data: { programmeId: officialId }
+        });
+
+        // Update displayNames to use official programme name
+        const classes = await prisma.class.findMany({
+          where: { programmeId: officialId }
+        });
+
+        const officialProg = await prisma.programme.findUnique({ where: { id: officialId } });
+        
+        for (const cls of classes) {
+          // Reconstruct displayName with official programme name
+          const newDisplayName = `${officialProg.name} LEVEL ${cls.level} ${cls.type} GROUP ${cls.group} (${cls.session})`;
+          await prisma.class.update({
+            where: { id: cls.id },
+            data: { displayName: newDisplayName }
+          });
+        }
+
+        report.merged.push({
+          from: allProgrammes.find(p => p.id === dupId)?.name,
+          to: officialProg.name,
+          classesMoved: updateResult.count
+        });
+      } catch (err) {
+        report.errors.push(`Failed to merge programme ID ${dupId}: ${err.message}`);
+      }
+    }
+
+    // Step 5: Delete duplicate programmes
+    for (const dupId of toDelete) {
+      try {
+        await prisma.programme.delete({ where: { id: dupId } });
+      } catch (err) {
+        report.errors.push(`Failed to delete duplicate programme ID ${dupId}: ${err.message}`);
+      }
+    }
+
+    // Final stats
+    report.summary = {
+      officialProgrammesCount: report.officialProgrammes.length,
+      duplicatesFound: report.duplicates.length,
+      duplicatesMerged: report.merged.length,
+      duplicatesDeleted: toDelete.length,
+      errorsCount: report.errors.length
+    };
+
+    res.json({
+      success: true,
+      message: `Cleanup complete: ${report.merged.length} duplicates merged, ${toDelete.length} deleted`,
+      report
+    });
+
+  } catch (err) {
+    console.error('Cleanup duplicate programmes error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+};
+
 module.exports = {
   createProgramme,
   getAllProgrammes,
@@ -1443,5 +1605,6 @@ module.exports = {
   updateSettings,
   uploadLogo,
   getAdminStats,
-  parseImportFile
+  parseImportFile,
+  cleanupDuplicateProgrammes
 };

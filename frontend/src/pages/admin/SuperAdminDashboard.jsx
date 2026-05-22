@@ -350,6 +350,55 @@ export default function SuperAdminDashboard() {
     });
   };
 
+  const handleCleanupDuplicateProgrammes = () => {
+    setConfirmState({
+      open: true,
+      message: 'This will merge duplicate programme names into 3 official programmes (BIT, BNSA, DIT). All classes will be reassigned. This action cannot be undone. Continue?',
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        setLoading(true);
+        try {
+          const response = await api.post('/admin/programmes/cleanup-duplicates');
+          showNotification(response.data.message || 'Programme cleanup completed successfully');
+          
+          // Show detailed report
+          if (response.data.report) {
+            const report = response.data.report;
+            console.log('Cleanup Report:', report);
+            
+            if (report.merged.length > 0) {
+              showNotification(
+                `Merged ${report.merged.length} duplicate(s): ${report.merged.map(m => m.from).join(', ')}`,
+                'success'
+              );
+            }
+            
+            if (report.errors.length > 0) {
+              showNotification(`${report.errors.length} error(s) occurred. Check console for details.`, 'error');
+            }
+          }
+          
+          // Refresh programmes list
+          const progRes = await api.get('/admin/programmes');
+          if (progRes && progRes.data) {
+            setProgrammes(progRes.data);
+          }
+          
+          // Refresh classes list to show updated names
+          const classRes = await api.get('/admin/classes');
+          if (classRes && classRes.data) {
+            setClasses(classRes.data);
+          }
+        } catch (err) {
+          console.error('Cleanup error:', err);
+          showNotification(err.response?.data?.error || 'Failed to cleanup programmes', 'error');
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+  };
+
   // 4. Multi-Step Class Creation Handlers
   const handleGroupToggle = (groupLetter) => {
     setNewClass(prev => {
@@ -1262,12 +1311,26 @@ export default function SuperAdminDashboard() {
                   <h3 className="font-bold text-white text-base">Academic Programmes</h3>
                   <p className="text-xs text-slate-400">Manage course pipelines that drive student enrollment</p>
                 </div>
-                <button
-                  onClick={() => setShowProgModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
-                >
-                  <span>+ Add Programme</span>
-                </button>
+                <div className="flex gap-2">
+                  {programmes.length > 3 && (
+                    <button
+                      onClick={handleCleanupDuplicateProgrammes}
+                      className="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
+                      title="Merge duplicate programme names into official programmes"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                      <span>Cleanup Duplicates</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setShowProgModal(true)}
+                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
+                  >
+                    <span>+ Add Programme</span>
+                  </button>
+                </div>
               </div>
 
               {programmes.length === 0 ? (

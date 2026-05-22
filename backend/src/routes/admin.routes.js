@@ -45,6 +45,7 @@ router.post('/programmes', superadminGuard, adminController.createProgramme);
 router.get('/programmes', superadminGuard, adminController.getAllProgrammes);
 router.patch('/programmes/:id', superadminGuard, adminController.updateProgramme);
 router.delete('/programmes/:id', superadminGuard, adminController.deleteProgramme);
+router.post('/programmes/cleanup-duplicates', superadminGuard, adminController.cleanupDuplicateProgrammes);
 
 // Class Routes
 router.post('/classes', superadminGuard, adminController.createClass);
