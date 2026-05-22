@@ -186,10 +186,16 @@ const queryOptimization = {
 const responseTimeHeader = (req, res, next) => {
   const startTime = Date.now();
   
-  res.on('finish', () => {
+  // Override res.send to set header before sending
+  const originalSend = res.send;
+  res.send = function(data) {
     const duration = Date.now() - startTime;
-    res.set('X-Response-Time', `${duration}ms`);
-  });
+    // Only set header if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.set('X-Response-Time', `${duration}ms`);
+    }
+    return originalSend.call(this, data);
+  };
   
   next();
 };

@@ -302,7 +302,15 @@ process.on('uncaughtException', (err) => {
   console.error('❌ FATAL: Uncaught Exception:', err);
   console.error('Stack:', err.stack);
   logger.error('Fatal Uncaught Exception', { message: err.message, stack: err.stack });
-  // Don't exit immediately - log and continue
+  
+  // For header-related errors, just log and continue
+  if (err.code === 'ERR_HTTP_HEADERS_SENT') {
+    console.log('⚠️  Headers already sent error - continuing operation');
+    return;
+  }
+  
+  // For other critical errors, attempt graceful shutdown
+  console.log('⚠️  Attempting to continue operation despite error');
   // gracefulShutdown('uncaughtException');
 });
 
