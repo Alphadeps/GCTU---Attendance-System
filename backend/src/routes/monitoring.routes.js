@@ -4,6 +4,9 @@ const { getMetrics, resetMetrics, getHealthStatus } = require('../middleware/mon
 const { getBlockedIPs, getSuspiciousIPs, unblockIP } = require('../middleware/rateLimiter');
 const { cache } = require('../lib/redis');
 const prisma = require('../lib/prisma');
+const fs = require('fs');
+const path = require('path');
+const readline = require('readline');
 
 const router = express.Router();
 
@@ -190,5 +193,163 @@ router.get('/system', protect, authorizeRoles('SUPERADMIN'), (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+/**
+ * Get audit logs (paginated)
+ */
+router.get('/logs/audit', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  try {
+    const { limit = 100, offset = 0, search = '' } = req.query;
+    const logsDir = path.join(__dirname, '../../logs');
+    
+    // Get today's audit log file
+    const today = new Date().toISOString().split('T')[0];
+    const auditFile = path.join(logsDir, `audit-${today}.log`);
+    
+    if (!fs.existsSync(auditFile)) {
+      return res.json({ logs: [], total: 0, message: 'No audit logs for today' });
+    }
+    
+    const logs = await readLogFile(auditFile, parseInt(limit), parseInt(offset), search);
+    
+    res.json({
+      logs: logs.entries,
+      total: logs.total,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get security logs (paginated)
+ */
+router.get('/logs/security', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  try {
+    const { limit = 100, offset = 0, search = '' } = req.query;
+    const logsDir = path.join(__dirname, '../../logs');
+    
+    // Get today's security log file
+    const today = new Date().toISOString().split('T')[0];
+    const securityFile = path.join(logsDir, `security-${today}.log`);
+    
+    if (!fs.existsSync(securityFile)) {
+      return res.json({ logs: [], total: 0, message: 'No security logs for today' });
+    }
+    
+    const logs = await readLogFile(securityFile, parseInt(limit), parseInt(offset), search);
+    
+    res.json({
+      logs: logs.entries,
+      total: logs.total,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get combined logs (audit + security)
+ */
+router.get('/logs/all', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  try {
+    const { limit = 100, offset = 0, search = '', type = 'all' } = req.query;
+    const logsDir = path.join(__dirname, '../../logs');
+    const today = new Date().toISOString().split('T')[0];
+    
+    let allLogs = [];
+    
+    // Read audit logs if requested
+    if (type === 'all' || type === 'audit') {
+      const auditFile = path.join(logsDir, `audit-${today}.log`);
+      if (fs.existsSync(auditFile)) {
+        const auditLogs = await readLogFile(auditFile, 1000, 0, search);
+        allLogs = allLogs.concat(auditLogs.entries.map(log => ({ ...log, type: 'audit' })));
+      }
+    }
+    
+    // Read security logs if requested
+    if (type === 'all' || type === 'security') {
+      const securityFile = path.join(logsDir, `security-${today}.log`);
+      if (fs.existsSync(securityFile)) {
+        const securityLogs = await readLogFile(securityFile, 1000, 0, search);
+        allLogs = allLogs.concat(securityLogs.entries.map(log => ({ ...log, type: 'security' })));
+      }
+    }
+    
+    // Sort by timestamp (newest first)
+    allLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    // Apply pagination
+    const total = allLogs.length;
+    const paginatedLogs = allLogs.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+    
+    res.json({
+      logs: paginatedLogs,
+      total,
+      limit: parseInt(limit),
+      offset: parseInt(offset)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Helper function to read log file
+ */
+async function readLogFile(filePath, limit, offset, search) {
+  return new Promise((resolve, reject) => {
+    const entries = [];
+    let lineCount = 0;
+    
+    const fileStream = fs.createReadStream(filePath);
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+    
+    rl.on('line', (line) => {
+      try {
+        const logEntry = JSON.parse(line);
+        
+        // Apply search filter
+        if (search) {
+          const searchLower = search.toLowerCase();
+          const logString = JSON.stringify(logEntry).toLowerCase();
+          if (!logString.includes(searchLower)) {
+            return;
+          }
+        }
+        
+        entries.push(logEntry);
+        lineCount++;
+      } catch (err) {
+        // Skip invalid JSON lines
+      }
+    });
+    
+    rl.on('close', () => {
+      // Reverse to get newest first
+      entries.reverse();
+      
+      // Apply pagination
+      const paginatedEntries = entries.slice(offset, offset + limit);
+      
+      resolve({
+        entries: paginatedEntries,
+        total: entries.length
+      });
+    });
+    
+    rl.on('error', (err) => {
+      reject(err);
+    });
+  });
+}
 
 module.exports = router;

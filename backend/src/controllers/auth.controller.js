@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
+const { logAuthEvent, logAudit } = require('../lib/logger');
 
 // Zod schemas for input validation
 const registerSchema = z.object({
@@ -103,15 +104,38 @@ const login = async (req, res) => {
     });
 
     if (!user) {
+      // Log failed login attempt
+      logAuthEvent('LOGIN_FAILED', {
+        username,
+        ip: req.ip,
+        reason: 'User not found',
+        userAgent: req.headers['user-agent']
+      });
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
     if (!user.isActive) {
+      // Log blocked login attempt
+      logAuthEvent('LOGIN_BLOCKED', {
+        username,
+        userId: user.id,
+        ip: req.ip,
+        reason: 'Account deactivated',
+        userAgent: req.headers['user-agent']
+      });
       return res.status(403).json({ error: 'Your account has been deactivated. Please contact the administrator.' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      // Log failed login attempt
+      logAuthEvent('LOGIN_FAILED', {
+        username,
+        userId: user.id,
+        ip: req.ip,
+        reason: 'Invalid password',
+        userAgent: req.headers['user-agent']
+      });
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
@@ -138,6 +162,15 @@ const login = async (req, res) => {
     });
 
     const needsPasswordChange = user.role === 'SUPERADMIN' && password === 'admin123';
+
+    // Log successful login
+    logAuthEvent('LOGIN_SUCCESS', {
+      username: user.username,
+      userId: user.id,
+      role: user.role,
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    });
 
     res.json({
       token,

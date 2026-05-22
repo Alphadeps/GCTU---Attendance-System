@@ -4,6 +4,7 @@ const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
 const { createNotificationHelper } = require('./notification.controller');
 const { cacheSession, removeCachedSession, updateCachedSession } = require('../lib/securityCache');
+const { logAudit } = require('../lib/logger');
 
 // 1. Create a session
 const createSession = async (req, res) => {
@@ -296,6 +297,17 @@ const approveSession = async (req, res) => {
         approvedByLecturerId: req.user.id,
         approvedAt: new Date()
       }
+    });
+
+    // Log session approval
+    logAudit('SESSION_APPROVED', {
+      user: req.user?.username || 'system',
+      userId: req.user?.id,
+      ip: req.ip,
+      sessionId: id,
+      courseName: session.course?.name,
+      repId: session.repId,
+      approvedAt: new Date().toISOString()
     });
 
     // Trigger Notifications in background

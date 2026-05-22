@@ -4,6 +4,7 @@ const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
 const { normalizeProgrammeName, isValidProgramme, getSuggestions } = require('../lib/programmeMapper');
 const { cache, cacheKeys } = require('../lib/redis');
+const { logAudit } = require('../lib/logger');
 
 // ==========================================
 // PROGRAMME MANAGEMENT
@@ -175,6 +176,20 @@ const createClass = async (req, res) => {
         }
       });
       createdClasses.push(newClass);
+      
+      // Log class creation
+      logAudit('CLASS_CREATED', {
+        user: req.user?.username || 'system',
+        userId: req.user?.id,
+        ip: req.ip,
+        classId: newClass.id,
+        className: displayName,
+        programme: programme.name,
+        level,
+        type,
+        group: groupLetter,
+        session
+      });
     }
 
     res.status(201).json({
@@ -346,7 +361,28 @@ const updateClass = async (req, res) => {
 const deleteClass = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Get class details before deletion for logging
+    const classToDelete = await prisma.class.findUnique({
+      where: { id },
+      include: { programme: true }
+    });
+    
+    if (!classToDelete) {
+      return res.status(404).json({ error: 'Class not found' });
+    }
+    
     await prisma.class.delete({ where: { id } });
+    
+    // Log class deletion
+    logAudit('CLASS_DELETED', {
+      user: req.user?.username || 'system',
+      userId: req.user?.id,
+      ip: req.ip,
+      classId: id,
+      className: classToDelete.displayName,
+      programme: classToDelete.programme?.name
+    });
     
     // Invalidate class caches and stats
     await cache.del(cacheKeys.class(id));
@@ -524,6 +560,18 @@ const addStudentsToClass = async (req, res) => {
     }
 
     res.json({ addedCount, skippedCount, errors });
+
+    // Log student upload
+    logAudit('STUDENTS_UPLOADED', {
+      user: req.user?.username || 'system',
+      userId: req.user?.id,
+      ip: req.ip,
+      classId: id,
+      className: classRecord.displayName,
+      studentsAdded: addedCount,
+      studentsSkipped: skippedCount,
+      totalAttempted: students.length
+    });
 
     // Invalidate cache for this class
     await cache.del(cacheKeys.classStudents(id));

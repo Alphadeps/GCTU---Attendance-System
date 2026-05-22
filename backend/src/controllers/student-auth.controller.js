@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
+const { logAuthEvent } = require('../lib/logger');
 
 // Validation schemas
 const studentLoginSchema = z.object({
@@ -53,6 +54,13 @@ const studentLogin = async (req, res) => {
     });
 
     if (!student) {
+      // Log failed student login
+      logAuthEvent('STUDENT_LOGIN_FAILED', {
+        indexNumber,
+        ip: req.ip,
+        reason: 'Student not found',
+        userAgent: req.headers['user-agent']
+      });
       return res.status(401).json({ error: 'Invalid index number or password' });
     }
 
@@ -66,6 +74,15 @@ const studentLogin = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, student.password);
     if (!isMatch) {
+      // Log failed student login
+      logAuthEvent('STUDENT_LOGIN_FAILED', {
+        indexNumber,
+        studentId: student.id,
+        studentName: student.name,
+        ip: req.ip,
+        reason: 'Invalid password',
+        userAgent: req.headers['user-agent']
+      });
       return res.status(401).json({ error: 'Invalid index number or password' });
     }
 
@@ -80,6 +97,15 @@ const studentLogin = async (req, res) => {
       JWT_SECRET,
       { expiresIn: '7d' }
     );
+
+    // Log successful student login
+    logAuthEvent('STUDENT_LOGIN_SUCCESS', {
+      indexNumber: student.indexNumber,
+      studentId: student.id,
+      studentName: student.name,
+      ip: req.ip,
+      userAgent: req.headers['user-agent']
+    });
 
     res.json({
       token,
