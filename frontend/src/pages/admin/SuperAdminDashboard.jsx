@@ -702,8 +702,10 @@ export default function SuperAdminDashboard() {
       });
       showNotification(`${validStudents.length} student(s) added successfully`);
       setManualStudents([{ name: '', indexNumber: '', email: '' }]);
-      // reload student list
-      handleOpenStudentsModal(selectedClassForStudents);
+      
+      // Reload student list with fresh data
+      const res = await api.get(`/admin/classes/${selectedClassForStudents.id}/students`);
+      setClassStudents(res.data);
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to add students', 'error');
     }
@@ -752,7 +754,10 @@ export default function SuperAdminDashboard() {
       });
       showNotification(`Successfully imported ${csvPreview.length} students into class.`);
       setCsvPreview([]);
-      handleOpenStudentsModal(selectedClassForStudents);
+      
+      // Reload student list with fresh data
+      const res = await api.get(`/admin/classes/${selectedClassForStudents.id}/students`);
+      setClassStudents(res.data);
     } catch (err) {
       showNotification(err.response?.data?.error || 'Failed to import student list.', 'error');
     }
@@ -767,7 +772,9 @@ export default function SuperAdminDashboard() {
         try {
           await api.delete(`/admin/classes/${selectedClassForStudents.id}/students/${studentId}`);
           showNotification('Student removed from class');
-          handleOpenStudentsModal(selectedClassForStudents);
+          
+          // Update state directly by removing the student
+          setClassStudents(prev => prev.filter(s => s.id !== studentId));
         } catch (err) {
           showNotification('Failed to remove student', 'error');
         }
@@ -797,8 +804,10 @@ export default function SuperAdminDashboard() {
             studentIds: selectedStudentIds
           });
           showNotification(`${selectedStudentIds.length} student(s) removed from class`);
+          
+          // Update state directly by removing deleted students
+          setClassStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)));
           setSelectedStudentIds([]);
-          handleOpenStudentsModal(selectedClassForStudents);
         } catch (err) {
           showNotification('Failed to remove students', 'error');
         }
