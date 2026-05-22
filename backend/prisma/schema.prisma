@@ -53,6 +53,10 @@ model User {
   lecturerAssignments LecturerAssignment[] @relation("LecturerAssignments")
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
+
+  @@index([role])
+  @@index([isActive])
+  @@index([username, role])
 }
 
 model Student {
@@ -67,6 +71,10 @@ model Student {
   classes           ClassStudent[]
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
+
+  @@index([indexNumber])
+  @@index([email])
+  @@index([isFirstLogin])
 }
 
 model Course {
@@ -105,6 +113,15 @@ model AttendanceSession {
   approvedAt         DateTime?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
+
+  @@index([courseId])
+  @@index([repId])
+  @@index([classId])
+  @@index([status])
+  @@index([startTime])
+  @@index([approvedByLecturerId])
+  @@index([courseId, classId, status])
+  @@index([repId, status])
 }
 
 model Attendance {
@@ -120,6 +137,13 @@ model Attendance {
   locationData String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+
+  @@index([sessionId])
+  @@index([studentId])
+  @@index([status])
+  @@index([checkInTime])
+  @@index([sessionId, studentId])
+  @@index([studentId, status])
 }
 
 model Notification {
@@ -132,6 +156,12 @@ model Notification {
   type         String   // INFO, SUCCESS, WARNING, DANGER
   isRead       Boolean  @default(false)
   createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([studentIndex])
+  @@index([isRead])
+  @@index([userId, isRead])
+  @@index([createdAt])
 }
 
 model Programme {
@@ -162,6 +192,11 @@ model Class {
   updatedAt    DateTime  @updatedAt
 
   @@unique([programmeId, level, type, group, session])
+  @@index([programmeId])
+  @@index([level])
+  @@index([repId])
+  @@index([programmeId, level])
+  @@index([level, type, session])
 }
 
 model ClassStudent {
@@ -173,6 +208,8 @@ model ClassStudent {
   createdAt   DateTime @default(now())
 
   @@unique([classId, studentId])
+  @@index([classId])
+  @@index([studentId])
 }
 
 model ClassCourse {
@@ -212,6 +249,13 @@ model Grievance {
   courseCode    String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([studentIndex])
+  @@index([status])
+  @@index([type])
+  @@index([resolvedById])
+  @@index([createdAt])
+  @@index([status, type])
 }
 
 model ReportTemplate {
@@ -238,6 +282,14 @@ model OfficialReport {
   signedAt      DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([classId])
+  @@index([courseId])
+  @@index([generatedById])
+  @@index([signedById])
+  @@index([status])
+  @@index([classId, courseId])
+  @@index([status, createdAt])
 }
 
 model LecturerAssignment {
@@ -252,4 +304,9 @@ model LecturerAssignment {
   updatedAt  DateTime @updatedAt
 
   @@unique([lecturerId, classId, courseId])
+  @@index([lecturerId])
+  @@index([classId])
+  @@index([courseId])
+  @@index([lecturerId, classId])
+  @@index([classId, courseId])
 }

@@ -3,6 +3,7 @@ const prisma = require('../lib/prisma');
 const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
 const { normalizeProgrammeName, isValidProgramme, getSuggestions } = require('../lib/programmeMapper');
+const { cache, cacheKeys } = require('../lib/redis');
 
 // ==========================================
 // PROGRAMME MANAGEMENT
@@ -24,6 +25,9 @@ const createProgramme = async (req, res) => {
       data: { name }
     });
 
+    // Invalidate programmes cache
+    await cache.del(cacheKeys.programmes());
+
     res.status(201).json(programme);
   } catch (err) {
     console.error('Create programme error:', err);
@@ -33,12 +37,24 @@ const createProgramme = async (req, res) => {
 
 const getAllProgrammes = async (req, res) => {
   try {
+    // Try cache first
+    const cacheKey = cacheKeys.programmes();
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    // Cache miss - fetch from database
     const programmes = await prisma.programme.findMany({
       include: {
         _count: { select: { classes: true } }
       },
       orderBy: { name: 'asc' }
     });
+
+    // Cache for 10 minutes
+    await cache.set(cacheKey, programmes, 600);
+
     res.json(programmes);
   } catch (err) {
     console.error('Get programmes error:', err);
@@ -56,6 +72,11 @@ const deleteProgramme = async (req, res) => {
     }
 
     await prisma.programme.delete({ where: { id } });
+    
+    // Invalidate programmes cache and stats
+    await cache.del(cacheKeys.programmes());
+    await cache.del(cacheKeys.stats());
+    
     res.json({ message: 'Programme deleted successfully' });
   } catch (err) {
     console.error('Delete programme error:', err);
@@ -88,6 +109,9 @@ const updateProgramme = async (req, res) => {
       where: { id },
       data: { name: name.trim() }
     });
+
+    // Invalidate programmes cache
+    await cache.del(cacheKeys.programmes());
 
     res.json(updated);
   } catch (err) {
@@ -158,6 +182,10 @@ const createClass = async (req, res) => {
       created: createdClasses,
       skipped: skippedClasses
     });
+
+    // Invalidate classes cache and stats
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.stats());
   } catch (err) {
     console.error('Create class error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -166,6 +194,36 @@ const createClass = async (req, res) => {
 
 const getAllClasses = async (req, res) => {
   try {
+    // Check for pagination
+    const usePagination = req.query.page || req.query.limit;
+    
+    if (usePagination) {
+      // Paginated response
+      const [classes, total] = await Promise.all([
+        prisma.class.findMany({
+          skip: req.pagination.skip,
+          take: req.pagination.limit,
+          include: {
+            programme: true,
+            rep: { select: { id: true, username: true } },
+            _count: { select: { students: true, courses: true } }
+          },
+          orderBy: { displayName: 'asc' }
+        }),
+        prisma.class.count()
+      ]);
+      
+      return res.json(req.pagination.createResponse(classes, total));
+    }
+    
+    // Try cache first (non-paginated)
+    const cacheKey = cacheKeys.classes();
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    // Cache miss - fetch from database
     const classes = await prisma.class.findMany({
       include: {
         programme: true,
@@ -174,6 +232,10 @@ const getAllClasses = async (req, res) => {
       },
       orderBy: { displayName: 'asc' }
     });
+
+    // Cache for 5 minutes
+    await cache.set(cacheKey, classes, 300);
+
     res.json(classes);
   } catch (err) {
     console.error('Get all classes error:', err);
@@ -184,6 +246,15 @@ const getAllClasses = async (req, res) => {
 const getClassById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Try cache first
+    const cacheKey = cacheKeys.class(id);
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    // Cache miss - fetch from database
     const classRecord = await prisma.class.findUnique({
       where: { id },
       include: {
@@ -197,6 +268,9 @@ const getClassById = async (req, res) => {
     if (!classRecord) {
       return res.status(404).json({ error: 'Class not found' });
     }
+
+    // Cache for 5 minutes
+    await cache.set(cacheKey, classRecord, 300);
 
     res.json(classRecord);
   } catch (err) {
@@ -258,6 +332,10 @@ const updateClass = async (req, res) => {
       }
     });
 
+    // Invalidate class caches
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+
     res.json(updated);
   } catch (err) {
     console.error('Update class error:', err);
@@ -269,6 +347,12 @@ const deleteClass = async (req, res) => {
   try {
     const { id } = req.params;
     await prisma.class.delete({ where: { id } });
+    
+    // Invalidate class caches and stats
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.stats());
+    
     res.json({ message: 'Class deleted successfully' });
   } catch (err) {
     console.error('Delete class error:', err);
@@ -339,6 +423,11 @@ const assignRep = async (req, res) => {
       include: { rep: { select: { id: true, username: true, indexNumber: true } } }
     });
 
+    // Invalidate class and reps caches
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.reps());
+
     res.json(updated);
   } catch (err) {
     console.error('Assign rep error:', err);
@@ -354,6 +443,11 @@ const removeRep = async (req, res) => {
       where: { id },
       data: { repId: null }
     });
+
+    // Invalidate class and reps caches
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.reps());
 
     res.json(updated);
   } catch (err) {
@@ -430,6 +524,11 @@ const addStudentsToClass = async (req, res) => {
     }
 
     res.json({ addedCount, skippedCount, errors });
+
+    // Invalidate cache for this class
+    await cache.del(cacheKeys.classStudents(id));
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
   } catch (err) {
     console.error('Add students to class error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -443,6 +542,11 @@ const removeStudentFromClass = async (req, res) => {
     await prisma.classStudent.deleteMany({
       where: { classId: id, studentId }
     });
+
+    // Invalidate cache for this class
+    await cache.del(cacheKeys.classStudents(id));
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
 
     res.json({ message: 'Student removed from class successfully' });
   } catch (err) {
@@ -467,6 +571,11 @@ const bulkDeleteStudentsFromClass = async (req, res) => {
       }
     });
 
+    // Invalidate cache for this class
+    await cache.del(cacheKeys.classStudents(id));
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+
     res.json({
       message: `${result.count} student(s) removed from class successfully`,
       count: result.count
@@ -480,6 +589,18 @@ const bulkDeleteStudentsFromClass = async (req, res) => {
 const getClassStudents = async (req, res) => {
   try {
     const { id } = req.params; // Class ID
+    
+    // Check for pagination
+    const usePagination = req.query.page || req.query.limit;
+
+    // Try cache first (shorter TTL since attendance changes frequently)
+    if (!usePagination) {
+      const cacheKey = cacheKeys.classStudents(id);
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
+    }
 
     const classRecord = await prisma.class.findUnique({
       where: { id },
@@ -493,10 +614,17 @@ const getClassStudents = async (req, res) => {
     }
 
     // Get all students linked to this class
-    const classStudents = await prisma.classStudent.findMany({
+    const classStudentsQuery = {
       where: { classId: id },
       include: { student: true }
-    });
+    };
+    
+    if (usePagination) {
+      classStudentsQuery.skip = req.pagination.skip;
+      classStudentsQuery.take = req.pagination.limit;
+    }
+    
+    const classStudents = await prisma.classStudent.findMany(classStudentsQuery);
 
     // Find all closed or approved attendance sessions for this class
     const sessions = await prisma.attendanceSession.findMany({
@@ -533,6 +661,14 @@ const getClassStudents = async (req, res) => {
         attendanceRate
       };
     }));
+
+    if (usePagination) {
+      const total = await prisma.classStudent.count({ where: { classId: id } });
+      return res.json(req.pagination.createResponse(studentsData, total));
+    }
+
+    // Cache for 2 minutes (shorter since attendance changes)
+    await cache.set(cacheKeys.classStudents(id), studentsData, 120);
 
     res.json(studentsData);
   } catch (err) {
@@ -788,6 +924,10 @@ const createRepAccount = async (req, res) => {
       role: newUser.role,
       isActive: newUser.isActive
     });
+
+    // Invalidate reps cache and stats
+    await cache.del(cacheKeys.reps());
+    await cache.del(cacheKeys.stats());
   } catch (err) {
     console.error('Create rep account error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -796,6 +936,14 @@ const createRepAccount = async (req, res) => {
 
 const getAllReps = async (req, res) => {
   try {
+    // Try cache first
+    const cacheKey = cacheKeys.reps();
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    // Cache miss - fetch from database
     const reps = await prisma.user.findMany({
       where: { role: 'REP' },
       include: { assignedClass: true },
@@ -811,6 +959,9 @@ const getAllReps = async (req, res) => {
         displayName: r.assignedClass.displayName
       } : null
     }));
+
+    // Cache for 5 minutes
+    await cache.set(cacheKey, formatted, 300);
 
     res.json(formatted);
   } catch (err) {
@@ -922,6 +1073,9 @@ const updateRep = async (req, res) => {
       role: updated.role,
       isActive: updated.isActive
     });
+
+    // Invalidate reps cache
+    await cache.del(cacheKeys.reps());
   } catch (err) {
     console.error('Update rep error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -946,6 +1100,9 @@ const deactivateRep = async (req, res) => {
       message: `Account ${updated.isActive ? 'activated' : 'deactivated'} successfully`,
       isActive: updated.isActive
     });
+
+    // Invalidate reps cache
+    await cache.del(cacheKeys.reps());
   } catch (err) {
     console.error('Deactivate rep error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -963,6 +1120,11 @@ const deleteRepAccount = async (req, res) => {
     });
 
     await prisma.user.delete({ where: { id } });
+    
+    // Invalidate reps cache and stats
+    await cache.del(cacheKeys.reps());
+    await cache.del(cacheKeys.stats());
+    
     res.json({ message: 'Representative account deleted successfully' });
   } catch (err) {
     console.error('Delete rep account error:', err);
@@ -1184,6 +1346,11 @@ const bulkUploadReps = async (req, res) => {
       skippedCount,
       errors: errors.slice(0, 20) // Limit error messages
     });
+
+    // Invalidate reps cache, classes cache, and stats
+    await cache.del(cacheKeys.reps());
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.stats());
   } catch (err) {
     console.error('Bulk upload reps error:', err);
     res.status(500).json({ error: 'Internal server error: ' + err.message });
@@ -1402,6 +1569,14 @@ const parseImportFile = async (req, res) => {
 
 const getAdminStats = async (req, res) => {
   try {
+    // Try cache first (shorter TTL since stats change frequently)
+    const cacheKey = cacheKeys.stats();
+    const cached = await cache.get(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
+    // Cache miss - fetch from database
     const [programmesCount, classesCount, studentsCount, repsCount, coursesCount, activeSessionsCount] = await Promise.all([
       prisma.programme.count(),
       prisma.class.count(),
@@ -1411,14 +1586,19 @@ const getAdminStats = async (req, res) => {
       prisma.attendanceSession.count({ where: { status: 'OPEN' } }),
     ]);
 
-    res.json({
+    const stats = {
       programmesCount,
       classesCount,
       studentsCount,
       repsCount,
       coursesCount,
       activeSessionsCount,
-    });
+    };
+
+    // Cache for 2 minutes (stats change frequently)
+    await cache.set(cacheKey, stats, 120);
+
+    res.json(stats);
   } catch (err) {
     console.error('Get admin stats error:', err);
     res.status(500).json({ error: 'Internal server error' });

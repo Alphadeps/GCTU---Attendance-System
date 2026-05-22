@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { protect, authorizeRoles } = require('../middleware/auth');
+const { reportLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const reportController = require('../controllers/report.controller');
 
 const router = express.Router();
@@ -30,11 +31,11 @@ const upload = multer({
 });
 
 // Admin: Template Management
-router.post('/template', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), upload.single('template'), reportController.uploadTemplate);
+router.post('/template', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), uploadLimiter, upload.single('template'), reportController.uploadTemplate);
 router.get('/template', protect, reportController.getActiveTemplate);
 
 // Rep: Generate Report
-router.post('/generate', protect, authorizeRoles('REP'), reportController.generateReport);
+router.post('/generate', protect, authorizeRoles('REP'), reportLimiter, reportController.generateReport);
 router.get('/my-generated', protect, authorizeRoles('REP'), reportController.getRepReports);
 
 // Lecturer: View and sign pending reports

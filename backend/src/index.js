@@ -2,7 +2,30 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const { apiLimiter } = require('./middleware/rateLimiter');
+const { apiLimiter, checkIPBlock } = require('./middleware/rateLimiter');
+const { requestTracker, errorTracker } = require('./middleware/monitoring');
+const {
+  securityHeaders,
+  sanitizeInput,
+  enforceHttps,
+  preventSqlInjection,
+  preventRateLimitBypass,
+  secureFileUpload,
+  securityAuditLog,
+  mongoSanitize,
+  hpp
+} = require('./middleware/security');
+const {
+  compressionMiddleware,
+  paginationMiddleware,
+  responseTimeHeader,
+  memoryMonitoring,
+  noCache
+} = require('./middleware/performance');
+const {
+  idempotencyMiddleware,
+  globalErrorHandler
+} = require('./middleware/errorRecovery');
 
 // Nodemon reload trigger
 const authRoutes = require('./routes/auth.routes');
@@ -15,13 +38,33 @@ const notificationRoutes = require('./routes/notification.routes');
 const grievanceRoutes = require('./routes/grievance.routes');
 const reportRoutes = require('./routes/report.routes');
 const lecturerRoutes = require('./routes/lecturer.routes');
+const monitoringRoutes = require('./routes/monitoring.routes');
 
 const prisma = require('./lib/prisma');
-const { protect } = require('./middleware/auth');
+const { protect, authorizeRoles } = require('./middleware/auth');
+const { logger, requestLogger } = require('./lib/logger');
 const seed = require('./seed');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Trust proxy (required for rate limiting and security behind reverse proxy)
+app.set('trust proxy', 1);
+
+// Performance: Response compression (gzip)
+app.use(compressionMiddleware);
+
+// Performance: Response time tracking
+app.use(responseTimeHeader);
+
+// Performance: Memory monitoring
+app.use(memoryMonitoring);
+
+// HTTPS Enforcement (production only)
+app.use(enforceHttps);
+
+// Security Headers (Helmet)
+app.use(securityHeaders);
 
 // Enable CORS with credentials support
 const allowedOrigins = [
@@ -52,8 +95,34 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
+// Security Middleware
+app.use(mongoSanitize); // Prevent NoSQL injection
+app.use(hpp); // Prevent HTTP Parameter Pollution
+app.use(sanitizeInput); // XSS protection
+app.use(preventSqlInjection); // Additional SQL injection prevention
+app.use(preventRateLimitBypass); // Prevent rate limit bypass
+app.use(securityAuditLog); // Security audit logging
+
+// Apply monitoring middleware (tracks all requests)
+app.use(requestTracker);
+
+// Apply request logging
+app.use(requestLogger);
+
+// Apply IP blocking check globally (before rate limiting)
+app.use('/api', checkIPBlock);
+
 // Apply rate limiter globally to all API endpoints
 app.use('/api', apiLimiter);
+
+// Performance: Pagination support for all API endpoints
+app.use('/api', paginationMiddleware);
+
+// Performance: No-cache headers for API responses (dynamic content)
+app.use('/api', noCache);
+
+// Error Recovery: Idempotency support
+app.use('/api', idempotencyMiddleware);
 
 // Health Check
 app.get('/api/health', async (req, res) => {
@@ -143,16 +212,32 @@ app.use('/api/grievances', grievanceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/lecturer', lecturerRoutes);
 app.use('/api/admin', require('./routes/admin.routes'));
+app.use('/api/monitoring', monitoringRoutes);
+
+// CSRF token endpoint
+const { getCsrfToken } = require('./middleware/security');
+app.get('/api/csrf-token', protect, getCsrfToken);
+
+// Logging endpoints
+const { getLogStats, cleanOldLogs } = require('./lib/logger');
+app.get('/api/monitoring/logs/stats', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  const stats = await getLogStats();
+  res.json(stats);
+});
+
+app.post('/api/monitoring/logs/clean', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  const { daysToKeep } = req.body;
+  const result = await cleanOldLogs(daysToKeep || 30);
+  res.json(result);
+});
 
 // Serve uploaded files (logos etc.)
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-  console.error('Server Error:', err.stack);
-  res.status(500).json({ error: 'Something went wrong on the server!' });
-});
+// Global Error Handler (with monitoring and user-friendly messages)
+app.use(errorTracker);
+app.use(globalErrorHandler);
 
 let server;
 
@@ -177,17 +262,17 @@ const connectWithRetry = async (attempts = 5, delay = 5000) => {
 
 // Graceful shutdown function to close active connections cleanly
 const gracefulShutdown = async (originSignal) => {
-  console.log(`[Resilience] Clean shutdown triggered via: ${originSignal}`);
+  logger.info(`Clean shutdown triggered via: ${originSignal}`);
   
   if (server) {
     server.close(async () => {
-      console.log('HTTP connection sockets closed.');
+      logger.info('HTTP connection sockets closed');
       try {
         await prisma.$disconnect();
-        console.log('Prisma client disconnected successfully.');
+        logger.info('Prisma client disconnected successfully');
         process.exit(originSignal === 'uncaughtException' || originSignal === 'unhandledRejection' ? 1 : 0);
       } catch (err) {
-        console.error('Error disconnecting database during shutdown:', err);
+        logger.error('Error disconnecting database during shutdown:', err);
         process.exit(1);
       }
     });
@@ -202,12 +287,12 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
 // Bind process crash events
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('[Resilience] Fatal Unhandled Rejection at:', promise, 'Reason:', reason);
+  logger.error('Fatal Unhandled Rejection', { reason, promise });
   gracefulShutdown('unhandledRejection');
 });
 
 process.on('uncaughtException', (err) => {
-  console.error('[Resilience] Fatal Uncaught Exception thrown:', err.message, err.stack);
+  logger.error('Fatal Uncaught Exception', { message: err.message, stack: err.stack });
   gracefulShutdown('uncaughtException');
 });
 
@@ -230,8 +315,10 @@ const bootstrap = async () => {
   }
 
   server = app.listen(PORT, () => {
-    console.log(`Class Attendance API running on port ${PORT}`);
-    console.log('Active handles:', process._getActiveHandles().map(h => h.constructor.name));
+    logger.info(`Class Attendance API running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`Database: Connected`);
+    logger.info(`Redis: ${process.env.REDIS_URL ? 'Enabled' : 'Disabled'}`);
   });
 };
 

@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const { protect, authorizeRoles } = require('../middleware/auth');
+const { adminLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const adminController = require('../controllers/admin.controller');
 
 const router = express.Router();
@@ -30,12 +31,12 @@ const csvStorage = multer.memoryStorage();
 const uploadCSV = multer({ storage: csvStorage });
 
 // Superadmin guard middleware helper
-const superadminGuard = [protect, authorizeRoles('SUPERADMIN')];
+const superadminGuard = [protect, authorizeRoles('SUPERADMIN'), adminLimiter];
 
 // Settings Routes
 router.get('/settings', protect, adminController.getSettings);
 router.patch('/settings', superadminGuard, adminController.updateSettings);
-router.post('/settings/logo', [...superadminGuard, uploadLogo.single('logo')], adminController.uploadLogo);
+router.post('/settings/logo', [...superadminGuard, uploadLimiter, uploadLogo.single('logo')], adminController.uploadLogo);
 
 // Stats Route
 router.get('/stats', superadminGuard, adminController.getAdminStats);
@@ -62,8 +63,8 @@ router.get('/classes/:id/students', superadminGuard, adminController.getClassStu
 router.post('/classes/:id/students', superadminGuard, adminController.addStudentsToClass);
 router.delete('/classes/:id/students/:studentId', superadminGuard, adminController.removeStudentFromClass);
 router.post('/classes/:id/students/bulk-delete', superadminGuard, adminController.bulkDeleteStudentsFromClass);
-router.post('/classes/:id/students/bulk-import', [...superadminGuard, uploadCSV.single('file')], adminController.bulkImportClassStudents);
-router.post('/classes/parse-file', [...superadminGuard, uploadCSV.single('file')], adminController.parseImportFile);
+router.post('/classes/:id/students/bulk-import', [...superadminGuard, uploadLimiter, uploadCSV.single('file')], adminController.bulkImportClassStudents);
+router.post('/classes/parse-file', [...superadminGuard, uploadLimiter, uploadCSV.single('file')], adminController.parseImportFile);
 
 // Course Management Per Class
 router.get('/classes/:id/courses', superadminGuard, adminController.getClassCourses);
@@ -73,7 +74,7 @@ router.delete('/classes/:id/courses/:courseId', superadminGuard, adminController
 // Rep Account Management
 router.post('/reps', superadminGuard, adminController.createRepAccount);
 router.get('/reps', superadminGuard, adminController.getAllReps);
-router.post('/reps/bulk-upload', [...superadminGuard, uploadCSV.single('file')], adminController.bulkUploadReps);
+router.post('/reps/bulk-upload', [...superadminGuard, uploadLimiter, uploadCSV.single('file')], adminController.bulkUploadReps);
 router.patch('/reps/:id', superadminGuard, adminController.updateRep);
 router.patch('/reps/:id/reset-password', superadminGuard, adminController.resetRepPassword);
 router.patch('/reps/:id/deactivate', superadminGuard, adminController.deactivateRep);
