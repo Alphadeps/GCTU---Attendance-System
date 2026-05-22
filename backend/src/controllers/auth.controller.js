@@ -93,14 +93,7 @@ const login = async (req, res) => {
     const { username, password } = validation.data;
 
     const user = await prisma.user.findUnique({
-      where: { username },
-      include: {
-        assignedClass: {
-          include: {
-            _count: { select: { courses: true, students: true } }
-          }
-        }
-      }
+      where: { username }
     });
 
     if (!user) {
@@ -137,6 +130,17 @@ const login = async (req, res) => {
         userAgent: req.headers['user-agent']
       });
       return res.status(401).json({ error: 'Invalid username or password' });
+    }
+
+    // For REPs, fetch their assigned class
+    let assignedClass = null;
+    if (user.role === 'REP') {
+      assignedClass = await prisma.class.findFirst({
+        where: { repId: user.id },
+        include: {
+          _count: { select: { courses: true, students: true } }
+        }
+      });
     }
 
     // Sign Short Access Token (15 mins)
@@ -178,12 +182,12 @@ const login = async (req, res) => {
         id: user.id,
         username: user.username,
         role: user.role,
-        assignedClass: user.assignedClass
+        assignedClass: assignedClass
           ? {
-              id: user.assignedClass.id,
-              displayName: user.assignedClass.displayName,
-              courseCount: user.assignedClass._count?.courses ?? 0,
-              studentCount: user.assignedClass._count?.students ?? 0
+              id: assignedClass.id,
+              displayName: assignedClass.displayName,
+              courseCount: assignedClass._count?.courses ?? 0,
+              studentCount: assignedClass._count?.students ?? 0
             }
           : null,
         needsPasswordChange
