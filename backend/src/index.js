@@ -298,30 +298,55 @@ process.on('uncaughtException', (err) => {
 
 // Bootstrapped server startup
 const bootstrap = async () => {
-  await connectWithRetry();
-  
-  // Check if the database has any users; if not, auto-seed the initial records
   try {
-    const userCount = await prisma.user.count();
-    if (userCount === 0) {
-      console.log('Database appears to be empty (0 users found). Running auto-seed...');
-      await seed();
-      console.log('Database auto-seeded successfully.');
-    } else {
-      console.log(`Database has ${userCount} users. Auto-seed not needed.`);
+    console.log('🚀 Starting server bootstrap...');
+    await connectWithRetry();
+    console.log('✅ Database connection established');
+    
+    // Check if the database has any users; if not, auto-seed the initial records
+    try {
+      const userCount = await prisma.user.count();
+      if (userCount === 0) {
+        console.log('Database appears to be empty (0 users found). Running auto-seed...');
+        await seed();
+        console.log('Database auto-seeded successfully.');
+      } else {
+        console.log(`Database has ${userCount} users. Auto-seed not needed.`);
+      }
+    } catch (err) {
+      console.error('Failed to run auto-seed check:', err.message);
     }
-  } catch (err) {
-    console.error('Failed to run auto-seed check:', err.message);
-  }
 
-  server = app.listen(PORT, () => {
-    logger.info(`Class Attendance API running on port ${PORT}`);
-    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    logger.info(`Database: Connected`);
-    logger.info(`Redis: ${process.env.REDIS_URL ? 'Enabled' : 'Disabled'}`);
-  });
+    console.log(`🌐 Starting HTTP server on port ${PORT}...`);
+    server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server is listening on port ${PORT}`);
+      logger.info(`Class Attendance API running on port ${PORT}`);
+      logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      logger.info(`Database: Connected`);
+      logger.info(`Redis: ${process.env.REDIS_URL ? 'Enabled' : 'Disabled'}`);
+    });
+    
+    server.on('error', (error) => {
+      console.error('❌ Server error:', error);
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use`);
+      } else {
+        logger.error('Server error:', error);
+      }
+      process.exit(1);
+    });
+    
+    console.log('✅ Bootstrap complete, server should be running...');
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
 };
 
-bootstrap();
+bootstrap().catch(err => {
+  console.error('❌ Unhandled error in bootstrap:', err);
+  process.exit(1);
+});
 
 // Force nodemon reload to pick up newly generated prisma client: 2
