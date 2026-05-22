@@ -1553,32 +1553,92 @@ const cleanupDuplicateProgrammes = async (req, res) => {
     // Step 4: Merge classes from duplicates to official programmes
     for (const [dupId, officialId] of Object.entries(mergeMap)) {
       try {
-        // Update all classes to point to the official programme
-        const updateResult = await prisma.class.updateMany({
-          where: { programmeId: dupId },
-          data: { programmeId: officialId }
-        });
-
-        // Update displayNames to use official programme name
-        const classes = await prisma.class.findMany({
-          where: { programmeId: officialId }
-        });
-
+        const dupProg = allProgrammes.find(p => p.id === dupId);
         const officialProg = await prisma.programme.findUnique({ where: { id: officialId } });
         
-        for (const cls of classes) {
-          // Reconstruct displayName with official programme name
-          const newDisplayName = `${officialProg.name} LEVEL ${cls.level} ${cls.type} GROUP ${cls.group} (${cls.session})`;
-          await prisma.class.update({
-            where: { id: cls.id },
-            data: { displayName: newDisplayName }
+        // Get classes from duplicate programme
+        const dupClasses = await prisma.class.findMany({
+          where: { programmeId: dupId }
+        });
+
+        let movedCount = 0;
+        let skippedCount = 0;
+
+        for (const dupClass of dupClasses) {
+          // Check if a class with same level/type/group/session already exists in official programme
+          const existingClass = await prisma.class.findFirst({
+            where: {
+              programmeId: officialId,
+              level: dupClass.level,
+              type: dupClass.type,
+              group: dupClass.group,
+              session: dupClass.session
+            }
           });
+
+          if (existingClass) {
+            // Conflict! Merge students and courses from duplicate class into existing class
+            try {
+              // Move students
+              await prisma.classStudent.updateMany({
+                where: { classId: dupClass.id },
+                data: { classId: existingClass.id }
+              });
+
+              // Move courses (check for duplicates first)
+              const dupCourses = await prisma.classCourse.findMany({
+                where: { classId: dupClass.id }
+              });
+
+              for (const dupCourse of dupCourses) {
+                const existingCourse = await prisma.classCourse.findFirst({
+                  where: {
+                    classId: existingClass.id,
+                    courseId: dupCourse.courseId
+                  }
+                });
+
+                if (!existingCourse) {
+                  await prisma.classCourse.update({
+                    where: { id: dupCourse.id },
+                    data: { classId: existingClass.id }
+                  });
+                } else {
+                  // Course already linked, just delete the duplicate
+                  await prisma.classCourse.delete({
+                    where: { id: dupCourse.id }
+                  });
+                }
+              }
+
+              // Delete the duplicate class
+              await prisma.class.delete({
+                where: { id: dupClass.id }
+              });
+
+              skippedCount++;
+            } catch (mergeErr) {
+              report.errors.push(`Failed to merge class ${dupClass.displayName}: ${mergeErr.message}`);
+            }
+          } else {
+            // No conflict, just move the class
+            const newDisplayName = `${officialProg.name} LEVEL ${dupClass.level} ${dupClass.type} GROUP ${dupClass.group} (${dupClass.session})`;
+            await prisma.class.update({
+              where: { id: dupClass.id },
+              data: {
+                programmeId: officialId,
+                displayName: newDisplayName
+              }
+            });
+            movedCount++;
+          }
         }
 
         report.merged.push({
-          from: allProgrammes.find(p => p.id === dupId)?.name,
+          from: dupProg?.name,
           to: officialProg.name,
-          classesMoved: updateResult.count
+          classesMoved: movedCount,
+          classesMerged: skippedCount
         });
       } catch (err) {
         report.errors.push(`Failed to merge programme ID ${dupId}: ${err.message}`);
