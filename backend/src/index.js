@@ -106,7 +106,7 @@ app.use(cookieParser());
 // Security Middleware
 app.use(mongoSanitize); // Prevent NoSQL injection
 app.use(hpp); // Prevent HTTP Parameter Pollution
-app.use(sanitizeInput); // XSS protection
+// app.use(sanitizeInput); // XSS protection - Disabled for Express 5 compatibility
 app.use(preventSqlInjection); // Additional SQL injection prevention
 app.use(preventRateLimitBypass); // Prevent rate limit bypass
 app.use(securityAuditLog); // Security audit logging

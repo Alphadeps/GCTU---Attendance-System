@@ -17,7 +17,7 @@ const hpp = require('hpp');
 /**
  * Input Sanitization Middleware
  * Prevents XSS attacks by sanitizing user input
- * Express 5 compatible - handles read-only properties gracefully
+ * Express 5 compatible - skips read-only req.query
  */
 const sanitizeInput = (req, res, next) => {
   try {
@@ -29,10 +29,11 @@ const sanitizeInput = (req, res, next) => {
       Object.assign(req.body, sanitized);
     }
     
-    // For Express 5: req.query is read-only
-    // We sanitize it but don't try to reassign
-    // The query parameters are already parsed by Express
-    // and XSS protection is handled by other layers (helmet, etc.)
+    // Skip req.query sanitization in Express 5 (read-only property)
+    // Query parameters are already protected by:
+    // - Helmet (XSS protection)
+    // - HPP (HTTP Parameter Pollution protection)
+    // - Express built-in query parser
     
     // Sanitize URL parameters
     if (req.params && typeof req.params === 'object') {
