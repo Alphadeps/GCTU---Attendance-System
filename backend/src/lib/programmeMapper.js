@@ -17,25 +17,34 @@ const PROGRAMME_VARIATIONS = {
   // BIT variations
   'bit': 'BIT',
   'bachelor of information technology': 'BIT',
+  'bachelor of information technology (bit)': 'BIT',
   'bsc information technology': 'BIT',
   'bsc. information technology': 'BIT',
   'bsc.information technology': 'BIT',
+  'bscinformation technology': 'BIT',
   'b.i.t': 'BIT',
   'b.i.t.': 'BIT',
   
   // BNSA variations
   'bnsa': 'BNSA',
   'bsc networking and systems administration': 'BNSA',
+  'bsc networking and systems administration (bnsa)': 'BNSA',
   'bsc. networking and systems administration': 'BNSA',
   'bsc.networking and systems administration': 'BNSA',
+  'bscnetworking and systems administration': 'BNSA',
+  'bsc network  system admin': 'BNSA',
+  'bscnetwork system admin': 'BNSA',
+  'bsc network system admin': 'BNSA',
   'bsc network & system admin': 'BNSA',
   'bsc.network &system admin': 'BNSA',
+  'bsc network &system admin': 'BNSA',
   'networking and systems administration': 'BNSA',
   'network and system admin': 'BNSA',
   
   // DIT variations
   'dit': 'DIT',
   'diploma in information technology': 'DIT',
+  'diploma in information technology (dit)': 'DIT',
   'diploma information technology': 'DIT',
   'd.i.t': 'DIT',
   'd.i.t.': 'DIT'
@@ -54,11 +63,13 @@ function normalizeProgrammeName(programmeName) {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-    .replace(/[.,]/g, ''); // Remove periods and commas
+    .replace(/[.,&]/g, '') // Remove periods, commas, and ampersands
+    .replace(/\s+/g, ' ')  // Clean up spaces again after removing special chars
+    .trim();
   
   // Check if it's already an official name
   const officialKey = Object.keys(OFFICIAL_PROGRAMMES).find(
-    key => OFFICIAL_PROGRAMMES[key].toLowerCase() === cleaned
+    key => OFFICIAL_PROGRAMMES[key].toLowerCase().replace(/[.,&()]/g, '').replace(/\s+/g, ' ').trim() === cleaned
   );
   if (officialKey) {
     return OFFICIAL_PROGRAMMES[officialKey];
