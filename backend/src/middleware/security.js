@@ -20,18 +20,33 @@ const hpp = require('hpp');
  */
 const sanitizeInput = (req, res, next) => {
   // Sanitize request body
-  if (req.body) {
-    req.body = sanitizeObject(req.body);
+  if (req.body && typeof req.body === 'object') {
+    const sanitized = sanitizeObject(req.body);
+    // Clear and repopulate body instead of reassigning
+    Object.keys(req.body).forEach(key => delete req.body[key]);
+    Object.assign(req.body, sanitized);
   }
   
-  // Sanitize query parameters
-  if (req.query) {
-    req.query = sanitizeObject(req.query);
+  // Sanitize query parameters (Express 5 makes req.query read-only)
+  if (req.query && typeof req.query === 'object') {
+    const sanitized = sanitizeObject(req.query);
+    // Modify query properties in place
+    Object.keys(req.query).forEach(key => {
+      if (sanitized[key] !== undefined) {
+        try {
+          req.query[key] = sanitized[key];
+        } catch (e) {
+          // If property is read-only, skip it
+        }
+      }
+    });
   }
   
   // Sanitize URL parameters
-  if (req.params) {
-    req.params = sanitizeObject(req.params);
+  if (req.params && typeof req.params === 'object') {
+    const sanitized = sanitizeObject(req.params);
+    Object.keys(req.params).forEach(key => delete req.params[key]);
+    Object.assign(req.params, sanitized);
   }
   
   next();
