@@ -244,8 +244,11 @@ const authenticatedLimiter = rateLimit({
   },
   
   keyGenerator: (req) => {
-    // Use user ID instead of IP for authenticated users
-    return req.user?.id || req.ip;
+    // Use user ID for authenticated users, otherwise let express-rate-limit handle IP
+    if (req.user?.id) {
+      return `user:${req.user.id}`;
+    }
+    return undefined;
   },
   
   handler: (req, res) => {
