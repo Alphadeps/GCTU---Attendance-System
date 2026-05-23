@@ -2030,130 +2030,74 @@ export default function SuperAdminDashboard() {
 
           {/* SETTINGS PANEL */}
           {activeTab === 'settings' && !loading && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
-              {/* Branding & Logo */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in-up">
+              {/* Branding */}
+              <div className="sip-card p-6 space-y-5">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Department Branding</h3>
-                  <p className="text-xs text-[#8392ab]">Customize the department name and banner logo</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Department Branding</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Customize department name and logo</p>
                 </div>
-
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-2">Logo Preview</label>
-                    <div className="flex items-center space-x-4">
-                      <div className="h-24 w-24 bg-[#f0f2f5] rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden">
-                        {logoPreview ? (
-                          <img src={logoPreview} alt="Dept Logo" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-xs text-[#8392ab] font-bold">No Logo</span>
-                        )}
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-2">Logo</label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-20 w-20 bg-[#f8f9fa] rounded-xl border border-[#e9ecef] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {logoPreview
+                          ? <img src={logoPreview} alt="Logo" className="h-full w-full object-cover" />
+                          : <span className="text-xs text-[#adb5bd] font-semibold">No Logo</span>}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="file"
-                          ref={logoInputRef}
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              setLogoFile(file);
-                              setLogoPreview(URL.createObjectURL(file));
-                            }
-                          }}
-                          accept="image/*"
-                          className="hidden"
-                        />
-                        <button
-                          onClick={() => logoInputRef.current.click()}
-                          className="bg-gray-200 hover:bg-gray-100 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition"
-                        >
-                          Select Image File
+                        <input type="file" ref={logoInputRef}
+                          onChange={(e) => { const file = e.target.files[0]; if (file) { setLogoFile(file); setLogoPreview(URL.createObjectURL(file)); } }}
+                          accept="image/*" className="hidden" />
+                        <button onClick={() => logoInputRef.current.click()}
+                          className="border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition">
+                          Choose File
                         </button>
                         {logoFile && (
-                          <button
-                            onClick={handleLogoUpload}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl ml-2 transition"
-                          >
-                            Save Upload
-                          </button>
+                          <button onClick={handleLogoUpload}
+                            className="sip-btn-dark !w-auto px-4 py-2 text-xs ml-2">Upload</button>
                         )}
                       </div>
                     </div>
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Department Name</label>
-                    <input
-                      type="text"
-                      value={settings.deptName}
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Department Name</label>
+                    <input type="text" value={settings.deptName}
                       onChange={(e) => setSettings(prev => ({ ...prev, deptName: e.target.value }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
+                      className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
                   </div>
-
-                  <button
-                    onClick={async () => {
-                      try {
-                        await api.patch('/admin/settings', { deptName: settings.deptName });
-                        showNotification('Department name branding updated');
-                      } catch (err) {
-                        showNotification('Failed to update brand name', 'error');
-                      }
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                  >
-                    Save Branding Text
+                  <button onClick={async () => {
+                    try {
+                      await api.patch('/admin/settings', { deptName: settings.deptName });
+                      showNotification('Department name updated');
+                    } catch (err) { showNotification('Failed to update name', 'error'); }
+                  }} className="sip-btn-dark !w-auto px-5 py-2.5 text-xs">
+                    Save Name
                   </button>
                 </div>
               </div>
 
-              {/* Threshold Parameters */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
+              {/* Thresholds */}
+              <div className="sip-card p-6 space-y-5">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">System Threshold Config</h3>
-                  <p className="text-xs text-[#8392ab]">Calibrate geofence range, late windows, and QR tokens</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Thresholds</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Calibrate geofence, late window, and QR token settings</p>
                 </div>
-
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Late Grace Period (Minutes)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.lateWindowMinutes}
-                      onChange={(e) => setSettings(prev => ({ ...prev, lateWindowMinutes: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">QR Expiry Span (Seconds)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.qrExpirySeconds}
-                      onChange={(e) => setSettings(prev => ({ ...prev, qrExpirySeconds: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Geofence Radius (Meters)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.geofenceRadiusMeters}
-                      onChange={(e) => setSettings(prev => ({ ...prev, geofenceRadiusMeters: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                  >
-                    Save Thresholds
-                  </button>
+                  {[
+                    {label:'Late Grace Period (Minutes)', field:'lateWindowMinutes', val:settings.lateWindowMinutes},
+                    {label:'QR Expiry (Seconds)', field:'qrExpirySeconds', val:settings.qrExpirySeconds},
+                    {label:'Geofence Radius (Meters)', field:'geofenceRadiusMeters', val:settings.geofenceRadiusMeters},
+                  ].map(t => (
+                    <div key={t.field}>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">{t.label}</label>
+                      <input type="number" required value={t.val}
+                        onChange={(e) => setSettings(prev => ({ ...prev, [t.field]: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
+                    </div>
+                  ))}
+                  <button type="submit" className="sip-btn-dark !w-auto px-5 py-2.5 text-xs">Save Thresholds</button>
                 </form>
               </div>
             </div>
@@ -2161,82 +2105,78 @@ export default function SuperAdminDashboard() {
 
           {/* GRIEVANCES PANEL */}
           {activeTab === 'grievances' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <AdminGrievancePanel />
             </div>
           )}
 
           {/* ARCHIVES PANEL */}
           {activeTab === 'reports' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <OfficialArchives />
             </div>
           )}
 
           {/* REPORT SETTINGS PANEL */}
           {activeTab === 'report_settings' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <ReportSettings />
             </div>
           )}
 
           {/* HELP & SETUP GUIDE */}
           {activeTab === 'help' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <HelpGuidePage />
             </div>
           )}
 
           {/* SYSTEM MONITORING PANEL */}
           {activeTab === 'monitoring' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <SystemMonitoring />
             </div>
           )}
 
           {/* PERFORMANCE METRICS PANEL */}
           {activeTab === 'performance' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <PerformanceMetrics />
             </div>
           )}
 
           {/* SECURITY LOGS PANEL */}
           {activeTab === 'security_logs' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <SecurityLogs />
             </div>
           )}
 
           {/* NOTIFICATIONS PANEL */}
           {activeTab === 'notifications' && (
-            <div className="animate-fade-in space-y-6">
-              <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                <div className="flex justify-between items-center mb-6">
+            <div className="animate-fade-in-up">
+              <div className="sip-card p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                   <div>
-                    <h3 className="font-bold text-[#344767] text-lg">System Notifications</h3>
-                    <p className="text-xs text-[#8392ab] mt-1">
-                      {notifications.filter(n => !n.isRead).length} unread • {notifications.length} total
+                    <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Notifications</h3>
+                    <p className="text-xs text-[#8392ab] mt-0.5">
+                      {notifications.filter(n => !n.isRead).length} unread &bull; {notifications.length} total
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {notifications.some(n => !n.isRead) && (
-                      <button
-                        onClick={handleMarkAllAsRead}
-                        className="bg-blue-600 hover:bg-blue-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <button onClick={handleMarkAllAsRead}
+                        className="flex items-center gap-2 border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Mark All Read
                       </button>
                     )}
                     {notifications.length > 0 && (
-                      <button
-                        onClick={handleClearAll}
-                        className="bg-rose-600 hover:bg-rose-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <button onClick={handleClearAll}
+                        className="flex items-center gap-2 border border-red-200 bg-red-50 text-red-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-red-100 transition">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                         Clear All
@@ -2246,104 +2186,55 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {notificationsLoading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-xl" />)}
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="text-center py-20 space-y-4">
-                    <div className="inline-flex p-4 bg-gray-200/50 rounded-2xl">
-                      <svg className="w-12 h-12 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0L12 17l-8-4" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-bold text-[#8392ab]">All caught up!</p>
-                    <p className="text-xs text-[#8392ab]">No notifications to display</p>
+                  <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                    <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <p className="text-sm font-semibold text-[#8392ab]">All caught up!</p>
+                    <p className="text-xs text-[#adb5bd] mt-1">No notifications to display</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {notifications.map((notification) => {
-                      const getIcon = (type) => {
-                        switch (type) {
-                          case 'SUCCESS':
-                            return (
-                              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                          case 'WARNING':
-                            return (
-                              <div className="p-3 bg-[#344767]/10 text-[#344767] rounded-xl border border-[#344767]/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                              </div>
-                            );
-                          case 'DANGER':
-                            return (
-                              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                          default:
-                            return (
-                              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                        }
+                      const iconMap = {
+                        SUCCESS: {bg:'bg-emerald-50', color:'text-emerald-600', path:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'},
+                        WARNING: {bg:'bg-amber-50', color:'text-amber-600', path:'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'},
+                        DANGER: {bg:'bg-red-50', color:'text-red-600', path:'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'},
                       };
+                      const icon = iconMap[notification.type] || {bg:'bg-blue-50', color:'text-blue-600', path:'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'};
 
                       const formatTime = (dateString) => {
                         const date = new Date(dateString);
                         const now = new Date();
-                        const diffMs = now - date;
-                        const diffMins = Math.floor(diffMs / 60000);
-
+                        const diffMins = Math.floor((now - date) / 60000);
                         if (diffMins < 1) return 'Just now';
                         if (diffMins < 60) return `${diffMins}m ago`;
-                        
                         const diffHours = Math.floor(diffMins / 60);
                         if (diffHours < 24) return `${diffHours}h ago`;
-
-                        return date.toLocaleDateString(undefined, { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric',
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        });
+                        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                       };
 
                       return (
-                        <div
-                          key={notification.id}
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className={`p-5 rounded-xl border transition-all cursor-pointer flex gap-4 relative ${
-                            !notification.isRead 
-                              ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' 
-                              : 'bg-gray-200/30 border-gray-200 hover:bg-gray-200/50'
-                          }`}
-                        >
+                        <div key={notification.id} onClick={() => handleMarkAsRead(notification.id)}
+                          className={`p-4 rounded-xl border cursor-pointer flex gap-3 relative transition-all ${
+                            !notification.isRead ? 'border-[#17c1e8]/20 bg-[#17c1e8]/5 hover:bg-[#17c1e8]/10' : 'border-[#f0f2f5] bg-[#f8f9fa] hover:bg-[#f0f2f5]'
+                          }`}>
                           {!notification.isRead && (
-                            <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-[#14172B] to-[#3A416F] animate-pulse" />
+                            <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#17c1e8] animate-pulse" />
                           )}
-                          {getIcon(notification.type)}
+                          <div className={`p-2 rounded-lg flex-shrink-0 ${icon.bg}`}>
+                            <svg className={`w-4 h-4 ${icon.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon.path} />
+                            </svg>
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold mb-1 ${!notification.isRead ? 'text-[#344767]' : 'text-[#344767]'}`}>
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-[#8392ab] leading-relaxed mb-2">
-                              {notification.message}
-                            </p>
-                            <span className="text-xs text-[#8392ab] font-medium">
-                              {formatTime(notification.createdAt)}
-                            </span>
+                            <p className="text-sm font-semibold text-[#344767] mb-0.5">{notification.title}</p>
+                            <p className="text-xs text-[#8392ab] leading-relaxed">{notification.message}</p>
+                            <span className="text-[10px] text-[#adb5bd] font-medium mt-1 block">{formatTime(notification.createdAt)}</span>
                           </div>
                         </div>
                       );
@@ -2380,8 +2271,8 @@ export default function SuperAdminDashboard() {
 
       {/* ADD CLASS MODAL (MULTI-STEP) */}
       {showClassModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-md w-full animate-scale-up">
             {/* Steps indicator */}
             <div className="flex justify-between items-center mb-6">
               <span className="text-xs font-bold text-[#8392ab]">Step {classStep} of 3</span>
@@ -2397,11 +2288,11 @@ export default function SuperAdminDashboard() {
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-[#344767]">Create Class Groups</h3>
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Academic Programme</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Academic Programme</label>
                   <select
                     value={newClass.programmeId}
                     onChange={(e) => setNewClass(prev => ({ ...prev, programmeId: e.target.value }))}
-                    className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                   >
                     <option value="" disabled>Select Programme</option>
                     {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -2410,7 +2301,7 @@ export default function SuperAdminDashboard() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Level</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Level</label>
                     <select
                       value={newClass.level}
                       onChange={(e) => setNewClass(prev => ({ ...prev, level: e.target.value }))}
@@ -2424,7 +2315,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Type</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Type</label>
                     <select
                       value={newClass.type}
                       onChange={(e) => setNewClass(prev => ({ ...prev, type: e.target.value }))}
@@ -2436,7 +2327,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Session</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Session</label>
                     <select
                       value={newClass.session}
                       onChange={(e) => setNewClass(prev => ({ ...prev, session: e.target.value }))}
@@ -2452,7 +2343,7 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     onClick={resetClassModal}
-                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                    className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                   >
                     Cancel
                   </button>
@@ -2464,7 +2355,7 @@ export default function SuperAdminDashboard() {
                       }
                       setClassStep(2);
                     }}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                    className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                   >
                     Next Step
                   </button>
@@ -2519,13 +2410,13 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-between pt-4">
                   <button
                     onClick={() => setClassStep(1)}
-                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                    className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleCreateClasses}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                    className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                   >
                     Create All
                   </button>
@@ -2570,67 +2461,67 @@ export default function SuperAdminDashboard() {
 
       {/* CREATE REP MODAL */}
       {showRepModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Create Class Rep</h3>
             <form onSubmit={handleCreateRep} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Full Name</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John Doe"
                   value={newRep.fullName}
                   onChange={(e) => setNewRep(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Index Number</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Index Number</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. 10912345"
                   value={newRep.indexNumber}
                   onChange={(e) => setNewRep(prev => ({ ...prev, indexNumber: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Username (Login ID)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Username (Login ID)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. johndoe"
                   value={newRep.username}
                   onChange={(e) => setNewRep(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Password"
                   value={newRep.password}
                   onChange={(e) => setNewRep(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Confirm Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Repeat password"
                   value={newRep.confirmPassword}
                   onChange={(e) => setNewRep(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
@@ -2638,13 +2529,13 @@ export default function SuperAdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowRepModal(false)}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                  className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                 >
                   Save Account
                 </button>
@@ -2656,8 +2547,8 @@ export default function SuperAdminDashboard() {
 
       {/* BULK UPLOAD REPS MODAL */}
       {showBulkUploadModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-lg w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Bulk Upload Class Reps</h3>
             
             <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
@@ -2709,7 +2600,7 @@ export default function SuperAdminDashboard() {
                     setBulkUploadFile(null);
                     setBulkUploadResult(null);
                   }}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
@@ -2740,32 +2631,32 @@ export default function SuperAdminDashboard() {
 
       {/* RESET PASSWORD MODAL */}
       {showResetPwdModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Reset Rep Password</h3>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">New Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">New Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowResetPwdModal(false)}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                  className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                 >
                   Reset Password
                 </button>
@@ -2821,8 +2712,8 @@ export default function SuperAdminDashboard() {
 
       {/* ASSIGN REPRESENTATIVE MODAL */}
       {showAssignRepModal && selectedClassForRep && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Assign Class Rep</h3>
@@ -2874,8 +2765,8 @@ export default function SuperAdminDashboard() {
 
       {/* VIEW STUDENTS MODAL (MANUAL + BULK IMPORT) */}
       {showStudentsModal && selectedClassForStudents && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-scale-up">
             <div className="flex justify-between items-start mb-4 border-b border-gray-200 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Enrollment List</h3>
@@ -3153,8 +3044,8 @@ export default function SuperAdminDashboard() {
 
       {/* CLASS COURSES MODAL */}
       {showClassCoursesModal && selectedClassForCourses && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-md w-full animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Linked Class Courses</h3>
