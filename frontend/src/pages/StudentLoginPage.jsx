@@ -3,6 +3,80 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/* ─── Icon helpers ────────────────────────────────────────────────────────── */
+const QrIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="7" height="7"/>
+    <rect x="14" y="3" width="7" height="7"/>
+    <rect x="3" y="14" width="7" height="7"/>
+    <path d="M14 14h.01M18 14h.01M14 18h.01M18 18h.01M14 22h.01M22 14h.01M22 18h.01M22 22h.01"/>
+  </svg>
+);
+const HistoryIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="12 8 12 12 14 14"/>
+    <path d="M3.05 11a9 9 0 1 0 .5-4.5M3 3v4h4"/>
+  </svg>
+);
+const SupportIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+);
+const UserIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+const KeyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+  </svg>
+);
+const AlertIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+const ShieldIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </svg>
+);
+const ArrowLeftIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="19" y1="12" x2="5" y2="12"/>
+    <polyline points="12 19 5 12 12 5"/>
+  </svg>
+);
+
+/* ─── Feature card data ───────────────────────────────────────────────────── */
+const FEATURES = [
+  {
+    icon: <QrIcon />,
+    title: 'QR Check-in',
+    desc: 'Scan your QR code to mark attendance instantly',
+    delay: 'delay-200',
+  },
+  {
+    icon: <HistoryIcon />,
+    title: 'Attendance History',
+    desc: 'View your full attendance record per course',
+    delay: 'delay-300',
+  },
+  {
+    icon: <SupportIcon />,
+    title: 'Grievance Support',
+    desc: 'Raise concerns about attendance discrepancies',
+    delay: 'delay-400',
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 const StudentLoginPage = () => {
   const [indexNumber, setIndexNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -70,168 +144,375 @@ const StudentLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#f0f2f5', fontFamily: "'Open Sans', sans-serif" }}>
+    <div className="login-root">
 
-      {/* ── Hero banner ────────────────────────────────────────────────── */}
+      {/* ══════════════════════ LEFT PANEL ══════════════════════ */}
       <div
-        className="relative overflow-hidden flex items-center justify-center"
-        style={{
-          background: 'linear-gradient(310deg, #141727, #3A416F)',
-          minHeight: '280px',
-          borderRadius: '0 0 12px 12px',
-          margin: '0 0 -100px 0',
-        }}
+        className="login-left animate-slide-left"
+        style={{ background: 'linear-gradient(135deg, #11cdef 0%, #1171ef 100%)' }}
       >
-        <img src="/logo2.png" alt="" aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none"
+        {/* Decorative background blobs */}
+        <div
+          className="login-blob"
+          style={{
+            width: 360, height: 360,
+            background: 'rgba(255,255,255,0.07)',
+            top: -100, right: -100,
+          }}
         />
-        <div className="relative z-10 text-center px-6 pb-16">
-          <h1
-            style={{
-              fontSize: '48px', fontWeight: 700, color: '#fff',
-              letterSpacing: '-0.8px', lineHeight: 1.2, margin: 0,
-              textShadow: '0 2px 12px rgba(0,0,0,.3)',
-            }}
-          >
-            {requiresPasswordSetup ? 'Set Password' : 'Student Portal'}
-          </h1>
-          <p className="mt-3 text-slate-300 text-sm font-semibold tracking-wide">
-            GCTU Smart Attendance System
+        <div
+          className="login-blob"
+          style={{
+            width: 220, height: 220,
+            background: 'rgba(255,255,255,0.06)',
+            bottom: 40, left: -70,
+          }}
+        />
+        <div
+          className="login-blob"
+          style={{
+            width: 130, height: 130,
+            background: 'rgba(17,193,239,0.15)',
+            bottom: 220, right: 30,
+          }}
+        />
+
+        {/* Content */}
+        <div style={{
+          position: 'relative', zIndex: 1, width: '100%', maxWidth: 340,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem',
+        }}>
+
+          {/* Logo */}
+          <div className="animate-fade-in-down" style={{ textAlign: 'center' }}>
+            <img
+              src="/logo2.png"
+              alt="GCTU Logo"
+              style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: '1rem' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
+
+          {/* Heading */}
+          <div className="animate-fade-in-up" style={{ textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '28px',
+              fontWeight: 800,
+              color: '#fff',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.5px',
+              lineHeight: 1.2,
+              textShadow: '0 2px 16px rgba(0,0,0,.2)',
+            }}>
+              Student Portal
+            </h1>
+            <p style={{
+              fontSize: '13px',
+              color: 'rgba(255,255,255,0.70)',
+              margin: 0,
+              letterSpacing: '.3px',
+              fontWeight: 500,
+            }}>
+              Check in your attendance
+            </p>
+          </div>
+
+          {/* Feature cards */}
+          <div style={{
+            display: 'flex', flexDirection: 'column',
+            gap: '12px', width: '100%', alignItems: 'center',
+          }}>
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className={`login-feature-card animate-float ${f.delay}`}
+              >
+                <div className="login-feature-icon">{f.icon}</div>
+                <div className="login-feature-text">
+                  <h4>{f.title}</h4>
+                  <p>{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom caption */}
+          <p className="animate-fade-in delay-600" style={{
+            fontSize: '11px',
+            color: 'rgba(255,255,255,0.35)',
+            textAlign: 'center',
+            margin: 0,
+            letterSpacing: '.3px',
+          }}>
+            Ghana Communication Technology University
           </p>
         </div>
       </div>
 
-      {/* ── Login card ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center px-4 pb-12">
-        <div
-          className="w-full max-w-md relative z-10"
-          style={{
-            background: '#fff',
-            borderRadius: '16px',
-            boxShadow: '0 20px 27px 0 rgba(0,0,0,.08)',
-            padding: '32px',
-          }}
-        >
-          {/* Logo + Name */}
-          <div className="text-center mb-8">
-            <img
-              src="/logo2.png" alt="GCTU Crest"
-              className="mx-auto mb-4 object-contain"
-              style={{ width: '72px', height: '72px' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <h5 style={{ fontSize: '20px', fontWeight: 700, color: 'rgb(52,71,103)', margin: 0 }}>
-              {requiresPasswordSetup ? 'Create Your Password' : 'Student Sign In'}
-            </h5>
-            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)', marginTop: '4px' }}>
-              {requiresPasswordSetup
-                ? 'First-time login — set a secure password'
-                : 'Sign in with your index number'}
-            </p>
+      {/* ══════════════════════ RIGHT PANEL ══════════════════════ */}
+      <div className="login-right">
+
+        {/* Mobile compact header */}
+        <div className="login-mobile-header" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: 380 }}>
+          <img
+            src="/logo2.png"
+            alt="GCTU"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+          <div>
+            <h2>GCTU Student Portal</h2>
+            <p>Attendance Check-in &amp; History</p>
           </div>
+        </div>
 
-          {/* Alerts */}
-          {errorMsg && (
-            <div
-              className="mb-5 p-3 rounded-lg flex gap-2 items-center text-sm"
-              style={{ background: 'rgba(234,6,6,.07)', border: '1px solid rgba(234,6,6,.2)', color: '#ea0606' }}
-            >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              {errorMsg}
-            </div>
-          )}
+        <div className="login-right-inner animate-fade-in-up">
 
+          {/* ── Normal login form ── */}
           {!requiresPasswordSetup ? (
-            <form onSubmit={handleLogin} className="space-y-5">
-              <input
-                type="text" required value={indexNumber}
-                onChange={(e) => setIndexNumber(e.target.value)}
-                placeholder="Index Number"
-                className="sip-input"
-              />
-              <input
-                type="password" required value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="sip-input"
-              />
-              <button type="submit" disabled={loading} className="sip-btn-dark flex items-center justify-center gap-2">
-                {loading
-                  ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-                  : 'Sign In'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handlePasswordSetup} className="space-y-5">
-              <div
-                className="p-3 rounded-lg text-sm"
-                style={{ background: 'rgba(23,193,232,.08)', border: '1px solid rgba(23,193,232,.25)', color: '#0c9abf' }}
-              >
-                <p className="font-semibold">First Time Login</p>
-                <p className="text-xs mt-0.5">Please create a secure password for your account.</p>
+            <>
+              {/* Heading */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h2 style={{
+                  fontSize: '24px',
+                  fontWeight: 800,
+                  color: 'var(--sip-text-heading)',
+                  margin: '0 0 6px 0',
+                  letterSpacing: '-0.3px',
+                }}>
+                  Student Sign In
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
+                  Sign in with your index number and password
+                </p>
               </div>
-              <input
-                type="text" disabled value={indexNumber}
-                className="sip-input"
-                style={{ background: '#f8f9fa', color: '#8392ab', cursor: 'not-allowed' }}
-              />
-              <input
-                type="password" required value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="New Password (min 6 characters)"
-                className="sip-input"
-              />
-              <input
-                type="password" required value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-                className="sip-input"
-              />
-              <button type="submit" disabled={loading} className="sip-btn-dark flex items-center justify-center gap-2">
-                {loading
-                  ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-                  : 'Set Password'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setRequiresPasswordSetup(false); setNewPassword(''); setConfirmPassword(''); setErrorMsg(''); }}
-                style={{ color: 'rgb(131,146,171)', fontSize: '13px', width: '100%', textAlign: 'center', paddingTop: '4px' }}
-                className="hover:underline block"
-              >
-                Back to Login
-              </button>
-            </form>
+
+              {/* Error alert */}
+              {errorMsg && (
+                <div className="sip-alert sip-alert-error animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+                  <AlertIcon />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-index">Index Number</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><UserIcon /></span>
+                    <input
+                      id="slp-index"
+                      type="text"
+                      required
+                      autoComplete="username"
+                      value={indexNumber}
+                      onChange={(e) => setIndexNumber(e.target.value)}
+                      placeholder="e.g. CS/2021/001"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-password">Password</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><KeyIcon /></span>
+                    <input
+                      id="slp-password"
+                      type="password"
+                      required
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="sip-btn-dark"
+                  style={{ marginTop: '0.4rem' }}
+                >
+                  {loading ? (
+                    <span
+                      style={{
+                        width: 16, height: 16,
+                        border: '2px solid rgba(255,255,255,0.4)',
+                        borderTopColor: '#fff',
+                        borderRadius: '50%',
+                        display: 'inline-block',
+                        animation: 'spinSlow 0.7s linear infinite',
+                      }}
+                    />
+                  ) : 'Sign In'}
+                </button>
+              </form>
+            </>
+          ) : (
+            /* ── Password setup form ── */
+            <>
+              {/* Heading */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h2 style={{
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  color: 'var(--sip-text-heading)',
+                  margin: '0 0 6px 0',
+                  letterSpacing: '-0.3px',
+                }}>
+                  Create Your Password
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
+                  First-time login — set a secure password for your account
+                </p>
+              </div>
+
+              {/* Info banner */}
+              <div className="sip-alert sip-alert-info animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+                <ShieldIcon />
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '12px' }}>First Time Login</p>
+                  <p style={{ margin: '2px 0 0', fontSize: '12px', opacity: 0.85 }}>
+                    Please create a secure password of at least 6 characters.
+                  </p>
+                </div>
+              </div>
+
+              {/* Error alert */}
+              {errorMsg && (
+                <div className="sip-alert sip-alert-error animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+                  <AlertIcon />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Form */}
+              <form onSubmit={handlePasswordSetup} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+                <div>
+                  <label className="sip-label">Index Number</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={indexNumber}
+                    className="sip-input"
+                  />
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-newpw">New Password</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><KeyIcon /></span>
+                    <input
+                      id="slp-newpw"
+                      type="password"
+                      required
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-confirmpw">Confirm Password</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><KeyIcon /></span>
+                    <input
+                      id="slp-confirmpw"
+                      type="password"
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter your password"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="sip-btn-dark"
+                  style={{ marginTop: '0.4rem' }}
+                >
+                  {loading ? (
+                    <span
+                      style={{
+                        width: 16, height: 16,
+                        border: '2px solid rgba(255,255,255,0.4)',
+                        borderTopColor: '#fff',
+                        borderRadius: '50%',
+                        display: 'inline-block',
+                        animation: 'spinSlow 0.7s linear infinite',
+                      }}
+                    />
+                  ) : 'Set Password'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRequiresPasswordSetup(false);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setErrorMsg('');
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    background: 'none', border: 'none', padding: '4px 0',
+                    color: 'var(--sip-text-footer)', fontSize: '13px', cursor: 'pointer',
+                    transition: 'color 150ms ease', width: '100%',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--sip-text-heading)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--sip-text-footer)'; }}
+                >
+                  <ArrowLeftIcon /> Back to Login
+                </button>
+              </form>
+            </>
           )}
 
-          {/* Links */}
-          <div className="mt-6 pt-5 text-center" style={{ borderTop: '1px solid #e9ecef' }}>
-            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+          {/* Divider */}
+          <hr className="divider" style={{ margin: '1.5rem 0' }} />
+
+          {/* Footer links */}
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Staff or Admin?{' '}
               <button
                 onClick={() => navigate('/login')}
-                style={{ color: 'rgb(52,71,103)', fontWeight: 700 }}
-                className="hover:underline"
+                style={{
+                  background: 'none', border: 'none', padding: 0,
+                  color: 'var(--sip-text-heading)', fontWeight: 700,
+                  fontSize: '13px', cursor: 'pointer',
+                  transition: 'color 150ms ease',
+                }}
+                onMouseEnter={(e) => { e.target.style.color = '#1171ef'; }}
+                onMouseLeave={(e) => { e.target.style.color = 'var(--sip-text-heading)'; }}
               >
                 Login here
               </button>
             </p>
           </div>
+
+          {/* Copyright */}
+          <p style={{
+            fontSize: '11px',
+            color: 'var(--sip-text-footer)',
+            textAlign: 'center',
+            marginTop: '2rem',
+            opacity: 0.7,
+          }}>
+            &copy; {new Date().getFullYear()} Software Unit | Msquare | GCTU
+          </p>
         </div>
       </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="text-center pb-6 px-4">
-        <nav className="flex flex-wrap justify-center gap-4 mb-2">
-          {['GCTU', 'Learning Platform', 'Library', 'Programmes'].map((l) => (
-            <span key={l} style={{ fontSize: '14px', color: 'rgb(131,146,171)', cursor: 'default' }}>{l}</span>
-          ))}
-        </nav>
-        <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
-          Copyright © {new Date().getFullYear()} Software Unit | Msquare | GCTU.
-        </p>
-      </footer>
     </div>
   );
 };

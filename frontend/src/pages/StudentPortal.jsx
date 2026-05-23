@@ -23,10 +23,17 @@ const getTimeDiffText = (startTime) => {
   return `Started ${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
 };
 
+const getGreeting = () => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+};
+
 const StudentPortal = () => {
   // Navigation & Tabs
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'history' | 'profile'
-  
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'history' | 'grievances' | 'profile'
+
   // Auth/Identity States
   const [isIdentified, setIsIdentified] = useState(
     !!localStorage.getItem('studentIndex') && !!localStorage.getItem('studentName')
@@ -43,7 +50,7 @@ const StudentPortal = () => {
   const [history, setHistory] = useState([]);
   const [loadingActive, setLoadingActive] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
-  
+
   // Filter chips for history
   const [filter, setFilter] = useState('All'); // 'All' | 'Present' | 'Late' | 'Absent'
 
@@ -205,89 +212,6 @@ const StudentPortal = () => {
     return acc;
   }, {});
 
-  if (!isIdentified) {
-    return (
-      <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex flex-col justify-center px-6 py-12 relative overflow-hidden">
-        {/* Subtle Watermark School Crest */}
-        <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
-          <img src="/logo2.png" alt="School Crest Watermark" className="w-[450px] h-[450px] object-contain" />
-        </div>
-
-        {/* Background Mesh decoration */}
-        <div className="absolute top-[-20%] left-[-10%] w-[80%] h-[50%] rounded-full bg-[#344767]/10 blur-[120px] pointer-events-none"></div>
-
-        <div className="max-w-[380px] w-full mx-auto space-y-8 relative z-10">
-          <div className="text-center">
-            {/* Large Gold Crest */}
-            <div className="w-20 h-20 bg-[#344767]/10 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#344767]/20 shadow-lg shadow-[#344767]/10">
-              <svg className="w-12 h-12 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth={1.5} />
-                <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeWidth={1.5} />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-              </svg>
-            </div>
-            
-            <h2 className="text-2xl font-black text-[#344767] tracking-tight">Mark Your Attendance</h2>
-            <p className="text-sm text-[#8392ab] mt-2">Enter your details to continue</p>
-          </div>
-
-          <form onSubmit={handleIdentifySubmit} className="space-y-5 bg-white backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-xl">
-            <div>
-              <label className="block text-[#8392ab] text-xs font-bold uppercase tracking-wider mb-2">Index Number</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                required
-                placeholder="e.g. 10892837"
-                value={indexNumber}
-                onChange={(e) => setIndexNumber(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-[#344767] text-lg font-mono focus:outline-none focus:border-[#344767] focus:ring-1 focus:ring-[#344767] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[#8392ab] text-xs font-bold uppercase tracking-wider mb-2">Full Name</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 text-[#344767] text-lg focus:outline-none focus:border-[#344767] focus:ring-1 focus:ring-[#344767] transition-all"
-              />
-            </div>
-
-            {/* Remember Me Switch */}
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm text-[#8392ab]">Remember Me</span>
-              <button
-                type="button"
-                onClick={() => setRememberMe(!rememberMe)}
-                className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${
-                  rememberMe ? 'bg-gradient-to-br from-[#14172B] to-[#3A416F]' : 'bg-gray-100'
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 transform ${
-                    rememberMe ? 'translate-x-5' : 'translate-x-0'
-                  }`}
-                />
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 active:scale-[0.97] text-white font-extrabold py-4 rounded-xl transition-all shadow-lg shadow-[#344767]/10 text-base"
-            >
-              Continue
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   // Pre-calculate unique courses from student history
   const uniqueCourses = (() => {
     const codes = Array.from(new Set(history.map(h => h.session?.courseCode).filter(Boolean)));
@@ -300,49 +224,138 @@ const StudentPortal = () => {
     });
   })();
 
-  return (
-    <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex flex-col max-w-[430px] mx-auto shadow-2xl border-x border-gray-200 relative">
-      {/* Subtle Watermark School Crest */}
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
-        <img src="/logo2.png" alt="School Crest Watermark" className="w-[300px] h-[300px] object-contain" />
-      </div>
+  // ── IDENTIFICATION SCREEN ──
+  if (!isIdentified) {
+    return (
+      <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
+        {/* Background gradient blobs */}
+        <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-[#17c1e8]/10 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-[#cb0c9f]/8 blur-[80px] pointer-events-none" />
 
-      {/* Top Header Bar */}
-      <header className="bg-gray-50 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30 px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <img src={deptLogo} alt="Logo" className="w-8 h-8 object-contain bg-gray-50 rounded border border-gray-200 p-0.5" />
-          <span className="text-xs font-extrabold text-[#344767] truncate max-w-[160px]">{deptName}</span>
+        <div className="w-full max-w-[380px] relative z-10 space-y-6 animate-fade-in-up">
+          {/* Logo + heading */}
+          <div className="text-center">
+            <div className="w-20 h-20 bg-white rounded-3xl shadow-[0_4px_20px_rgba(0,0,0,.1)] flex items-center justify-center mx-auto mb-5 border border-gray-100">
+              <img src={deptLogo} alt="Logo" className="w-12 h-12 object-contain" />
+            </div>
+            <h1 className="text-[22px] font-black text-[#344767] tracking-tight">Who are you?</h1>
+            <p className="text-[13px] text-[#8392ab] mt-1">Enter your details to mark attendance</p>
+          </div>
+
+          {/* Identification card */}
+          <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(0,0,0,.08)] border border-gray-100">
+            <form onSubmit={handleIdentifySubmit} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-2">
+                  Index Number
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  required
+                  placeholder="e.g. 10892837"
+                  value={indexNumber}
+                  onChange={(e) => setIndexNumber(e.target.value)}
+                  className="sip-input w-full text-[16px] font-mono py-3.5"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="sip-input w-full text-[16px] py-3.5"
+                />
+              </div>
+
+              {/* Remember Me toggle */}
+              <div className="flex items-center justify-between py-1">
+                <span className="text-[13px] text-[#344767] font-medium">Remember Me</span>
+                <button
+                  type="button"
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${
+                    rememberMe ? 'bg-[#17c1e8]' : 'bg-gray-200'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      rememberMe ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                className="sip-btn-primary w-full py-4 text-[15px] mt-2"
+              >
+                Confirm Identity
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-[11px] text-[#8392ab]">{deptName}</p>
         </div>
-        
-        {/* Connection Status Badge */}
-        {!isOnline && (
-          <span className="bg-rose-500/15 border border-rose-500/20 px-2 py-0.5 rounded-full text-[9px] text-rose-400 font-extrabold uppercase animate-pulse">
-            ⚠️ Offline
-          </span>
-        )}
+      </div>
+    );
+  }
+
+  // ── MAIN APP SHELL (identified) ──
+  return (
+    <div className="min-h-screen bg-[#f8f9fa] flex flex-col max-w-[430px] mx-auto relative">
+
+      {/* ── STICKY TOP HEADER ── */}
+      <header className="bg-white sticky top-0 z-30 px-4 py-3 flex items-center justify-between border-b border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-[#f8f9fa] flex items-center justify-center">
+            <img src={deptLogo} alt="Logo" className="w-5 h-5 object-contain" />
+          </div>
+          <span className="text-[13px] font-bold text-[#344767] truncate max-w-[140px]">Attendance</span>
+        </div>
 
         <div className="flex items-center gap-3">
-          <NotificationPanel studentIndex={indexNumber} />
-          <div className="text-right">
-            <span className="block text-[10px] text-[#8392ab] uppercase font-semibold">Welcome</span>
-            <span className="text-xs font-bold text-[#344767]">Hi, {fullName.split(' ')[0]}</span>
+          {/* Online indicator */}
+          <div className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-rose-400 animate-pulse'}`} />
+            <span className={`text-[10px] font-semibold ${isOnline ? 'text-emerald-500' : 'text-rose-400'}`}>
+              {isOnline ? 'Online' : 'Offline'}
+            </span>
           </div>
+          <NotificationPanel studentIndex={indexNumber} />
         </div>
       </header>
 
-      {/* Main Tab Content */}
-      <main className="flex-1 p-4 pb-24 overflow-y-auto relative z-10">
-        
-        {/* TAB 1: HOME (Active Sessions) */}
+      {/* Welcome banner (when identified) */}
+      {isIdentified && (activeTab === 'home') && (
+        <div className="bg-gradient-to-r from-[#14172B] to-[#3A416F] px-5 py-4 animate-fade-in">
+          <p className="text-[11px] text-blue-200 font-medium">{getGreeting()},</p>
+          <p className="text-[16px] font-black text-white mt-0.5 truncate">{fullName.split(' ')[0]}</p>
+          <p className="text-[10px] text-blue-300 font-mono mt-0.5">{indexNumber}</p>
+        </div>
+      )}
+
+      {/* ── TAB CONTENT ── */}
+      <main className="flex-1 overflow-y-auto pb-20">
+
+        {/* ── HOME TAB ── */}
         {activeTab === 'home' && (
-          <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-black text-[#344767]">Active Sessions</h2>
+          <div className="p-4 space-y-4">
+
+            {/* Active sessions header */}
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] font-bold text-[#344767]">Active Sessions</p>
               <button
                 onClick={fetchActiveSessions}
                 disabled={loadingActive}
-                className="p-2 rounded-lg bg-gray-50 border border-gray-200 hover:bg-white text-[#8392ab] hover:text-[#344767] transition-colors"
-                title="Refresh sessions"
+                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#17c1e8] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingActive ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -350,155 +363,163 @@ const StudentPortal = () => {
               </button>
             </div>
 
-            {loadingActive ? (
-              <div className="space-y-4">
-                <div className="bg-white border border-gray-200 p-5 rounded-2xl space-y-4 animate-pulse">
-                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-                  <div className="h-10 bg-gray-200 rounded-xl"></div>
-                </div>
-              </div>
-            ) : activeSessions.length === 0 ? (
-              <div className="text-center py-16 px-4 flex flex-col items-center">
-                <svg className="w-16 h-16 text-[#8392ab] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 className="text-sm font-bold text-[#344767]">No active sessions right now</h3>
-                <p className="text-xs text-[#8392ab] mt-2 max-w-[240px]">Check back when your class rep opens a session</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {activeSessions.map((session) => (
-                  <div key={session.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-xl flex flex-col">
-                    {/* Top Type Indicator bar - Gold for physical, blue for online */}
-                    <div className={`h-1.5 ${session.sessionType === 'PHYSICAL' ? 'bg-gradient-to-br from-[#14172B] to-[#3A416F]' : 'bg-blue-500'}`} />
-                    
-                    <div className="p-5 flex-1 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider ${
-                          session.sessionType === 'PHYSICAL' ? 'bg-[#344767]/10 text-[#344767] border border-[#344767]/20' : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                        }`}>
-                          {session.sessionType === 'PHYSICAL' ? '📍 Physical' : '💻 Online'}
-                        </span>
-                        <span className="text-[10px] text-[#8392ab] font-medium">
-                          {getTimeDiffText(session.startTime)}
-                        </span>
-                      </div>
-
-                      <div>
-                        <h4 className="font-extrabold text-[#344767] text-base leading-snug">{session.courseName}</h4>
-                        <p className="text-xs font-mono text-[#8392ab] mt-1">{session.courseCode}</p>
-                      </div>
-                      
-                      <button
-                        onClick={() => handleStartCheckIn(session)}
-                        className="w-full mt-2 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 active:scale-[0.97] text-white font-extrabold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5"
-                      >
-                        Mark Attendance
-                      </button>
-                    </div>
-                  </div>
+            {/* Loading skeleton */}
+            {loadingActive && (
+              <div className="space-y-3">
+                {[1, 2].map(i => (
+                  <div key={i} className="skeleton h-36 rounded-2xl" />
                 ))}
               </div>
             )}
+
+            {/* Empty state */}
+            {!loadingActive && activeSessions.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-14 text-center animate-fade-in-up">
+                <div className="w-16 h-16 rounded-3xl bg-white border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,.08)] flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-[14px] font-bold text-[#344767]">No active sessions</p>
+                <p className="text-[12px] text-[#8392ab] mt-1 max-w-[220px]">Check back when your class rep opens a session</p>
+              </div>
+            )}
+
+            {/* Session cards */}
+            {!loadingActive && activeSessions.map((session, idx) => (
+              <div
+                key={session.id}
+                className="bg-white rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,.08)] hover-lift animate-fade-in-up"
+                style={{ animationDelay: `${idx * 80}ms` }}
+              >
+                {/* Type indicator bar */}
+                <div className={`h-1 ${session.sessionType === 'PHYSICAL' ? 'bg-gradient-to-r from-[#17c1e8] to-[#0ea5c9]' : 'bg-gradient-to-r from-[#cb0c9f] to-[#e91e8c]'}`} />
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`badge ${session.sessionType === 'PHYSICAL' ? 'badge-info' : 'badge-primary'}`}>
+                      {session.sessionType === 'PHYSICAL' ? 'Physical' : 'Online'}
+                    </span>
+                    <span className="text-[11px] text-[#8392ab]">{getTimeDiffText(session.startTime)}</span>
+                  </div>
+                  <div>
+                    <p className="text-[15px] font-extrabold text-[#344767] leading-snug">{session.courseName}</p>
+                    <p className="text-[11px] font-mono text-[#8392ab] mt-0.5">{session.courseCode}</p>
+                  </div>
+                  <button
+                    onClick={() => handleStartCheckIn(session)}
+                    className="sip-btn-primary w-full py-3.5 text-[13px] flex items-center justify-center gap-1.5"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Mark Attendance
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* TAB 2: HISTORY (My Attendance) */}
+        {/* ── HISTORY TAB ── */}
         {activeTab === 'history' && (
-          <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
-            <h2 className="text-lg font-black text-[#344767]">My Attendance</h2>
+          <div className="p-4 space-y-4 animate-fade-in">
 
-            {/* Horizontal Scrollable stats */}
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-              <div className="flex-shrink-0 bg-white border border-gray-200 p-3.5 rounded-xl text-center min-w-[80px]">
-                <span className="block text-lg font-bold text-[#344767] font-mono">{totalClasses}</span>
+            <p className="text-[14px] font-bold text-[#344767]">My Attendance</p>
+
+            {/* Stats row */}
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
+              <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <span className="block text-[18px] font-bold text-[#344767] font-mono">{totalClasses}</span>
                 <span className="text-[9px] text-[#8392ab] font-bold uppercase">Total</span>
               </div>
-              <div className="flex-shrink-0 bg-white border border-gray-200 p-3.5 rounded-xl text-center min-w-[80px]">
-                <span className="block text-lg font-bold text-[#344767] font-mono">{presentCount}</span>
+              <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <span className="block text-[18px] font-bold text-emerald-500 font-mono">{presentCount}</span>
                 <span className="text-[9px] text-[#8392ab] font-bold uppercase">Present</span>
               </div>
-              <div className="flex-shrink-0 bg-white border border-gray-200 p-3.5 rounded-xl text-center min-w-[80px]">
-                <span className="block text-lg font-bold text-amber-400 font-mono">{lateCount}</span>
+              <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <span className="block text-[18px] font-bold text-amber-500 font-mono">{lateCount}</span>
                 <span className="text-[9px] text-[#8392ab] font-bold uppercase">Late</span>
               </div>
-              <div className="flex-shrink-0 bg-white border border-gray-200 p-3.5 rounded-xl text-center min-w-[80px]">
-                <span className="block text-lg font-bold text-rose-400 font-mono">{absentCount}</span>
+              <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <span className="block text-[18px] font-bold text-rose-500 font-mono">{absentCount}</span>
                 <span className="text-[9px] text-[#8392ab] font-bold uppercase">Absent</span>
               </div>
-              
-              {/* Circular Progress Ring */}
-              <div className="flex-shrink-0 bg-white border border-gray-200 p-2 px-3 rounded-xl flex items-center gap-2">
+              {/* Progress ring */}
+              <div className="flex-shrink-0 bg-white rounded-2xl px-3 py-2 flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 <div className="relative w-11 h-11 flex items-center justify-center">
-                  <svg className="w-11 h-11 transform -rotate-90">
+                  <svg className="w-11 h-11 -rotate-90">
                     <circle cx="22" cy="22" r="18" stroke="#e2e8f0" strokeWidth="3" fill="transparent" />
-                    <circle cx="22" cy="22" r="18" stroke="#344767" strokeWidth="3" fill="transparent"
-                            strokeDasharray={113.1} strokeDashoffset={113.1 - (113.1 * attendanceRate) / 100} />
+                    <circle cx="22" cy="22" r="18" stroke="#17c1e8" strokeWidth="3" fill="transparent"
+                      strokeDasharray={113.1} strokeDashoffset={113.1 - (113.1 * attendanceRate) / 100} />
                   </svg>
                   <span className="absolute text-[9px] font-bold text-[#344767]">{attendanceRate}%</span>
                 </div>
-                <div className="leading-none">
+                <div>
                   <span className="block text-[8px] text-[#8392ab] font-bold uppercase">Rate</span>
-                  <span className="text-[10px] font-bold text-[#344767]">Standard</span>
                 </div>
               </div>
             </div>
 
-            {/* Filter Chips */}
+            {/* Filter chips */}
             <div className="flex gap-2">
               {['All', 'Present', 'Late', 'Absent'].map(chip => (
                 <button
                   key={chip}
                   onClick={() => setFilter(chip)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all border ${
-                    filter === chip
-                      ? 'bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white border-[#344767]'
-                      : 'bg-gray-50 text-[#8392ab] border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all
+                    ${filter === chip
+                      ? 'bg-[#17c1e8] text-white border-[#17c1e8]'
+                      : 'bg-white text-[#8392ab] border-gray-200 hover:border-[#17c1e8]'
+                    }`}
                 >
                   {chip}
                 </button>
               ))}
             </div>
 
+            {/* Records */}
             {loadingHistory ? (
-              <div className="space-y-4">
-                <div className="h-10 bg-white rounded-xl animate-pulse"></div>
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => <div key={i} className="skeleton h-24 rounded-2xl" />)}
               </div>
             ) : totalClasses === 0 ? (
-              <div className="text-center py-10 bg-white border border-dashed border-gray-200 rounded-xl text-xs text-[#8392ab]">
-                No attendance logs found.
+              <div className="flex flex-col items-center py-12 text-center bg-white rounded-2xl border border-dashed border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p className="text-[12px] font-semibold text-[#8392ab]">No attendance logs found.</p>
               </div>
             ) : Object.keys(groupedHistory).length === 0 ? (
-              <div className="text-center py-10 bg-white border border-dashed border-gray-200 rounded-xl text-xs text-[#8392ab]">
-                No logs matching filter selection.
+              <div className="py-10 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-[12px] text-[#8392ab] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                No logs match the selected filter.
               </div>
             ) : (
-              <div className="space-y-6">
-                {Object.keys(groupedHistory).map(code => (
-                  <div key={code} className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3">
-                    <div className="flex justify-between items-center border-b border-gray-200/60 pb-2">
-                      <h4 className="font-extrabold text-sm text-[#344767]">{groupedHistory[code].name}</h4>
-                      <span className="font-mono text-[10px] text-[#8392ab]">{code}</span>
+              <div className="space-y-4">
+                {Object.keys(groupedHistory).map((code, idx) => (
+                  <div
+                    key={code}
+                    className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.06)] animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-2.5 mb-3">
+                      <p className="text-[13px] font-bold text-[#344767]">{groupedHistory[code].name}</p>
+                      <span className="badge badge-dark font-mono">{code}</span>
                     </div>
-
                     <div className="space-y-2">
                       {groupedHistory[code].records.map(record => (
-                        <div key={record.id} className="flex justify-between items-center bg-gray-50 p-2.5 rounded-lg border border-gray-200/40 text-xs">
+                        <div key={record.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                           <div>
-                            <span className="text-[10px] text-[#8392ab]">
-                              {new Date(record.checkInTime || record.createdAt).toLocaleDateString()}
-                            </span>
-                            <span className="block text-[10px] text-[#8392ab] mt-0.5">
-                              {record.status === 'ABSENT' ? '-' : new Date(record.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                            <p className="text-[12px] font-semibold text-[#344767]">
+                              {new Date(record.checkInTime || record.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </p>
+                            <p className="text-[10px] text-[#8392ab] mt-0.5">
+                              {record.status === 'ABSENT' ? '—' : new Date(record.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
                           </div>
-
-                          <span className={`px-2 py-0.5 text-[10px] font-extrabold rounded ${
-                            record.status === 'PRESENT' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                            record.status === 'LATE' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                            'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          <span className={`badge ${
+                            record.status === 'PRESENT' ? 'badge-success' :
+                            record.status === 'LATE' ? 'badge-warning' :
+                            'badge-danger'
                           }`}>
                             {record.status}
                           </span>
@@ -512,15 +533,16 @@ const StudentPortal = () => {
           </div>
         )}
 
-        {/* TAB: SUPPORT */}
-        {activeTab === 'support' && (
-          <div className="space-y-5 animate-[fadeIn_0.2s_ease-out]">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-black text-[#344767]">Support Desk</h2>
+        {/* ── GRIEVANCES TAB ── */}
+        {activeTab === 'grievances' && (
+          <div className="p-4 space-y-4 animate-fade-in">
+
+            <div className="flex items-center justify-between">
+              <p className="text-[14px] font-bold text-[#344767]">My Grievances</p>
               <button
                 onClick={fetchStudentGrievances}
                 disabled={loadingGrievances}
-                className="p-2 rounded-lg bg-gray-50 border border-gray-200 hover:bg-white text-[#8392ab] hover:text-[#344767] transition-colors"
+                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#17c1e8] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingGrievances ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -528,24 +550,14 @@ const StudentPortal = () => {
               </button>
             </div>
 
-            <p className="text-xs text-[#8392ab] leading-relaxed">
-              Have issues checking in? Request attendance overrides for sickness/excusable absences, report system/GPS failures, or report academic dishonesty.
+            <p className="text-[12px] text-[#8392ab] leading-relaxed">
+              Report GPS failures, request attendance overrides for excusable absences, or flag academic dishonesty.
             </p>
 
             <button
               onClick={() => {
-                // Pre-calculate unique courses from student history
-                const codes = Array.from(new Set(history.map(h => h.session?.courseCode).filter(Boolean)));
-                const list = codes.map(code => {
-                  const match = history.find(h => h.session?.courseCode === code);
-                  return {
-                    code,
-                    name: match?.session?.course?.name || code
-                  };
-                });
-                // Initialize course selector if options exist
-                if (list.length > 0 && !grievanceCourse) {
-                  setGrievanceCourse(list[0].code);
+                if (uniqueCourses.length > 0 && !grievanceCourse) {
+                  setGrievanceCourse(uniqueCourses[0].code);
                 }
                 setShowGrievanceModal(true);
               }}
@@ -557,178 +569,213 @@ const StudentPortal = () => {
               Submit Support Case / Request
             </button>
 
-            {/* List of Student Support Tickets */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold text-[#8392ab] uppercase tracking-wide">My Grievances & Excuses</h3>
-              {loadingGrievances ? (
-                <div className="h-12 bg-white rounded-xl animate-pulse"></div>
-              ) : grievances.length === 0 ? (
-                <div className="text-center py-10 bg-white border border-dashed border-gray-200 rounded-xl text-xs text-[#8392ab]">
-                  No grievances or excused absence requests logged under your name.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {grievances.map((g) => (
-                    <div key={g.id} className="bg-white border border-gray-200 rounded-2xl p-4 space-y-3 shadow-md border-t-2 border-t-[#344767]/30">
-                      <div className="flex justify-between items-start">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase border ${
-                          g.type === 'ABSENCE_EXCUSE' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
-                          g.type === 'SYSTEM_ISSUE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                          g.type === 'INTEGRITY_REPORT' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                          'bg-slate-500/10 text-[#8392ab] border-slate-500/20'
-                        }`}>
-                          {g.type.replace('_', ' ')}
-                        </span>
-                        
-                        <span className={`px-2 py-0.5 text-[9px] font-extrabold rounded ${
-                          g.status === 'PENDING' ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/25' :
-                          g.status === 'RESOLVED' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25' :
-                          'bg-rose-500/15 text-rose-400 border border-rose-500/25'
-                        }`}>
-                          {g.status}
-                        </span>
-                      </div>
-
-                      <div>
-                        <h4 className="font-extrabold text-sm text-[#344767] leading-snug">{g.subject}</h4>
-                        {g.courseCode && <span className="text-[10px] font-mono text-[#344767]">{g.courseCode}</span>}
-                        <p className="text-xs text-[#344767] mt-2 whitespace-pre-wrap">{g.message}</p>
-                      </div>
-
-                      {g.evidenceUrl && (
-                        <div className="pt-2 border-t border-gray-200/40 flex justify-between items-center text-[10px]">
-                          <span className="text-[#8392ab]">Attachment:</span>
-                          <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer" className="text-[#344767] underline hover:text-[#b88a14]">
-                            View Evidence Document
-                          </a>
-                        </div>
-                      )}
-                      {g.adminResponse && (
-                        <div className="bg-gray-50 border border-gray-200/80 p-3 rounded-xl space-y-1.5">
-                          <span className="block text-[8px] text-[#344767] font-bold uppercase tracking-wider">Department Reply</span>
-                          <p className="text-xs text-[#344767] italic">"{g.adminResponse}"</p>
-                        </div>
-                      )}
-                      
-                      <div className="text-[9px] text-[#8392ab] text-right font-mono">
-                        Submitted: {new Date(g.createdAt).toLocaleString()}
-                      </div>
+            {/* Grievance list */}
+            {loadingGrievances ? (
+              <div className="space-y-3">
+                {[1, 2].map(i => <div key={i} className="skeleton h-28 rounded-2xl" />)}
+              </div>
+            ) : grievances.length === 0 ? (
+              <div className="flex flex-col items-center py-12 text-center bg-white rounded-2xl border border-dashed border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+                <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <p className="text-[12px] font-semibold text-[#8392ab]">No grievances logged yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {grievances.map((g, idx) => (
+                  <div
+                    key={g.id}
+                    className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.06)] animate-fade-in-up"
+                    style={{ animationDelay: `${idx * 60}ms` }}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className={`badge ${
+                        g.type === 'ABSENCE_EXCUSE' ? 'badge-info' :
+                        g.type === 'SYSTEM_ISSUE' ? 'badge-warning' :
+                        g.type === 'INTEGRITY_REPORT' ? 'badge-danger' :
+                        'badge-dark'
+                      }`}>
+                        {g.type.replace('_', ' ')}
+                      </span>
+                      <span className={`badge ${
+                        g.status === 'PENDING' ? 'badge-warning' :
+                        g.status === 'RESOLVED' ? 'badge-success' :
+                        'badge-danger'
+                      }`}>
+                        {g.status}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <p className="text-[13px] font-bold text-[#344767]">{g.subject}</p>
+                    {g.courseCode && <p className="text-[10px] font-mono text-[#8392ab] mt-0.5">{g.courseCode}</p>}
+                    <p className="text-[11px] text-[#8392ab] mt-2 leading-relaxed line-clamp-2">{g.message}</p>
+                    {g.adminResponse && (
+                      <div className="mt-3 bg-[#f8f9fa] rounded-xl p-3 border border-gray-100">
+                        <p className="text-[9px] font-bold text-[#344767] uppercase tracking-wider mb-1">Department Reply</p>
+                        <p className="text-[11px] text-[#344767] italic">"{g.adminResponse}"</p>
+                      </div>
+                    )}
+                    {g.evidenceUrl && (
+                      <div className="mt-2 flex justify-end">
+                        <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer"
+                          className="text-[10px] text-[#17c1e8] font-semibold hover:underline">
+                          View Evidence
+                        </a>
+                      </div>
+                    )}
+                    <p className="text-[9px] text-[#8392ab] mt-2 text-right font-mono">
+                      {new Date(g.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Spacer so FAB doesn't overlap last card */}
+            <div className="h-4" />
           </div>
         )}
 
-        {/* TAB 3: PROFILE */}
+        {/* ── PROFILE TAB ── */}
         {activeTab === 'profile' && (
-          <div className="space-y-6 text-center animate-[fadeIn_0.2s_ease-out]">
-            <h2 className="text-lg font-black text-[#344767] text-left">Student Profile</h2>
+          <div className="p-4 space-y-4 animate-fade-in">
 
-            {/* Avatar & Initials */}
-            <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-xl space-y-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white text-2xl font-black rounded-full flex items-center justify-center mx-auto shadow-lg shadow-[#344767]/10 border-4 border-white">
+            <p className="text-[14px] font-bold text-[#344767]">My Profile</p>
+
+            {/* Avatar card */}
+            <div className="bg-white rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,.08)] flex flex-col items-center text-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] text-white text-2xl font-black flex items-center justify-center shadow-lg shadow-[#17c1e8]/30 mb-3">
                 {getInitials(fullName)}
               </div>
-              <div>
-                <h3 className="text-lg font-extrabold text-[#344767]">{fullName}</h3>
-                <p className="text-xs text-[#8392ab] font-mono mt-1">Index: {indexNumber}</p>
-              </div>
+              <p className="text-[16px] font-extrabold text-[#344767]">{fullName}</p>
+              <p className="text-[12px] text-[#8392ab] font-mono mt-0.5">Index: {indexNumber}</p>
             </div>
 
-            {/* Statistics */}
-            <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-xl">
-              <h4 className="text-xs font-bold text-[#8392ab] uppercase tracking-wide mb-4">Summary Statistics</h4>
+            {/* Quick stats */}
+            <div className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
+              <p className="text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-4">Attendance Summary</p>
               <div className="grid grid-cols-3 gap-3">
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/80">
-                  <span className="block text-base font-bold text-[#344767] font-mono">{presentCount}</span>
+                <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
+                  <span className="block text-[18px] font-bold text-emerald-500 font-mono">{presentCount}</span>
                   <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Present</span>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/80">
-                  <span className="block text-base font-bold text-amber-400 font-mono">{lateCount}</span>
+                <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
+                  <span className="block text-[18px] font-bold text-amber-500 font-mono">{lateCount}</span>
                   <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Late</span>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-200/80">
-                  <span className="block text-base font-bold text-rose-400 font-mono">{absentCount}</span>
+                <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
+                  <span className="block text-[18px] font-bold text-rose-500 font-mono">{absentCount}</span>
                   <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Absent</span>
                 </div>
               </div>
+              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                <p className="text-[12px] text-[#8392ab]">Overall Attendance Rate</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${attendanceRate >= 75 ? 'bg-emerald-500' : attendanceRate >= 60 ? 'bg-amber-400' : 'bg-rose-500'}`}
+                      style={{ width: `${attendanceRate}%` }}
+                    />
+                  </div>
+                  <span className="text-[13px] font-bold text-[#344767]">{attendanceRate}%</span>
+                </div>
+              </div>
             </div>
 
-            {/* Operations */}
-            <div className="space-y-4">
+            {/* Actions */}
+            <div className="space-y-3">
               <button
                 onClick={handleClearData}
-                className="w-full py-4 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-sm font-extrabold rounded-xl transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-rose-50 hover:bg-rose-100 text-rose-500 border border-rose-200 text-[13px] font-bold rounded-xl transition-all flex items-center justify-center gap-2"
               >
-                Clear My Data & Logout
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out &amp; Clear Data
               </button>
-              
-              <div className="text-[10px] text-[#8392ab] font-mono pt-4">
-                Class Attendance System v1.0
-              </div>
+              <p className="text-center text-[10px] text-[#8392ab] font-mono">Class Attendance System v1.0</p>
             </div>
           </div>
         )}
-
       </main>
 
-      {/* Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-1/2 transform -translate-x-1/2 z-40 max-w-[430px] w-full bg-gray-50 backdrop-blur-md border-t border-gray-200 px-6 py-2 pb-safe flex justify-between items-center shadow-2xl">
-        <button
-          onClick={() => setActiveTab('home')}
-          className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
-            activeTab === 'home' ? 'text-[#344767] font-extrabold' : 'text-[#8392ab] font-medium'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span className="text-[10px] tracking-tight">Home</span>
-        </button>
+      {/* ── BOTTOM TAB NAVIGATION ── */}
+      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-[430px] w-full z-40 bg-white border-t border-gray-100 shadow-[0_-1px_4px_rgba(0,0,0,.07)]">
+        <div className="flex items-center">
+          {/* Home */}
+          <button
+            onClick={() => setActiveTab('home')}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
+              ${activeTab === 'home' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            <span className={`text-[10px] font-semibold ${activeTab === 'home' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Home</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
-            activeTab === 'history' ? 'text-[#344767] font-extrabold' : 'text-[#8392ab] font-medium'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-          </svg>
-          <span className="text-[10px] tracking-tight">History</span>
-        </button>
+          {/* History */}
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
+              ${activeTab === 'history' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className={`text-[10px] font-semibold ${activeTab === 'history' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>History</span>
+          </button>
 
-        <button
-          onClick={() => {
-            setActiveTab('support');
-            fetchStudentGrievances();
-          }}
-          className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
-            activeTab === 'support' ? 'text-[#344767] font-extrabold' : 'text-[#8392ab] font-medium'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-          <span className="text-[10px] tracking-tight">Support</span>
-        </button>
+          {/* Grievances */}
+          <button
+            onClick={() => { setActiveTab('grievances'); fetchStudentGrievances(); }}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
+              ${activeTab === 'grievances' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span className={`text-[10px] font-semibold ${activeTab === 'grievances' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Grievances</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-1.5 transition-colors py-1 flex-1 ${
-            activeTab === 'profile' ? 'text-[#344767] font-extrabold' : 'text-[#8392ab] font-medium'
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          <span className="text-[10px] tracking-tight">Profile</span>
-        </button>
+          {/* Profile */}
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
+              ${activeTab === 'profile' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className={`text-[10px] font-semibold ${activeTab === 'profile' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Profile</span>
+          </button>
+        </div>
       </nav>
 
-      {/* MARK ATTENDANCE BOTTOM SHEET MODAL */}
+      {/* ── GRIEVANCE FAB ── */}
+      {activeTab === 'grievances' && (
+        <button
+          onClick={() => {
+            const codes = Array.from(new Set(history.map(h => h.session?.courseCode).filter(Boolean)));
+            const list = codes.map(code => {
+              const match = history.find(h => h.session?.courseCode === code);
+              return { code, name: match?.session?.course?.name || code };
+            });
+            if (list.length > 0 && !grievanceCourse) {
+              setGrievanceCourse(list[0].code);
+            }
+            setShowGrievanceModal(true);
+          }}
+          className="fixed bottom-[72px] right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] text-white shadow-lg shadow-[#17c1e8]/30 flex items-center justify-center hover-lift transition-all animate-scale-in"
+          title="New Grievance"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+          </svg>
+        </button>
+      )}
+
+      {/* ── MARK ATTENDANCE BOTTOM SHEET ── */}
       {showBottomSheet && selectedSession && (
         <CheckInSheet
           session={selectedSession}
@@ -742,7 +789,7 @@ const StudentPortal = () => {
         />
       )}
 
-      {/* GRIEVANCE SUBMISSION MODAL */}
+      {/* ── GRIEVANCE MODAL ── */}
       {showGrievanceModal && (
         <GrievanceModal
           indexNumber={indexNumber}
@@ -753,7 +800,7 @@ const StudentPortal = () => {
         />
       )}
 
-      {/* Confirm Modal */}
+      {/* ── CONFIRM MODAL ── */}
       {confirmState.open && (
         <ConfirmModal
           message={confirmState.message}
@@ -762,15 +809,15 @@ const StudentPortal = () => {
         />
       )}
 
-      {/* Team Credit Footer */}
-      <div className="fixed bottom-4 right-4 z-10">
-        <p className="text-[#8392ab] text-xs bg-white backdrop-blur-sm px-3 py-1.5 rounded-full border border-gray-200">
-          Built with ❤️ by{' '}
+      {/* Credit footer */}
+      <div className="fixed bottom-[72px] left-4 z-10 pointer-events-none">
+        <p className="text-[#8392ab] text-[9px] font-mono">
+          Built by{' '}
           <a
             href="https://alphagroupofdevelopers.github.io"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#344767] hover:text-[#FFD700] font-semibold underline transition-colors"
+            className="text-[#344767] pointer-events-auto"
           >
             Alpha Group
           </a>

@@ -3,6 +3,68 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+/* ─── Icon helpers ────────────────────────────────────────────────────────── */
+const LockIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+  </svg>
+);
+const ChartIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10"/>
+    <line x1="12" y1="20" x2="12" y2="4"/>
+    <line x1="6"  y1="20" x2="6"  y2="14"/>
+  </svg>
+);
+const LightningIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </svg>
+);
+const UserIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+const KeyIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+  </svg>
+);
+const AlertIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/>
+    <line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+/* ─── Feature card data ───────────────────────────────────────────────────── */
+const FEATURES = [
+  {
+    icon: <LockIcon />,
+    title: 'Secure Login',
+    desc: 'Role-based access with encrypted credentials',
+    delay: 'delay-200',
+  },
+  {
+    icon: <ChartIcon />,
+    title: 'Real-time Attendance',
+    desc: 'Live session tracking across all courses',
+    delay: 'delay-300',
+  },
+  {
+    icon: <LightningIcon />,
+    title: 'Smart Analytics',
+    desc: 'Instant reports and attendance insights',
+    delay: 'delay-400',
+  },
+];
+
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -41,188 +103,267 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#f0f2f5', fontFamily: "'Open Sans', sans-serif" }}>
+    <div className="login-root">
 
-      {/* ── Hero banner ────────────────────────────────────────────────── */}
+      {/* ══════════════════════ LEFT PANEL ══════════════════════ */}
       <div
-        className="relative overflow-hidden flex items-center justify-center"
-        style={{
-          background: 'linear-gradient(310deg, #141727, #3A416F)',
-          minHeight: '280px',
-          borderRadius: '0 0 12px 12px',
-          margin: '0 0 -100px 0',
-        }}
+        className="login-left animate-slide-left"
+        style={{ background: 'linear-gradient(135deg, #141727 0%, #3A416F 100%)' }}
       >
-        {/* Watermark */}
-        <img
-          src="/logo2.png"
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none"
-          style={{ objectPosition: 'center' }}
+        {/* Decorative background blobs */}
+        <div
+          className="login-blob"
+          style={{
+            width: 340, height: 340,
+            background: 'rgba(255,255,255,0.05)',
+            top: -80, right: -80,
+          }}
         />
-        <div className="relative z-10 text-center px-6 pb-16">
-          <h1
-            style={{
-              fontSize: '48px',
-              fontWeight: 700,
+        <div
+          className="login-blob"
+          style={{
+            width: 200, height: 200,
+            background: 'rgba(255,255,255,0.07)',
+            bottom: 60, left: -60,
+          }}
+        />
+        <div
+          className="login-blob"
+          style={{
+            width: 120, height: 120,
+            background: 'rgba(203,12,159,0.10)',
+            bottom: 200, right: 40,
+          }}
+        />
+
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
+
+          {/* Logo */}
+          <div className="animate-fade-in-down" style={{ textAlign: 'center' }}>
+            <img
+              src="/logo2.png"
+              alt="GCTU Logo"
+              style={{ width: 72, height: 72, objectFit: 'contain', marginBottom: '1rem' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          </div>
+
+          {/* Heading */}
+          <div className="animate-fade-in-up" style={{ textAlign: 'center' }}>
+            <h1 style={{
+              fontSize: '28px',
+              fontWeight: 800,
               color: '#fff',
-              letterSpacing: '-0.8px',
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.5px',
               lineHeight: 1.2,
+              textShadow: '0 2px 16px rgba(0,0,0,.3)',
+            }}>
+              Welcome Back
+            </h1>
+            <p style={{
+              fontSize: '13px',
+              color: 'rgba(255,255,255,0.65)',
               margin: 0,
-              textShadow: '0 2px 12px rgba(0,0,0,.3)',
-            }}
-          >
-            Welcome!
-          </h1>
-          <p className="mt-3 text-slate-300 text-sm font-semibold tracking-wide">
-            GCTU Smart Attendance System
+              letterSpacing: '.3px',
+              fontWeight: 500,
+            }}>
+              GCTU Smart Attendance System
+            </p>
+          </div>
+
+          {/* Feature cards */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className={`login-feature-card animate-float ${f.delay}`}
+              >
+                <div className="login-feature-icon">{f.icon}</div>
+                <div className="login-feature-text">
+                  <h4>{f.title}</h4>
+                  <p>{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom caption */}
+          <p className="animate-fade-in delay-600" style={{
+            fontSize: '11px',
+            color: 'rgba(255,255,255,0.35)',
+            textAlign: 'center',
+            margin: 0,
+            letterSpacing: '.3px',
+          }}>
+            Ghana Communication Technology University
           </p>
         </div>
       </div>
 
-      {/* ── Login card ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col items-center px-4 pb-12">
-        <div
-          className="w-full max-w-md relative z-10"
-          style={{
-            background: '#fff',
-            borderRadius: '16px',
-            boxShadow: '0 20px 27px 0 rgba(0,0,0,.08)',
-            padding: '32px',
-          }}
-        >
-          {/* Logo + Name */}
-          <div className="text-center mb-8">
-            <img
-              src="/logo2.png"
-              alt="GCTU Crest"
-              className="mx-auto mb-4 object-contain"
-              style={{ width: '72px', height: '72px' }}
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <h5
-              style={{
-                fontSize: '20px',
-                fontWeight: 700,
-                color: 'rgb(52,71,103)',
-                margin: 0,
-              }}
-            >
-              Staff / Admin Sign In
-            </h5>
-            <p
-              style={{
-                fontSize: '13px',
-                color: 'rgb(131,146,171)',
-                marginTop: '4px',
-              }}
-            >
-              Ghana Communication Technology University
+      {/* ══════════════════════ RIGHT PANEL ══════════════════════ */}
+      <div className="login-right">
+
+        {/* Mobile compact header (only visible below 768px) */}
+        <div className="login-mobile-header" style={{ marginBottom: '1.5rem', width: '100%', maxWidth: 380 }}>
+          <img
+            src="/logo2.png"
+            alt="GCTU"
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+          <div>
+            <h2>GCTU Attendance</h2>
+            <p>Staff / Admin Sign In</p>
+          </div>
+        </div>
+
+        <div className="login-right-inner animate-fade-in-up">
+
+          {/* Heading */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: 800,
+              color: 'var(--sip-text-heading)',
+              margin: '0 0 6px 0',
+              letterSpacing: '-0.3px',
+            }}>
+              Sign In
+            </h2>
+            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
+              Staff &amp; Admin access — enter your credentials below
             </p>
           </div>
 
-          {/* Alerts */}
+          {/* Access denied alert */}
           {accessDenied && (
-            <div
-              className="mb-5 p-3 rounded-lg flex gap-2 items-center text-sm"
-              style={{ background: 'rgba(251,207,51,.1)', border: '1px solid rgba(251,207,51,.3)', color: '#b45309' }}
-            >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              </svg>
-              Access denied — insufficient permissions
+            <div className="sip-alert sip-alert-warning animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+              <AlertIcon />
+              <span>Access denied — insufficient permissions for that page.</span>
             </div>
           )}
+
+          {/* Error alert */}
           {errorMsg && (
-            <div
-              className="mb-5 p-3 rounded-lg flex gap-2 items-center text-sm"
-              style={{ background: 'rgba(234,6,6,.07)', border: '1px solid rgba(234,6,6,.2)', color: '#ea0606' }}
-            >
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              {errorMsg}
+            <div className="sip-alert sip-alert-error animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+              <AlertIcon />
+              <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+            {/* Username */}
             <div>
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                className="sip-input"
-              />
-            </div>
-            <div>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="sip-input"
-              />
+              <label className="sip-label" htmlFor="lp-username">Username</label>
+              <div className="sip-input-group">
+                <span className="sip-input-icon"><UserIcon /></span>
+                <input
+                  id="lp-username"
+                  type="text"
+                  required
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter your username"
+                  className="sip-input"
+                />
+              </div>
             </div>
 
-            <button type="submit" disabled={loading} className="sip-btn-dark flex items-center justify-center gap-2">
+            {/* Password */}
+            <div>
+              <label className="sip-label" htmlFor="lp-password">Password</label>
+              <div className="sip-input-group">
+                <span className="sip-input-icon"><KeyIcon /></span>
+                <input
+                  id="lp-password"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="sip-input"
+                />
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="sip-btn-dark"
+              style={{ marginTop: '0.4rem' }}
+            >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-              ) : (
-                'Sign In'
-              )}
+                <span
+                  style={{
+                    width: 16, height: 16,
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    borderTopColor: '#fff',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: 'spinSlow 0.7s linear infinite',
+                  }}
+                />
+              ) : 'Sign In'}
             </button>
           </form>
 
-          {/* Links */}
-          <div
-            className="mt-6 pt-5 text-center space-y-2"
-            style={{ borderTop: '1px solid #e9ecef' }}
-          >
-            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+          {/* Divider */}
+          <hr className="divider" style={{ margin: '1.5rem 0' }} />
+
+          {/* Footer links */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Are you a student?{' '}
               <button
                 onClick={() => navigate('/student-login')}
-                style={{ color: 'rgb(52,71,103)', fontWeight: 700 }}
-                className="hover:underline transition-all"
+                style={{
+                  background: 'none', border: 'none', padding: 0,
+                  color: 'var(--sip-text-heading)', fontWeight: 700,
+                  fontSize: '13px', cursor: 'pointer',
+                  transition: 'color 150ms ease',
+                }}
+                onMouseEnter={(e) => { e.target.style.color = 'var(--sip-primary)'; }}
+                onMouseLeave={(e) => { e.target.style.color = 'var(--sip-text-heading)'; }}
               >
                 Student Login
               </button>
             </p>
-            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Just checking in?{' '}
               <button
                 onClick={() => navigate('/student')}
-                style={{ color: 'rgb(52,71,103)', fontWeight: 700 }}
-                className="hover:underline transition-all"
+                style={{
+                  background: 'none', border: 'none', padding: 0,
+                  color: 'var(--sip-text-heading)', fontWeight: 700,
+                  fontSize: '13px', cursor: 'pointer',
+                  transition: 'color 150ms ease',
+                }}
+                onMouseEnter={(e) => { e.target.style.color = 'var(--sip-primary)'; }}
+                onMouseLeave={(e) => { e.target.style.color = 'var(--sip-text-heading)'; }}
               >
                 Go to Check-In Portal
               </button>
             </p>
           </div>
+
+          {/* Copyright */}
+          <p style={{
+            fontSize: '11px',
+            color: 'var(--sip-text-footer)',
+            textAlign: 'center',
+            marginTop: '2rem',
+            opacity: 0.7,
+          }}>
+            &copy; {new Date().getFullYear()} Software Unit | Msquare | GCTU
+          </p>
         </div>
       </div>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="text-center pb-6 px-4">
-        <nav className="flex flex-wrap justify-center gap-4 mb-2">
-          {['GCTU', 'Learning Platform', 'Library', 'Programmes'].map((l) => (
-            <span
-              key={l}
-              style={{ fontSize: '14px', color: 'rgb(131,146,171)', cursor: 'default' }}
-            >
-              {l}
-            </span>
-          ))}
-        </nav>
-        <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
-          Copyright © {new Date().getFullYear()} Software Unit | Msquare | GCTU.
-        </p>
-      </footer>
     </div>
   );
 };

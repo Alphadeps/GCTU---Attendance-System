@@ -3,60 +3,76 @@ import React from 'react';
 const AttendanceTable = ({ attendances }) => {
   const formatTime = (timeString) => {
     if (!timeString) return 'N/A';
-    const date = new Date(timeString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
 
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'PRESENT':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Present</span>;
-      case 'LATE':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Late</span>;
-      case 'ABSENT':
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">Absent</span>;
-      default:
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-500/10 text-[#8392ab] border border-slate-500/20">{status}</span>;
-    }
+    const map = {
+      PRESENT: 'badge badge-success',
+      LATE:    'badge badge-warning',
+      ABSENT:  'badge badge-danger',
+    };
+    const labels = { PRESENT: 'Present', LATE: 'Late', ABSENT: 'Absent' };
+    return (
+      <span className={map[status] || 'badge badge-dark'}>
+        {labels[status] || status}
+      </span>
+    );
   };
 
   if (!attendances || attendances.length === 0) {
     return (
-      <div className="text-center py-8 text-[#8392ab] bg-gray-100/50 rounded-xl border border-slate-800/80">
-        No attendance records found.
+      <div className="flex flex-col items-center justify-center py-14 text-center animate-fade-in">
+        <div className="w-14 h-14 rounded-2xl bg-[#f0f2f5] flex items-center justify-center mb-4">
+          <svg className="w-7 h-7 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <p className="text-sm font-semibold text-[#344767]">No records yet</p>
+        <p className="text-xs text-[#8392ab] mt-1">Students will appear here as they check in</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-gray-100/40 backdrop-blur-md shadow-lg">
-      <table className="w-full text-left border-collapse min-w-[600px]">
+    <div className="overflow-x-auto animate-fade-in-up">
+      <table className="sip-table min-w-[560px]">
         <thead>
-          <tr className="border-b border-slate-800 bg-slate-950/40 text-[#344767] text-sm font-semibold">
-            <th className="p-4">Name</th>
-            <th className="p-4">Index Number</th>
-            <th className="p-4">Status</th>
-            <th className="p-4">Check-in Time</th>
-            <th className="p-4 hidden md:table-cell font-normal text-[#8392ab]">Device</th>
+          <tr>
+            <th style={{ paddingLeft: '16px' }}>#</th>
+            <th>Student</th>
+            <th>Index No.</th>
+            <th>Status</th>
+            <th>Check-in Time</th>
+            <th className="hidden md:table-cell">Device</th>
           </tr>
         </thead>
-        <tbody className="text-[#344767] divide-y divide-slate-800/60">
-          {attendances.map((att) => (
-            <tr key={att.id} className="hover:bg-gray-200/20 transition-colors text-sm">
-              <td className="p-4 font-medium text-[#344767]">
-                {att.student?.name || 'Unknown Student'}
+        <tbody>
+          {attendances.map((att, i) => (
+            <tr key={att.id}>
+              <td className="text-xs text-[#8392ab] pl-4">{i + 1}</td>
+              <td>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0"
+                    style={{ background: att.status === 'ABSENT' ? '#ea0606' : att.status === 'LATE' ? '#fbcf33' : 'linear-gradient(135deg,#11cdef,#1171ef)' }}
+                  >
+                    {(att.student?.name || 'S').charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-[13px] font-semibold text-[#344767]">{att.student?.name || 'Unknown'}</span>
+                </div>
               </td>
-              <td className="p-4 font-mono text-[#8392ab]">
-                {att.student?.indexNumber || 'N/A'}
+              <td>
+                <span className="font-mono text-[11px] text-[#8392ab] bg-[#f0f2f5] px-2 py-0.5 rounded">
+                  {att.student?.indexNumber || 'N/A'}
+                </span>
               </td>
-              <td className="p-4">
-                {getStatusBadge(att.status)}
+              <td>{getStatusBadge(att.status)}</td>
+              <td className="text-[12px] text-[#8392ab]">
+                {att.status === 'ABSENT' ? '—' : formatTime(att.checkInTime)}
               </td>
-              <td className="p-4 text-[#8392ab]">
-                {att.status === 'ABSENT' ? '-' : formatTime(att.checkInTime)}
-              </td>
-              <td className="p-4 text-[#8392ab] text-xs hidden md:table-cell truncate max-w-[150px]" title={att.deviceInfo}>
-                {att.deviceInfo}
+              <td className="hidden md:table-cell text-[11px] text-[#8392ab] max-w-[140px] truncate" title={att.deviceInfo}>
+                {att.deviceInfo || '—'}
               </td>
             </tr>
           ))}

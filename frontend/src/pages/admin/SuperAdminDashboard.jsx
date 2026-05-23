@@ -186,6 +186,9 @@ export default function SuperAdminDashboard() {
   // Logo input ref
   const logoInputRef = useRef(null);
 
+  // Mobile sidebar toggle
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   // Confirm modal state
   const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
 
@@ -1033,66 +1036,57 @@ export default function SuperAdminDashboard() {
     return Object.values(groups);
   };
 
+  // Active tab label for breadcrumb
+  const getActiveTabLabel = () => {
+    for (const group of MENU_GROUPS) {
+      const item = group.items.find(i => i.id === activeTab);
+      if (item) return item.label;
+    }
+    return activeTab;
+  };
+
+  const attendanceChartData = [72, 85, 68, 91, 77, 83];
+  const attendanceChartLabels = ['Lvl 100', 'Lvl 200', 'Lvl 300', 'Lvl 400', 'Top-Up', 'Evening'];
+  const maxBar = Math.max(...attendanceChartData);
+
   return (
-    <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex font-sans antialiased relative">
+    <div className="min-h-screen bg-[#f8f9fa] text-[#344767] flex font-sans antialiased relative">
       {/* 0. FORCE PASSWORD CHANGE OVERLAY */}
       {needsPasswordChange && (
-        <div className="fixed inset-0 bg-gray-50/95 z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 bg-white/95 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full animate-fade-in-up" style={{boxShadow:'0 25px 50px -12px rgba(0,0,0,.18)'}}>
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="h-16 w-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
-                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <div className="h-14 w-14 rounded-xl flex items-center justify-center mb-4" style={{background:'linear-gradient(135deg,#f5365c,#cb0c9f)'}}>
+                <svg className="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-[#344767] mb-2">Change Default Password</h2>
-              <p className="text-[#8392ab] text-sm">
-                For security reasons, you must change the default password (<code className="bg-[#f0f2f5] px-1.5 py-0.5 rounded text-red-400">admin123</code>) on your first login.
+              <h2 className="text-xl font-bold text-[#344767] mb-2">Change Default Password</h2>
+              <p className="text-[#8392ab] text-sm leading-relaxed">
+                For security, you must change the default password (<code className="bg-[#f8f9fa] px-1.5 py-0.5 rounded text-red-500 font-mono text-xs">admin123</code>) before continuing.
               </p>
             </div>
-
             <form onSubmit={handleForcePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Current Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Enter your current password"
-                  value={pwdChangeForm.currentPassword}
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Current Password</label>
+                <input type="password" required placeholder="Enter current password" value={pwdChangeForm.currentPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, currentPassword: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
-                />
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">New Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Minimum 6 characters"
-                  value={pwdChangeForm.newPassword}
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">New Password</label>
+                <input type="password" required placeholder="Minimum 6 characters" value={pwdChangeForm.newPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, newPassword: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
-                />
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
-
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Confirm New Password</label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Repeat new password"
-                  value={pwdChangeForm.confirmPassword}
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Confirm New Password</label>
+                <input type="password" required placeholder="Repeat new password" value={pwdChangeForm.confirmPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, confirmPassword: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
-                />
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-red-600 to-indigo-600 text-[#344767] font-bold py-3.5 px-4 rounded-xl shadow-lg hover:from-red-500 hover:to-indigo-500 active:scale-95 transition-transform"
-              >
-                Change Password & Access System
+              <button type="submit" className="sip-btn-dark">
+                Change Password &amp; Access System
               </button>
             </form>
           </div>
@@ -1101,218 +1095,330 @@ export default function SuperAdminDashboard() {
 
       {/* Global alert notification */}
       {message.text && (
-        <div className={`fixed top-6 right-6 z-[9999] px-5 py-3.5 rounded-xl shadow-2xl flex items-center space-x-3 border animate-fade-in backdrop-blur-sm ${
-          message.type === 'error' ? 'bg-red-500/90 text-white border-red-600' : 
-          message.type === 'info' ? 'bg-blue-500/90 text-white border-blue-600' :
-          'bg-green-500/90 text-white border-green-600'
+        <div className={`fixed top-5 right-5 z-[9999] px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-fade-in-down backdrop-blur-sm text-white text-sm font-semibold ${
+          message.type === 'error' ? 'bg-red-500' :
+          message.type === 'info' ? 'bg-blue-500' : 'bg-emerald-500'
         }`}>
-          <span className="font-medium text-sm">{message.text}</span>
+          <span className="w-2 h-2 rounded-full bg-white/60 flex-shrink-0"></span>
+          {message.text}
         </div>
       )}
 
+      {/* Mobile sidebar overlay */}
+      {mobileSidebarOpen && (
+        <div className="sidebar-overlay lg:hidden" onClick={() => setMobileSidebarOpen(false)} />
+      )}
+
       {/* 1. LEFT SIDEBAR */}
-      <aside className="w-[260px] bg-white border-r border-gray-200 flex flex-col shrink-0 h-screen sticky top-0">
-        {/* Header / Brand */}
-        <div className="p-6 border-b border-gray-200 flex items-center space-x-3">
+      <aside className={`w-[260px] bg-white flex flex-col h-screen fixed left-0 top-0 z-50 transition-transform duration-300
+        ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:sticky lg:top-0`}
+        style={{boxShadow:'2px 0 20px rgba(0,0,0,.05)'}}>
+
+        {/* Brand */}
+        <div className="px-5 py-5 flex items-center gap-3 border-b border-[#f0f2f5]">
           <img
             src={logoPreview || '/logo.jfif'}
-            alt="Dept Logo"
+            alt="Logo"
             onError={(e) => { e.target.src = '/logo.jfif'; }}
-            className="w-10 h-10 rounded-xl object-cover border border-gray-300 bg-white"
+            className="w-9 h-9 rounded-xl object-cover flex-shrink-0"
           />
-          <div className="overflow-hidden">
-            <h1 className="font-bold text-sm leading-tight text-[#344767] truncate">{settings.deptName}</h1>
-            <span className="text-[10px] text-[#8392ab] font-bold uppercase tracking-wider">Super Admin</span>
+          <div className="min-w-0">
+            <h1 className="font-bold leading-tight text-[#344767] truncate" style={{fontSize:13}}>GCTU Attendance</h1>
+            <span className="text-[9px] text-[#adb5bd] font-bold uppercase tracking-widest">Super Admin Panel</span>
           </div>
+          <button className="ml-auto lg:hidden text-[#adb5bd] hover:text-[#344767]" onClick={() => setMobileSidebarOpen(false)}>
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* Navigation items */}
-        <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
           {MENU_GROUPS.map((group, groupIdx) => (
-            <div key={groupIdx} className="space-y-1">
-              <span className="px-3 text-[10px] font-black text-[#8392ab] uppercase tracking-widest block mb-2">
+            <div key={groupIdx}>
+              <span className="px-3 block mb-1.5" style={{fontSize:9,fontWeight:700,letterSpacing:'0.1em',textTransform:'uppercase',color:'#adb5bd'}}>
                 {group.title}
               </span>
-              {group.items.map(item => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3.5 px-4 py-2.5 rounded-xl font-semibold text-[13px] transition-all duration-200 ${
-                    activeTab === item.id
-                      ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white shadow-lg shadow-indigo-500/10'
-                      : 'text-[#8392ab] hover:bg-gray-100 hover:text-[#344767]'
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                  </svg>
-                  <span>{item.label}</span>
-                </button>
-              ))}
+              <div className="space-y-0.5">
+                {group.items.map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => { setActiveTab(item.id); setMobileSidebarOpen(false); }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150 ${
+                      activeTab === item.id
+                        ? 'text-white shadow-md'
+                        : 'text-[#67748e] hover:bg-[#f8f9fa] hover:text-[#344767]'
+                    }`}
+                    style={activeTab === item.id ? {background:'linear-gradient(135deg, #344767, #3A416F)', boxShadow:'0 4px 12px rgba(52,71,103,.35)'} : {}}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d={item.icon} />
+                    </svg>
+                    <span style={{fontSize:12,fontWeight:600}}>{item.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </nav>
 
-        {/* Footer info & Logout */}
-        <div className="p-4 border-t border-gray-200 space-y-3">
-          <div className="flex items-center justify-between px-2">
-            <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 bg-gray-200 rounded-full flex items-center justify-center text-[#8392ab] font-bold border border-gray-300">
-                SA
-              </div>
-              <div className="overflow-hidden">
-                <p className="text-xs font-semibold text-[#344767] truncate">Administrator</p>
-                <span className="text-[10px] text-[#8392ab]">superadmin</span>
-              </div>
+        {/* User footer */}
+        <div className="p-3 border-t border-[#f0f2f5] space-y-2">
+          <div className="flex items-center gap-3 px-2 py-1">
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+              style={{background:'linear-gradient(135deg, #11cdef, #1171ef)'}}>SA</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold text-[#344767] truncate">Administrator</p>
+              <span className="text-[10px] text-[#adb5bd]">superadmin</span>
             </div>
             <NotificationPanel />
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-2 px-4 py-2.5 rounded-xl border border-gray-200 text-[#8392ab] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition-all text-xs font-semibold"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[#8392ab] hover:text-rose-600 hover:bg-rose-50 transition-all text-xs font-semibold"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Log Out</span>
+            Log Out
           </button>
         </div>
       </aside>
 
       {/* 2. MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#f0f2f5]">
-        {/* Header */}
-        <header className="h-[76px] border-b border-gray-200 px-8 flex items-center justify-between shrink-0 bg-white shadow-sm">
-          <h2 className="text-lg font-bold text-[#344767] capitalize">{activeTab.replace('-', ' ')}</h2>
-          <div className="flex items-center space-x-4">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#f8f9fa] lg:ml-[260px]">
+
+        {/* Sticky Header */}
+        <header className="sticky top-0 z-30 bg-white px-6 h-[68px] flex items-center justify-between shrink-0"
+          style={{boxShadow:'0 2px 12px rgba(0,0,0,.06)'}}>
+          <div className="flex items-center gap-3">
+            {/* Hamburger - mobile only */}
+            <button
+              className="lg:hidden p-2 rounded-lg text-[#8392ab] hover:bg-[#f8f9fa] transition-colors"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div>
+              <p className="text-[10px] text-[#adb5bd] font-medium">Dashboard &rsaquo; <span className="text-[#344767] font-semibold">{getActiveTabLabel()}</span></p>
+              <h2 className="font-bold text-[#344767] leading-tight" style={{fontSize:15}}>{getActiveTabLabel()}</h2>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Visual search bar */}
+            <div className="hidden md:flex items-center gap-2 bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2 w-48">
+              <svg className="w-4 h-4 text-[#adb5bd] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <span className="text-xs text-[#adb5bd]">Search...</span>
+            </div>
+
+            {/* System status indicator */}
+            <div className="flex items-center gap-2 bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+              <span className="text-xs font-semibold text-[#344767] hidden sm:block">Live</span>
+            </div>
+
+            {/* Help button */}
             <button
               onClick={() => setShowOnboarding(true)}
-              className="p-2 text-[#8392ab] hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all border border-transparent hover:border-indigo-500/20"
+              className="p-2 rounded-xl text-[#8392ab] hover:bg-[#f8f9fa] hover:text-[#344767] transition-colors border border-transparent hover:border-[#e9ecef]"
               title="Show setup guide"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
-            <span className="bg-white border border-gray-300 px-3 py-1 rounded-full text-xs text-indigo-400 font-semibold flex items-center space-x-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>System Live</span>
-            </span>
+
+            {/* User avatar */}
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 cursor-pointer"
+              style={{background:'linear-gradient(135deg, #344767, #3A416F)'}}>SA</div>
           </div>
         </header>
 
         {/* Tab panels */}
-        <div className="flex-1 p-8 overflow-y-auto">
+        <div className="flex-1 p-5 md:p-7 overflow-y-auto">
           {loading && (
-            <div className="flex items-center justify-center p-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500"></div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="skeleton h-28 rounded-2xl" />
+              ))}
             </div>
           )}
 
           {/* OVERVIEW PANEL */}
           {activeTab === 'overview' && !loading && (
-            <div className="space-y-8 animate-fade-in">
-              {/* Stats Row */}
-              <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
-                {[
-                  { label: 'Programmes', value: stats.programmesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
-                  { label: 'Classes', value: stats.classesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
-                  { label: 'Total Students', value: stats.studentsCount, bg: 'border-gray-200', text: 'text-[#344767]' },
-                  { label: 'Class Reps', value: stats.repsCount, bg: 'border-gray-200', text: 'text-[#344767]' },
-                  { label: 'Global Courses', value: stats.coursesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
-                  { label: 'Active Sessions', value: stats.activeSessionsCount, bg: 'border-indigo-500/20 bg-indigo-500/5', text: 'text-indigo-400' },
-                ].map((stat, i) => (
-                  <div key={i} className={`bg-white border rounded-2xl p-5 shadow-sm hover:scale-[1.02] transition-transform ${stat.bg}`}>
-                    <span className="text-[#8392ab] text-xs font-semibold block mb-1">{stat.label}</span>
-                    <span className={`text-2xl font-black ${stat.text}`}>{stat.value}</span>
+            <div className="space-y-6 animate-fade-in-up">
+
+              {/* TOP ROW - 4 Stat Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Card 1 - teal gradient */}
+                <div className="stat-card-teal p-5 hover-lift animate-fade-in-up">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
                   </div>
-                ))}
+                  <p className="text-4xl font-black text-white animate-number-pop">{stats.studentsCount}</p>
+                  <p className="text-sm font-semibold text-white/90 mt-1">Total Students</p>
+                  <p className="text-xs text-white/60 mt-0.5">Enrolled across all classes</p>
+                </div>
+
+                {/* Card 2 - white, pink accent */}
+                <div className="sip-card p-5 hover-lift animate-fade-in-up delay-100">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 rounded-lg" style={{background:'rgba(245,54,92,.1)'}}>
+                      <svg className="w-5 h-5" style={{color:'#f5365c'}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-4xl font-black text-[#344767] animate-number-pop delay-100">{stats.classesCount}</p>
+                  <p className="text-sm font-semibold text-[#344767] mt-1">Active Classes</p>
+                  <p className="text-xs text-[#8392ab] mt-0.5">{stats.programmesCount} programme{stats.programmesCount !== 1 ? 's' : ''}</p>
+                </div>
+
+                {/* Card 3 - white, green accent */}
+                <div className="sip-card p-5 hover-lift animate-fade-in-up delay-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 rounded-lg" style={{background:'rgba(130,214,22,.1)'}}>
+                      <svg className="w-5 h-5" style={{color:'#4a7c10'}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <p className="text-4xl font-black text-[#344767] animate-number-pop delay-200">{stats.repsCount}</p>
+                  <p className="text-sm font-semibold text-[#344767] mt-1">Class Reps</p>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Managing attendance</p>
+                </div>
+
+                {/* Card 4 - white, amber accent + pulse if active */}
+                <div className="sip-card p-5 hover-lift animate-fade-in-up delay-300">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 rounded-lg" style={{background:'rgba(251,207,51,.15)'}}>
+                      <svg className="w-5 h-5" style={{color:'#9a6f00'}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    {stats.activeSessionsCount > 0 && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Live
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-4xl font-black text-[#344767] animate-number-pop delay-300">{stats.activeSessionsCount}</p>
+                  <p className="text-sm font-semibold text-[#344767] mt-1">Live Sessions</p>
+                  <p className="text-xs text-[#8392ab] mt-0.5">{stats.activeSessionsCount > 0 ? 'Sessions in progress' : 'No active sessions'}</p>
+                </div>
               </div>
 
-              {/* Main Overview Split */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Quick Actions */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                  <h3 className="font-bold text-[#344767] text-base">Quick Actions</h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    <button
-                      onClick={() => setShowProgModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="h-9 w-9 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center font-bold">+</span>
-                        <div>
-                          <p className="text-xs font-bold text-[#344767]">Add Programme</p>
-                          <p className="text-[10px] text-[#8392ab]">Insert new academic course path</p>
-                        </div>
-                      </div>
-                      <span className="text-[#8392ab] group-hover:text-indigo-400 transition-colors">→</span>
-                    </button>
+              {/* SECOND ROW */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-                    <button
-                      onClick={() => setShowClassModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="h-9 w-9 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center font-bold">🏫</span>
-                        <div>
-                          <p className="text-xs font-bold text-[#344767]">Create Classes</p>
-                          <p className="text-[10px] text-[#8392ab]">Initialize new course groups (A-K)</p>
-                        </div>
-                      </div>
-                      <span className="text-[#8392ab] group-hover:text-emerald-400 transition-colors">→</span>
-                    </button>
+                {/* Attendance Performance Chart (2/3 width) */}
+                <div className="lg:col-span-2 sip-card p-6 animate-fade-in-up delay-200">
+                  <div className="flex items-center justify-between mb-5">
+                    <div>
+                      <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Attendance Performance</h3>
+                      <p className="text-xs text-[#8392ab] mt-0.5">Rate by level grouping</p>
+                    </div>
+                    <span className="badge badge-info">This Semester</span>
+                  </div>
 
-                    <button
-                      onClick={() => setShowRepModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="h-9 w-9 bg-rose-500/10 text-rose-400 rounded-lg flex items-center justify-center font-bold">👤</span>
-                        <div>
-                          <p className="text-xs font-bold text-[#344767]">Create Class Rep</p>
-                          <p className="text-[10px] text-[#8392ab]">Provision representative credentials</p>
-                        </div>
+                  {/* CSS bar chart */}
+                  <div className="flex items-end gap-3 h-36 overflow-x-auto pb-1">
+                    {attendanceChartData.map((val, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1 flex-1 min-w-[36px]">
+                        <span className="text-[10px] font-bold" style={{color: val === maxBar ? '#cb0c9f' : '#344767'}}>{val}%</span>
+                        <div className="w-full rounded-t-lg transition-all duration-700"
+                          style={{
+                            height: `${Math.round((val / maxBar) * 100)}%`,
+                            background: val === maxBar ? 'linear-gradient(135deg,#f5365c,#cb0c9f)' : 'linear-gradient(135deg,#11cdef,#1171ef)',
+                            minHeight: 8,
+                            animation: `growBar 0.8s calc(${i}*0.1s) ease both`,
+                            '--bar-h': `${Math.round((val / maxBar) * 100)}%`,
+                          }} />
+                        <span className="text-[9px] text-[#8392ab] font-medium text-center whitespace-nowrap">{attendanceChartLabels[i]}</span>
                       </div>
-                      <span className="text-[#8392ab] group-hover:text-rose-400 transition-colors">→</span>
-                    </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* System Threshold Summary */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                  <h3 className="font-bold text-[#344767] text-base">Threshold Settings</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                      <div>
-                        <p className="text-xs font-bold text-[#344767]">Late Grace Period</p>
-                        <p className="text-[10px] text-[#8392ab]">Marker status thresholds</p>
-                      </div>
-                      <span className="bg-[#f0f2f5] text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
-                        {settings.lateWindowMinutes} Mins
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
-                      <div>
-                        <p className="text-xs font-bold text-[#344767]">QR Expiry</p>
-                        <p className="text-[10px] text-[#8392ab]">Dynamic refresh frequency</p>
-                      </div>
-                      <span className="bg-[#f0f2f5] text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
-                        {settings.qrExpirySeconds} Secs
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-xs font-bold text-[#344767]">Geofence Boundary</p>
-                        <p className="text-[10px] text-[#8392ab]">Check-in location range</p>
-                      </div>
-                      <span className="bg-[#f0f2f5] text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
-                        {settings.geofenceRadiusMeters} Meters
-                      </span>
-                    </div>
+                {/* Quick Actions (1/3 width) */}
+                <div className="sip-card p-5 animate-fade-in-up delay-300">
+                  <h3 className="font-bold text-[#344767] mb-4" style={{fontSize:14}}>Quick Actions</h3>
+                  <div className="divide-y divide-[#f0f2f5]">
+                    {[
+                      {
+                        label: 'Add Programme', sub: 'New academic path',
+                        icon: 'M12 6v6m0 0v6m0-6h6m-6 0H6',
+                        color: '#11cdef', bg: 'rgba(17,205,239,.1)',
+                        action: () => setShowProgModal(true)
+                      },
+                      {
+                        label: 'Create Classes', sub: 'Initialize groups A-K',
+                        icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+                        color: '#82d616', bg: 'rgba(130,214,22,.1)',
+                        action: () => setShowClassModal(true)
+                      },
+                      {
+                        label: 'Create Rep', sub: 'Provision credentials',
+                        icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+                        color: '#f5365c', bg: 'rgba(245,54,92,.1)',
+                        action: () => setShowRepModal(true)
+                      },
+                      {
+                        label: 'Add Course', sub: 'Register global course',
+                        icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+                        color: '#cb0c9f', bg: 'rgba(203,12,159,.1)',
+                        action: () => setShowCourseModal(true)
+                      },
+                    ].map((item, i) => (
+                      <button key={i} onClick={item.action}
+                        className="w-full flex items-center gap-3 py-3 hover:bg-[#f8f9fa] rounded-lg px-1 transition-colors group text-left">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{background:item.bg}}>
+                          <svg className="w-4 h-4" style={{color:item.color}} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-[#344767]">{item.label}</p>
+                          <p className="text-[10px] text-[#8392ab]">{item.sub}</p>
+                        </div>
+                        <svg className="w-4 h-4 text-[#adb5bd] group-hover:text-[#344767] transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    ))}
                   </div>
+                </div>
+              </div>
+
+              {/* System thresholds summary row */}
+              <div className="sip-card p-5 animate-fade-in-up delay-400">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:13}}>System Thresholds</h3>
+                  <button onClick={() => setActiveTab('settings')} className="text-xs text-[#17c1e8] font-semibold hover:underline">Configure</button>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    {label:'Late Grace Period', val:`${settings.lateWindowMinutes} min`, color:'#fbcf33'},
+                    {label:'QR Expiry', val:`${settings.qrExpirySeconds} sec`, color:'#17c1e8'},
+                    {label:'Geofence Radius', val:`${settings.geofenceRadiusMeters} m`, color:'#82d616'},
+                  ].map((t,i) => (
+                    <div key={i} className="bg-[#f8f9fa] rounded-xl p-3.5">
+                      <p className="text-[10px] text-[#8392ab] font-medium mb-1">{t.label}</p>
+                      <p className="text-lg font-black" style={{color:t.color}}>{t.val}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -1320,69 +1426,67 @@ export default function SuperAdminDashboard() {
 
           {/* PROGRAMMES PANEL */}
           {activeTab === 'programmes' && !loading && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center">
+            <div className="sip-card p-6 space-y-5 animate-fade-in-up">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Academic Programmes</h3>
-                  <p className="text-xs text-[#8392ab]">Manage course pipelines that drive student enrollment</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Academic Programmes</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Manage course pipelines that drive student enrollment</p>
                 </div>
                 <div className="flex gap-2">
                   {programmes.length > 3 && (
                     <button
                       onClick={handleCleanupDuplicateProgrammes}
-                      className="bg-amber-600 hover:bg-amber-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
-                      title="Merge duplicate programme names into official programmes"
+                      className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold px-4 py-2 rounded-xl hover:bg-amber-100 transition active:scale-95"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
-                      <span>Cleanup Duplicates</span>
+                      Cleanup Duplicates
                     </button>
                   )}
                   <button
                     onClick={() => setShowProgModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
+                    className="sip-btn-dark !w-auto px-4 py-2 text-xs"
                   >
-                    <span>+ Add Programme</span>
+                    + Add Programme
                   </button>
                 </div>
               </div>
 
               {programmes.length === 0 ? (
-                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
-                  No academic programmes configured. Click Add Programme to get started.
+                <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                  <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                  </svg>
+                  <p className="text-sm font-semibold text-[#8392ab]">No programmes yet</p>
+                  <p className="text-xs text-[#adb5bd] mt-1">Click Add Programme to get started</p>
                 </div>
               ) : (
-                <div className="overflow-hidden border border-gray-200 rounded-xl">
-                  <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                  <table className="sip-table">
                     <thead>
-                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
-                        <th className="p-4">Name</th>
-                        <th className="p-4">Class Count</th>
-                        <th className="p-4 text-right">Actions</th>
+                      <tr>
+                        <th>Name</th>
+                        <th>Classes</th>
+                        <th className="text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody>
                       {programmes.map(prog => (
-                        <tr key={prog.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
-                          <td className="p-4 font-bold text-[#344767] text-sm">{prog.name}</td>
-                          <td className="p-4 text-xs font-semibold">{prog._count?.classes || 0} Class(es)</td>
-                          <td className="p-4 text-right space-x-2">
+                        <tr key={prog.id}>
+                          <td className="font-semibold text-[#344767]">{prog.name}</td>
+                          <td>
+                            <span className="badge badge-dark">{prog._count?.classes || 0} class{(prog._count?.classes || 0) !== 1 ? 'es' : ''}</span>
+                          </td>
+                          <td className="text-right space-x-1">
                             <button
-                              onClick={() => {
-                                setEditingProgramme(prog);
-                                setShowEditProgModal(true);
-                              }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Edit
-                            </button>
+                              onClick={() => { setEditingProgramme(prog); setShowEditProgModal(true); }}
+                              className="text-xs text-[#17c1e8] hover:underline font-semibold px-2 py-1"
+                            >Edit</button>
                             <button
                               onClick={() => handleDeleteProgramme(prog.id)}
-                              className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Delete
-                            </button>
+                              className="text-xs text-red-400 hover:underline font-semibold px-2 py-1"
+                            >Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -1395,86 +1499,70 @@ export default function SuperAdminDashboard() {
 
           {/* CLASSES CONTROL PANEL */}
           {activeTab === 'classes' && !loading && (
-            <div className="space-y-6 animate-fade-in">
-              {/* Filter Bar */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-wrap gap-4 items-center justify-between">
-                <div className="flex flex-wrap gap-3 items-center">
-                  <input
-                    type="text"
-                    placeholder="Search classes..."
-                    value={classFilters.search}
-                    onChange={(e) => setClassFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2 text-xs text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors w-48"
-                  />
-
-                  <select
-                    value={classFilters.programmeId}
-                    onChange={(e) => setClassFilters(prev => ({ ...prev, programmeId: e.target.value }))}
-                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
-                  >
+            <div className="space-y-5 animate-fade-in-up">
+              {/* Filter bar */}
+              <div className="sip-card p-4 flex flex-wrap gap-2 items-center justify-between">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search classes..."
+                      value={classFilters.search}
+                      onChange={(e) => setClassFilters(prev => ({ ...prev, search: e.target.value }))}
+                      className="bg-[#f8f9fa] border border-[#e9ecef] rounded-xl pl-8 pr-3 py-2 text-xs text-[#344767] focus:outline-none focus:border-[#344767] transition-colors w-44"
+                    />
+                    <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#adb5bd]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <select value={classFilters.programmeId} onChange={(e) => setClassFilters(prev => ({ ...prev, programmeId: e.target.value }))}
+                    className="bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none">
                     <option value="">All Programmes</option>
                     {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
-
-                  <select
-                    value={classFilters.level}
-                    onChange={(e) => setClassFilters(prev => ({ ...prev, level: e.target.value }))}
-                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
-                  >
+                  <select value={classFilters.level} onChange={(e) => setClassFilters(prev => ({ ...prev, level: e.target.value }))}
+                    className="bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none">
                     <option value="">All Levels</option>
                     <option value="100">Level 100</option>
                     <option value="200">Level 200</option>
                     <option value="300">Level 300</option>
                     <option value="400">Level 400</option>
                   </select>
-
-                  <select
-                    value={classFilters.type}
-                    onChange={(e) => setClassFilters(prev => ({ ...prev, type: e.target.value }))}
-                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
-                  >
+                  <select value={classFilters.type} onChange={(e) => setClassFilters(prev => ({ ...prev, type: e.target.value }))}
+                    className="bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none">
                     <option value="">All Types</option>
                     <option value="REGULAR">Regular</option>
                     <option value="TOP-UP">Top-Up</option>
                   </select>
-
-                  <select
-                    value={classFilters.session}
-                    onChange={(e) => setClassFilters(prev => ({ ...prev, session: e.target.value }))}
-                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
-                  >
+                  <select value={classFilters.session} onChange={(e) => setClassFilters(prev => ({ ...prev, session: e.target.value }))}
+                    className="bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none">
                     <option value="">All Sessions</option>
                     <option value="MORNING">Morning</option>
                     <option value="EVENING">Evening</option>
                     <option value="WEEKEND">Weekend</option>
                   </select>
                 </div>
-
-                <button
-                  onClick={() => setShowClassModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                >
+                <button onClick={() => setShowClassModal(true)} className="sip-btn-dark !w-auto px-4 py-2 text-xs">
                   + Create Classes
                 </button>
               </div>
 
               {classes.length === 0 ? (
-                <div className="bg-white text-center py-16 text-[#8392ab] border border-gray-200 rounded-2xl">
-                  No classes configured. Click Create Classes to initialize groups.
+                <div className="sip-card text-center py-16">
+                  <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  <p className="text-sm font-semibold text-[#8392ab]">No classes yet</p>
+                  <p className="text-xs text-[#adb5bd] mt-1">Click Create Classes to initialize groups</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {getGroupedClasses().map((grouped, groupIdx) => (
-                    <div key={groupIdx} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                      {/* Section Header */}
-                      <div className="bg-[#f0f2f5] px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest">{grouped.header}</h4>
-                        <span className="text-[10px] bg-gray-200 text-[#344767] font-bold px-2.5 py-1 rounded-full border border-gray-300">
-                          {grouped.items.length} Group(s)
-                        </span>
+                    <div key={groupIdx} className="sip-card overflow-hidden">
+                      <div className="bg-[#f8f9fa] px-5 py-3 border-b border-[#f0f2f5] flex justify-between items-center">
+                        <h4 className="text-xs font-bold text-[#344767] uppercase tracking-wider">{grouped.header}</h4>
+                        <span className="badge badge-dark">{grouped.items.length} group{grouped.items.length !== 1 ? 's' : ''}</span>
                       </div>
-
-                      {/* Class Cards Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
                         {grouped.items.map(cls => {
                           const hasRep = !!cls.rep;
@@ -1483,135 +1571,81 @@ export default function SuperAdminDashboard() {
                           const readyCount = [hasRep, hasCourses, hasStudents].filter(Boolean).length;
                           const isReady = readyCount === 3;
                           const progressPct = Math.round((readyCount / 3) * 100);
-
                           return (
-                            <div key={cls.id} className={`bg-[#f0f2f5] rounded-2xl border transition-all duration-200 overflow-hidden ${
-                              isReady ? 'border-emerald-500/20 hover:border-emerald-500/40' : 'border-gray-200 hover:border-amber-500/30'
+                            <div key={cls.id} className={`bg-[#f8f9fa] rounded-xl border transition-all overflow-hidden ${
+                              isReady ? 'border-emerald-200' : 'border-[#e9ecef]'
                             }`}>
-                              {/* Card Header */}
-                              <div className="flex items-start justify-between p-4 pb-3 border-b border-gray-200/60">
+                              <div className="flex items-start justify-between p-4 pb-3">
                                 <div>
                                   <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm font-black text-[#344767]">Group {cls.group}</span>
-                                    {/* Overall status badge */}
-                                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
-                                      isReady
-                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                                        : 'bg-amber-500/10 text-amber-400 border-amber-500/30 animate-pulse'
-                                    }`}>
-                                      {isReady ? '✓ Ready' : `⚠ ${3 - readyCount} step${3 - readyCount > 1 ? 's' : ''} left`}
+                                    <span className="text-sm font-bold text-[#344767]">Group {cls.group}</span>
+                                    <span className={`badge ${isReady ? 'badge-success' : 'badge-warning'}`}>
+                                      {isReady ? 'Ready' : `${3-readyCount} step${3-readyCount>1?'s':''} left`}
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-[#8392ab] font-mono leading-none">{cls.displayName}</p>
+                                  <p className="text-[10px] text-[#adb5bd] font-mono">{cls.displayName}</p>
                                 </div>
                               </div>
 
-                              {/* Setup Progress Bar */}
-                              <div className="px-4 pt-3 pb-2">
-                                <div className="flex justify-between items-center mb-1.5">
-                                  <span className="text-[9px] text-[#8392ab] font-bold uppercase tracking-wider">Setup Progress</span>
-                                  <span className={`text-[9px] font-black ${isReady ? 'text-emerald-400' : 'text-amber-400'}`}>{readyCount}/3</span>
+                              {/* Thin progress bar */}
+                              <div className="px-4 pb-3">
+                                <div className="flex justify-between mb-1">
+                                  <span className="text-[9px] text-[#adb5bd] font-bold uppercase tracking-wider">Setup</span>
+                                  <span className="text-[9px] font-bold text-[#344767]">{readyCount}/3</span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                  <div
-                                    className={`h-full rounded-full transition-all duration-500 ${isReady ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                                    style={{ width: `${progressPct}%` }}
-                                  />
+                                <div className="w-full bg-[#e9ecef] rounded-full h-1 overflow-hidden">
+                                  <div className={`h-full rounded-full transition-all duration-500 ${isReady ? 'bg-emerald-500' : 'bg-amber-400'}`}
+                                    style={{width:`${progressPct}%`}} />
                                 </div>
                               </div>
 
-                              {/* Status Pills */}
-                              <div className="px-4 py-3 grid grid-cols-3 gap-2">
-                                {/* Rep Pill */}
-                                <div className={`rounded-xl p-2.5 border text-center ${
-                                  hasRep ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-gray-200/60 border-gray-300'
-                                }`}>
-                                  <div className={`text-base mb-0.5 ${hasRep ? 'text-emerald-400' : 'text-[#8392ab]'}`}>
-                                    {hasRep ? '✓' : '✗'}
-                                  </div>
-                                  <div className={`text-[9px] font-black uppercase tracking-wide ${hasRep ? 'text-emerald-400' : 'text-[#8392ab]'}`}>Rep</div>
-                                  <div className={`text-[9px] mt-0.5 truncate ${hasRep ? 'text-emerald-300/70' : 'text-[#8392ab]'}`}>
-                                    {hasRep ? cls.rep.username : 'None'}
-                                  </div>
+                              {/* Status indicators as dots + text */}
+                              <div className="px-4 pb-3 flex gap-4">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasRep ? 'bg-emerald-500' : 'bg-[#e9ecef]'}`}></span>
+                                  <span className="text-[10px] text-[#8392ab]">{hasRep ? cls.rep.username : 'No rep'}</span>
                                 </div>
-
-                                {/* Courses Pill */}
-                                <div className={`rounded-xl p-2.5 border text-center ${
-                                  hasCourses ? 'bg-purple-500/5 border-purple-500/20' : 'bg-rose-500/5 border-rose-500/20'
-                                }`}>
-                                  <div className={`text-base mb-0.5 font-black font-mono ${hasCourses ? 'text-purple-400' : 'text-rose-400'}`}>
-                                    {hasCourses ? cls._count.courses : '0'}
-                                  </div>
-                                  <div className={`text-[9px] font-black uppercase tracking-wide ${hasCourses ? 'text-purple-400' : 'text-rose-400'}`}>Courses</div>
-                                  <div className={`text-[9px] mt-0.5 ${hasCourses ? 'text-purple-300/70' : 'text-rose-400/60'}`}>
-                                    {hasCourses ? 'Linked' : 'None linked'}
-                                  </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasCourses ? 'bg-blue-400' : 'bg-[#e9ecef]'}`}></span>
+                                  <span className="text-[10px] text-[#8392ab]">{hasCourses ? `${cls._count.courses} course${cls._count.courses!==1?'s':''}` : 'No courses'}</span>
                                 </div>
-
-                                {/* Students Pill */}
-                                <div className={`rounded-xl p-2.5 border text-center ${
-                                  hasStudents ? 'bg-blue-500/5 border-blue-500/20' : 'bg-rose-500/5 border-rose-500/20'
-                                }`}>
-                                  <div className={`text-base mb-0.5 font-black font-mono ${hasStudents ? 'text-blue-400' : 'text-rose-400'}`}>
-                                    {hasStudents ? cls._count.students : '0'}
-                                  </div>
-                                  <div className={`text-[9px] font-black uppercase tracking-wide ${hasStudents ? 'text-blue-400' : 'text-rose-400'}`}>Students</div>
-                                  <div className={`text-[9px] mt-0.5 ${hasStudents ? 'text-blue-300/70' : 'text-rose-400/60'}`}>
-                                    {hasStudents ? 'Enrolled' : 'Not uploaded'}
-                                  </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasStudents ? 'bg-purple-400' : 'bg-[#e9ecef]'}`}></span>
+                                  <span className="text-[10px] text-[#8392ab]">{hasStudents ? `${cls._count.students} student${cls._count.students!==1?'s':''}` : 'No students'}</span>
                                 </div>
                               </div>
 
-                              {/* Action Buttons */}
-                              <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 border-t border-gray-200/60 mt-2 pt-3">
-                                <button
-                                  onClick={() => { setSelectedClassForRep(cls); setShowAssignRepModal(true); }}
-                                  className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-500/20 hover:border-indigo-500/40 transition-all"
-                                >
-                                  {hasRep ? '↻ Change Rep' : '+ Assign Rep'}
+                              {/* Action links */}
+                              <div className="px-4 pb-4 pt-1 flex flex-wrap gap-x-3 gap-y-1 border-t border-[#f0f2f5] mt-1 pt-3">
+                                <button onClick={() => { setSelectedClassForRep(cls); setShowAssignRepModal(true); }}
+                                  className="text-[11px] font-semibold text-[#17c1e8] hover:underline">
+                                  {hasRep ? 'Change Rep' : 'Assign Rep'}
                                 </button>
                                 {hasRep && (
-                                  <button
-                                    onClick={() => handleRemoveRepFromClass(cls.id)}
-                                    className="text-[10px] font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 px-2.5 py-1.5 rounded-lg border border-rose-500/20 hover:border-rose-500/40 transition-all"
-                                  >
-                                    ✕ Remove Rep
-                                  </button>
+                                  <button onClick={() => handleRemoveRepFromClass(cls.id)}
+                                    className="text-[11px] font-semibold text-red-400 hover:underline">Remove Rep</button>
                                 )}
-                                <button
-                                  onClick={() => handleOpenStudentsModal(cls)}
-                                  className="text-[10px] font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 px-2.5 py-1.5 rounded-lg border border-blue-500/20 hover:border-blue-500/40 transition-all"
-                                >
-                                  👥 Manage Students
-                                </button>
-                                <button
-                                  onClick={() => handleOpenCoursesModal(cls)}
-                                  className="text-[10px] font-bold text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 px-2.5 py-1.5 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all"
-                                >
-                                  📚 Manage Courses
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setConfirmState({
-                                      open: true,
-                                      message: 'Delete this class group? Enrollment records will be affected.',
-                                      onConfirm: async () => {
-                                        setConfirmState({ open: false, message: '', onConfirm: null });
-                                        try {
-                                          await api.delete(`/admin/classes/${cls.id}`);
-                                          showNotification('Class deleted successfully');
-                                          // Update classes state directly
-                                          setClasses(prev => prev.filter(c => c.id !== cls.id));
-                                        } catch (err) {
-                                          showNotification('Failed to delete class', 'error');
-                                        }
+                                <button onClick={() => handleOpenStudentsModal(cls)}
+                                  className="text-[11px] font-semibold text-[#344767] hover:underline">Students</button>
+                                <button onClick={() => handleOpenCoursesModal(cls)}
+                                  className="text-[11px] font-semibold text-[#8392ab] hover:text-[#344767] hover:underline">Courses</button>
+                                <button onClick={() => {
+                                  setConfirmState({
+                                    open: true,
+                                    message: 'Delete this class group? Enrollment records will be affected.',
+                                    onConfirm: async () => {
+                                      setConfirmState({ open: false, message: '', onConfirm: null });
+                                      try {
+                                        await api.delete(`/admin/classes/${cls.id}`);
+                                        showNotification('Class deleted successfully');
+                                        setClasses(prev => prev.filter(c => c.id !== cls.id));
+                                      } catch (err) {
+                                        showNotification('Failed to delete class', 'error');
                                       }
-                                    });
-                                  }}
-                                  className="text-[10px] font-bold text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2.5 py-1.5 rounded-lg border border-red-500/20 hover:border-red-500/40 transition-all ml-auto"
-                                >
-                                  🗑 Delete
-                                </button>
+                                    }
+                                  });
+                                }}
+                                  className="text-[11px] font-semibold text-red-400 hover:underline ml-auto">Delete</button>
                               </div>
                             </div>
                           );
@@ -1626,104 +1660,87 @@ export default function SuperAdminDashboard() {
 
           {/* CLASS REPS PANEL */}
           {activeTab === 'reps' && !loading && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center">
+            <div className="sip-card p-6 space-y-5 animate-fade-in-up">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Class Representative Accounts</h3>
-                  <p className="text-xs text-[#8392ab]">Provision and manage rep login credentials</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Class Representatives</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Provision and manage rep login credentials</p>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowBulkUploadModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
-                  >
+                  <button onClick={() => setShowBulkUploadModal(true)}
+                    className="flex items-center gap-2 border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-bold px-4 py-2 rounded-xl hover:bg-white transition active:scale-95">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     Bulk Upload
                   </button>
-                  <button
-                    onClick={() => setShowRepModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                  >
-                    + Create Rep Account
+                  <button onClick={() => setShowRepModal(true)} className="sip-btn-dark !w-auto px-4 py-2 text-xs">
+                    + Create Rep
                   </button>
                 </div>
               </div>
 
               {reps.length === 0 ? (
-                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
-                  No representative accounts configured. Click Create Rep Account.
+                <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                  <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <p className="text-sm font-semibold text-[#8392ab]">No rep accounts yet</p>
+                  <p className="text-xs text-[#adb5bd] mt-1">Click Create Rep to provision credentials</p>
                 </div>
               ) : (
-                <div className="overflow-hidden border border-gray-200 rounded-xl">
-                  <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                  <table className="sip-table">
                     <thead>
-                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
-                        <th className="p-4">Username</th>
-                        <th className="p-4">Assigned Class</th>
-                        <th className="p-4">Status</th>
-                        <th className="p-4 text-right">Actions</th>
+                      <tr>
+                        <th>Representative</th>
+                        <th>Assigned Class</th>
+                        <th>Status</th>
+                        <th className="text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
-                      {reps.map(rep => (
-                        <tr key={rep.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
-                          <td className="p-4">
-                            <span className="font-bold text-[#344767] text-sm block">{rep.username}</span>
-                          </td>
-                          <td className="p-4 text-xs font-semibold">
-                            {rep.assignedClass ? (
-                              <span className="text-[#8392ab] font-bold">{rep.assignedClass.displayName}</span>
-                            ) : (
-                              <span className="text-[#8392ab] italic">No assigned class</span>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full border ${
-                              rep.isActive
-                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                : 'bg-red-500/10 text-red-400 border-red-500/20'
-                            }`}>
-                              {rep.isActive ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right space-x-2">
-                            <button
-                              onClick={() => {
-                                setEditingRep(rep);
-                                setShowEditRepModal(true);
-                              }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-2.5 py-1.5 rounded-lg transition"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => {
-                                setResetPwdRepId(rep.id);
-                                setShowResetPwdModal(true);
-                              }}
-                              className="text-xs text-indigo-400 hover:text-indigo-300 font-bold hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg transition"
-                            >
-                              Reset Password
-                            </button>
-                            <button
-                              onClick={() => handleToggleRepStatus(rep.id, rep.isActive)}
-                              className={`text-xs font-bold hover:bg-gray-200 px-2.5 py-1.5 rounded-lg transition ${
-                                rep.isActive ? 'text-amber-400 hover:text-amber-300' : 'text-emerald-400 hover:text-emerald-300'
-                              }`}
-                            >
-                              {rep.isActive ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteRep(rep.id)}
-                              className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-2.5 py-1.5 rounded-lg transition"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                    <tbody>
+                      {reps.map(rep => {
+                        const initials = rep.username?.substring(0,2).toUpperCase() || 'R';
+                        return (
+                          <tr key={rep.id}>
+                            <td>
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                                  style={{background:'linear-gradient(135deg,#11cdef,#1171ef)'}}>
+                                  {initials}
+                                </div>
+                                <div>
+                                  <p className="text-sm font-semibold text-[#344767]">{rep.username}</p>
+                                  {rep.fullName && <p className="text-[10px] text-[#8392ab]">{rep.fullName}</p>}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="text-xs">
+                              {rep.assignedClass
+                                ? <span className="font-medium text-[#344767]">{rep.assignedClass.displayName}</span>
+                                : <span className="text-[#adb5bd] italic">Unassigned</span>}
+                            </td>
+                            <td>
+                              <span className={`badge ${rep.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                {rep.isActive ? 'Active' : 'Inactive'}
+                              </span>
+                            </td>
+                            <td className="text-right space-x-1">
+                              <button onClick={() => { setEditingRep(rep); setShowEditRepModal(true); }}
+                                className="text-xs text-[#17c1e8] font-semibold hover:underline px-2 py-1">Edit</button>
+                              <button onClick={() => { setResetPwdRepId(rep.id); setShowResetPwdModal(true); }}
+                                className="text-xs text-[#8392ab] font-semibold hover:underline px-2 py-1">Reset Pwd</button>
+                              <button onClick={() => handleToggleRepStatus(rep.id, rep.isActive)}
+                                className={`text-xs font-semibold hover:underline px-2 py-1 ${rep.isActive ? 'text-amber-500' : 'text-emerald-500'}`}>
+                                {rep.isActive ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button onClick={() => handleDeleteRep(rep.id)}
+                                className="text-xs text-red-400 font-semibold hover:underline px-2 py-1">Delete</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1733,18 +1750,17 @@ export default function SuperAdminDashboard() {
 
           {/* LECTURER ALLOCATIONS PANEL */}
           {activeTab === 'lecturers' && !loading && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-5 animate-fade-in-up">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Lecturer Course & Class Allocations</h3>
-                  <p className="text-xs text-[#8392ab]">Map lecturers to their specific course-class assignments using Excel sheets</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Lecturer Course &amp; Class Allocations</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Map lecturers to their course-class assignments via Excel sheets</p>
                 </div>
                 <button
                   onClick={() => {
                     const headers = ["Lecturer Name", "Course Code", "Course Name", "Programme", "Level", "Type", "Group", "Session"];
                     const sampleRow = ["Dr. Kofi Mensah", "BIT 102", "Software Engineering", "BIT", "100", "REGULAR", "A", "MORNING"];
-                    const csvContent = "data:text/csv;charset=utf-8," 
-                      + [headers.join(","), sampleRow.join(",")].join("\n");
+                    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), sampleRow.join(",")].join("\n");
                     const encodedUri = encodeURI(csvContent);
                     const link = document.createElement("a");
                     link.setAttribute("href", encodedUri);
@@ -1754,24 +1770,22 @@ export default function SuperAdminDashboard() {
                     document.body.removeChild(link);
                     showNotification("Template CSV downloaded. Edit and re-upload.");
                   }}
-                  className="bg-gray-200 hover:bg-gray-100 active:scale-95 text-indigo-400 border border-gray-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                  className="flex items-center gap-2 border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition active:scale-95"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Download Allocation Template
+                  Download Template
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                {/* Left Side: Upload Panel */}
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
-                    <h4 className="font-bold text-sm text-[#344767]">Upload Allocation Spreadsheets</h4>
-                    
-                    <form onSubmit={handleLecturerFileUpload} className="space-y-4">
-                      {/* Drag & Drop zone */}
-                      <div 
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* Left: Upload Panel */}
+                <div className="lg:col-span-4 space-y-4">
+                  <div className="sip-card p-5 space-y-4">
+                    <h4 className="font-bold text-sm text-[#344767]">Upload Allocation Sheet</h4>
+                    <form onSubmit={handleLecturerFileUpload} className="space-y-3">
+                      <div
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => {
                           e.preventDefault();
@@ -1785,131 +1799,95 @@ export default function SuperAdminDashboard() {
                             }
                           }
                         }}
-                        className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[160px] ${
-                          lecturerFile 
-                            ? 'border-emerald-500 bg-emerald-500/5' 
-                            : 'border-gray-300 hover:border-indigo-500 bg-gray-100/50'
+                        className={`border-2 border-dashed rounded-xl p-5 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[140px] ${
+                          lecturerFile ? 'border-emerald-400 bg-emerald-50' : 'border-[#e9ecef] hover:border-[#17c1e8] bg-[#f8f9fa]'
                         }`}
                       >
-                        <input
-                          type="file"
-                          accept=".xlsx,.xls,.csv"
-                          id="lecturer-file-upload"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) setLecturerFile(file);
-                          }}
-                        />
+                        <input type="file" accept=".xlsx,.xls,.csv" id="lecturer-file-upload" className="hidden"
+                          onChange={(e) => { const file = e.target.files?.[0]; if (file) setLecturerFile(file); }} />
                         <label htmlFor="lecturer-file-upload" className="cursor-pointer w-full flex flex-col items-center justify-center">
-                          <svg className={`w-10 h-10 mb-3 transition-colors ${lecturerFile ? 'text-emerald-400' : 'text-[#8392ab]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className={`w-8 h-8 mb-2 ${lecturerFile ? 'text-emerald-500' : 'text-[#adb5bd]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                           </svg>
                           {lecturerFile ? (
                             <div>
-                              <p className="text-xs font-bold text-emerald-400 break-all">{lecturerFile.name}</p>
+                              <p className="text-xs font-bold text-emerald-600 break-all">{lecturerFile.name}</p>
                               <p className="text-[10px] text-[#8392ab] mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
                             </div>
                           ) : (
                             <div>
-                              <p className="text-xs font-bold text-[#344767]">Drag & drop sheet here, or <span className="text-indigo-400 hover:underline">browse</span></p>
-                              <p className="text-[10px] text-[#8392ab] mt-1.5">Supports Excel (.xlsx, .xls) and CSV files</p>
+                              <p className="text-xs font-semibold text-[#344767]">Drag &amp; drop or <span className="text-[#17c1e8]">browse</span></p>
+                              <p className="text-[10px] text-[#adb5bd] mt-1">Excel (.xlsx, .xls) or CSV</p>
                             </div>
                           )}
                         </label>
                       </div>
-
                       <div className="flex gap-2">
                         {lecturerFile && (
-                          <button
-                            type="button"
-                            onClick={() => setLecturerFile(null)}
-                            className="bg-gray-200 hover:bg-gray-100 active:scale-95 text-[#344767] text-xs font-semibold px-3 py-2 rounded-xl transition"
-                          >
-                            Clear
-                          </button>
+                          <button type="button" onClick={() => setLecturerFile(null)}
+                            className="border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-3 py-2 rounded-xl hover:bg-white transition">Clear</button>
                         )}
-                        <button
-                          type="submit"
-                          disabled={uploadingLecturers || !lecturerFile}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-200 disabled:text-[#8392ab] active:scale-95 text-[#344767] text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
-                        >
+                        <button type="submit" disabled={uploadingLecturers || !lecturerFile}
+                          className="sip-btn-dark flex-1 py-2.5 text-xs disabled:opacity-50">
                           {uploadingLecturers ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="flex items-center justify-center gap-2">
+                              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                               Processing...
-                            </>
-                          ) : (
-                            'Process Allocation Sheet'
-                          )}
+                            </span>
+                          ) : 'Process Sheet'}
                         </button>
                       </div>
                     </form>
                   </div>
 
-                  {/* Guide Panel */}
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
-                    <h5 className="font-bold text-xs uppercase tracking-wider text-[#344767] flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  {/* Guide */}
+                  <div className="sip-card p-4 space-y-3">
+                    <h5 className="text-xs font-bold text-[#344767] flex items-center gap-2">
+                      <svg className="w-4 h-4 text-[#17c1e8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Allocations Mapping Guide
+                      Mapping Guide
                     </h5>
-                    <p className="text-[11px] leading-relaxed text-[#8392ab]">
-                      When mapping sheets are uploaded, the GCTU Attendance System automates administrative registration:
-                    </p>
-                    <ul className="text-[10px] space-y-2 text-[#344767] list-disc list-inside">
-                      <li>Matches and registers missing <span className="font-bold text-indigo-400">Courses</span> & <span className="font-bold text-indigo-400">Programmes</span>.</li>
-                      <li>Ensures exact <span className="font-bold text-indigo-400">Classes</span> are constructed and linked.</li>
-                      <li>Auto-creates <span className="font-bold text-[#344767]">Lecturer Accounts</span> using names as usernames (Role: <code className="text-indigo-400">LECTURER</code>).</li>
-                      <li>Default temp password: <code className="bg-[#f0f2f5] px-1 py-0.5 rounded text-emerald-400 font-mono font-bold">gctuLecturer123!</code>.</li>
-                      <li>Accounts can immediately log in and will see customized portals.</li>
+                    <ul className="text-[10px] space-y-1.5 text-[#8392ab] list-disc list-inside leading-relaxed">
+                      <li>Auto-matches <span className="font-semibold text-[#344767]">Courses</span> &amp; <span className="font-semibold text-[#344767]">Programmes</span></li>
+                      <li>Creates missing <span className="font-semibold text-[#344767]">Classes</span> automatically</li>
+                      <li>Registers <span className="font-semibold text-[#344767]">Lecturer Accounts</span> (role: <code className="text-[#17c1e8]">LECTURER</code>)</li>
+                      <li>Default password: <code className="bg-[#f8f9fa] px-1 rounded text-emerald-600 font-mono">gctuLecturer123!</code></li>
                     </ul>
                   </div>
 
-                  {/* Parse Results Log */}
+                  {/* Upload results */}
                   {lecturerUploadResults && (
-                    <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 animate-fade-in">
-                      <div className="flex justify-between items-center border-b border-gray-200 pb-3">
-                        <h4 className="font-bold text-xs uppercase text-[#8392ab]">Processing Summary</h4>
-                        <button 
-                          onClick={() => setLecturerUploadResults(null)}
-                          className="text-[10px] text-[#8392ab] hover:text-[#344767] font-semibold"
-                        >
-                          Dismiss
-                        </button>
+                    <div className="sip-card p-4 space-y-3 animate-fade-in-up">
+                      <div className="flex justify-between items-center">
+                        <h4 className="text-xs font-bold text-[#344767] uppercase tracking-wider">Processing Summary</h4>
+                        <button onClick={() => setLecturerUploadResults(null)} className="text-[10px] text-[#adb5bd] hover:text-[#344767]">Dismiss</button>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-[#f0f2f5] rounded-xl p-3 border border-emerald-500/10">
-                          <p className="text-[10px] text-[#8392ab] font-bold uppercase">Linked Rows</p>
-                          <p className="text-2xl font-black text-emerald-400">{lecturerUploadResults.successCount}</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-emerald-50 rounded-xl p-3">
+                          <p className="text-[9px] text-[#8392ab] font-bold uppercase">Linked</p>
+                          <p className="text-2xl font-black text-emerald-600">{lecturerUploadResults.successCount}</p>
                         </div>
-                        <div className="bg-[#f0f2f5] rounded-xl p-3 border border-red-500/10">
-                          <p className="text-[10px] text-[#8392ab] font-bold uppercase">Skipped Rows</p>
-                          <p className="text-2xl font-black text-red-400">{lecturerUploadResults.failedCount}</p>
+                        <div className="bg-red-50 rounded-xl p-3">
+                          <p className="text-[9px] text-[#8392ab] font-bold uppercase">Skipped</p>
+                          <p className="text-2xl font-black text-red-500">{lecturerUploadResults.failedCount}</p>
                         </div>
                       </div>
-                      
                       {lecturerUploadResults.createdLecturers?.length > 0 && (
                         <div>
-                          <p className="text-[10px] font-bold uppercase text-[#8392ab] mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
-                          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto bg-[#f0f2f5] p-2 rounded-xl border border-gray-200">
+                          <p className="text-[9px] font-bold uppercase text-[#8392ab] mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
+                          <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto bg-[#f8f9fa] p-2 rounded-lg">
                             {lecturerUploadResults.createdLecturers.map((name, i) => (
-                              <span key={i} className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold">
-                                {name}
-                              </span>
+                              <span key={i} className="badge badge-info text-[9px]">{name}</span>
                             ))}
                           </div>
                         </div>
                       )}
-
                       {lecturerUploadResults.errors?.length > 0 && (
                         <div>
-                          <p className="text-[10px] font-bold uppercase text-red-400 mb-1.5">Error Log</p>
-                          <div className="bg-[#f0f2f5] p-2.5 rounded-xl border border-red-500/10 text-[9px] font-mono text-red-300 space-y-1 max-h-36 overflow-y-auto">
-                            {lecturerUploadResults.errors.map((err, i) => (
-                              <p key={i} className="leading-tight border-b border-red-500/5 pb-1">{err}</p>
-                            ))}
+                          <p className="text-[9px] font-bold uppercase text-red-500 mb-1.5">Error Log</p>
+                          <div className="bg-red-50 p-2.5 rounded-lg text-[9px] font-mono text-red-500 space-y-1 max-h-32 overflow-y-auto">
+                            {lecturerUploadResults.errors.map((err, i) => <p key={i}>{err}</p>)}
                           </div>
                         </div>
                       )}
@@ -1917,32 +1895,24 @@ export default function SuperAdminDashboard() {
                   )}
                 </div>
 
-                {/* Right Side: Active Allocations Database Registry */}
-                <div className="lg:col-span-8 space-y-6">
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                {/* Right: Allocation Registry */}
+                <div className="lg:col-span-8">
+                  <div className="sip-card p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <h4 className="font-bold text-sm text-[#344767]">Active Allocation Registry</h4>
-                        <p className="text-xs text-[#8392ab]">Search and prune lecturer distribution assignments</p>
+                        <p className="text-xs text-[#8392ab] mt-0.5">Search and manage lecturer assignments</p>
                       </div>
-                      
-                      <div className="relative w-full sm:w-64">
-                        <input
-                          type="text"
-                          placeholder="Search Lecturer or Course..."
-                          value={lecturerSearchQuery}
+                      <div className="relative w-full sm:w-56">
+                        <input type="text" placeholder="Search lecturer or course..." value={lecturerSearchQuery}
                           onChange={(e) => setLecturerSearchQuery(e.target.value)}
-                          className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2 text-xs text-[#344767] placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-9"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg className="h-4 w-4 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                          </svg>
-                        </div>
+                          className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl pl-8 pr-3 py-2 text-xs text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
+                        <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#adb5bd]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                       </div>
                     </div>
 
-                    {/* Filter Allocations */}
                     {(() => {
                       const filtered = lecturerAssignments.filter(a => {
                         const query = lecturerSearchQuery.toLowerCase();
@@ -1956,48 +1926,44 @@ export default function SuperAdminDashboard() {
 
                       if (filtered.length === 0) {
                         return (
-                          <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
-                            {lecturerSearchQuery ? 'No matching allocations found.' : 'No active lecturer allocations found. Parse spreadsheet to populate.'}
+                          <div className="text-center py-12 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                            <p className="text-sm font-semibold text-[#8392ab]">{lecturerSearchQuery ? 'No matching allocations' : 'No allocations yet'}</p>
+                            <p className="text-xs text-[#adb5bd] mt-1">{lecturerSearchQuery ? 'Try a different search term' : 'Upload a spreadsheet to populate this registry'}</p>
                           </div>
                         );
                       }
 
                       return (
-                        <div className="overflow-hidden border border-gray-200 rounded-xl">
-                          <table className="w-full text-left border-collapse">
+                        <div className="overflow-x-auto">
+                          <table className="sip-table">
                             <thead>
-                              <tr className="bg-[#f0f2f5] text-[#8392ab] text-[10px] uppercase font-bold border-b border-gray-200">
-                                <th className="p-4">Lecturer</th>
-                                <th className="p-4">Taught Course</th>
-                                <th className="p-4">Assigned Class / Level</th>
-                                <th className="p-4 text-right">Action</th>
+                              <tr>
+                                <th>Lecturer</th>
+                                <th>Course</th>
+                                <th>Class</th>
+                                <th className="text-right">Action</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-800">
+                            <tbody>
                               {filtered.map(assignment => (
-                                <tr key={assignment.id} className="hover:bg-[#162238]/60 transition-colors text-[#344767] text-xs">
-                                  <td className="p-4">
+                                <tr key={assignment.id}>
+                                  <td>
                                     <div className="flex items-center gap-2">
-                                      <div className="h-6 w-6 rounded-full bg-indigo-500/10 text-[#8392ab] font-bold text-[9px] flex items-center justify-center border border-indigo-500/20">
+                                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                                        style={{background:'linear-gradient(135deg,#344767,#3A416F)'}}>
                                         {assignment.lecturerName.charAt(0).toUpperCase()}
                                       </div>
-                                      <span className="font-bold text-[#344767] text-sm block">{assignment.lecturerName}</span>
+                                      <span className="font-semibold text-[#344767]">{assignment.lecturerName}</span>
                                     </div>
                                   </td>
-                                  <td className="p-4">
-                                    <span className="font-bold block text-[#344767]">{assignment.courseName}</span>
-                                    <span className="text-[9px] text-[#8392ab] font-mono mt-0.5 block">{assignment.courseCode}</span>
+                                  <td>
+                                    <span className="font-medium text-[#344767] block">{assignment.courseName}</span>
+                                    <span className="text-[10px] text-[#adb5bd] font-mono">{assignment.courseCode}</span>
                                   </td>
-                                  <td className="p-4">
-                                    <span className="text-[#8392ab] font-bold block">{assignment.classDisplayName}</span>
-                                  </td>
-                                  <td className="p-4 text-right">
-                                    <button
-                                      onClick={() => handleDeleteAssignment(assignment.id)}
-                                      className="text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/10 font-bold px-3 py-1.5 rounded-lg border border-transparent hover:border-red-500/20 transition-all duration-200"
-                                    >
-                                      Remove Link
-                                    </button>
+                                  <td className="text-[#8392ab] font-medium">{assignment.classDisplayName}</td>
+                                  <td className="text-right">
+                                    <button onClick={() => handleDeleteAssignment(assignment.id)}
+                                      className="text-xs text-red-400 font-semibold hover:underline px-2 py-1">Remove</button>
                                   </td>
                                 </tr>
                               ))}
@@ -2014,55 +1980,44 @@ export default function SuperAdminDashboard() {
 
           {/* COURSES PANEL */}
           {activeTab === 'courses' && !loading && (
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
-              <div className="flex justify-between items-center">
+            <div className="sip-card p-6 space-y-5 animate-fade-in-up">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Global Courses Database</h3>
-                  <p className="text-xs text-[#8392ab]">Configure courses which can be linked to class sessions</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Global Courses Database</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Configure courses that can be linked to class sessions</p>
                 </div>
-                <button
-                  onClick={() => setShowCourseModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                >
+                <button onClick={() => setShowCourseModal(true)} className="sip-btn-dark !w-auto px-4 py-2 text-xs">
                   + Add Course
                 </button>
               </div>
-
               {courses.length === 0 ? (
-                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
-                  No courses found in system. Click Add Course to register one.
+                <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                  <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <p className="text-sm font-semibold text-[#8392ab]">No courses yet</p>
+                  <p className="text-xs text-[#adb5bd] mt-1">Click Add Course to register one</p>
                 </div>
               ) : (
-                <div className="overflow-hidden border border-gray-200 rounded-xl">
-                  <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                  <table className="sip-table">
                     <thead>
-                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
-                        <th className="p-4">Course Name</th>
-                        <th className="p-4">Course Code</th>
-                        <th className="p-4 text-right">Actions</th>
+                      <tr>
+                        <th>Course Name</th>
+                        <th>Code</th>
+                        <th className="text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800">
+                    <tbody>
                       {courses.map(course => (
-                        <tr key={course.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
-                          <td className="p-4 font-bold text-[#344767] text-sm">{course.name}</td>
-                          <td className="p-4 font-mono text-xs text-indigo-300">{course.code}</td>
-                          <td className="p-4 text-right space-x-2">
-                            <button
-                              onClick={() => {
-                                setEditingCourse(course);
-                                setShowEditCourseModal(true);
-                              }}
-                              className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:bg-blue-500/10 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteGlobalCourse(course.id)}
-                              className="text-xs text-red-400 hover:text-red-300 font-bold hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition"
-                            >
-                              Delete
-                            </button>
+                        <tr key={course.id}>
+                          <td className="font-semibold text-[#344767]">{course.name}</td>
+                          <td><span className="badge badge-info font-mono">{course.code}</span></td>
+                          <td className="text-right space-x-1">
+                            <button onClick={() => { setEditingCourse(course); setShowEditCourseModal(true); }}
+                              className="text-xs text-[#17c1e8] font-semibold hover:underline px-2 py-1">Edit</button>
+                            <button onClick={() => handleDeleteGlobalCourse(course.id)}
+                              className="text-xs text-red-400 font-semibold hover:underline px-2 py-1">Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -2075,130 +2030,74 @@ export default function SuperAdminDashboard() {
 
           {/* SETTINGS PANEL */}
           {activeTab === 'settings' && !loading && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
-              {/* Branding & Logo */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 animate-fade-in-up">
+              {/* Branding */}
+              <div className="sip-card p-6 space-y-5">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">Department Branding</h3>
-                  <p className="text-xs text-[#8392ab]">Customize the department name and banner logo</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Department Branding</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Customize department name and logo</p>
                 </div>
-
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-2">Logo Preview</label>
-                    <div className="flex items-center space-x-4">
-                      <div className="h-24 w-24 bg-[#f0f2f5] rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden">
-                        {logoPreview ? (
-                          <img src={logoPreview} alt="Dept Logo" className="h-full w-full object-cover" />
-                        ) : (
-                          <span className="text-xs text-[#8392ab] font-bold">No Logo</span>
-                        )}
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-2">Logo</label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-20 w-20 bg-[#f8f9fa] rounded-xl border border-[#e9ecef] flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {logoPreview
+                          ? <img src={logoPreview} alt="Logo" className="h-full w-full object-cover" />
+                          : <span className="text-xs text-[#adb5bd] font-semibold">No Logo</span>}
                       </div>
                       <div className="space-y-2">
-                        <input
-                          type="file"
-                          ref={logoInputRef}
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                              setLogoFile(file);
-                              setLogoPreview(URL.createObjectURL(file));
-                            }
-                          }}
-                          accept="image/*"
-                          className="hidden"
-                        />
-                        <button
-                          onClick={() => logoInputRef.current.click()}
-                          className="bg-gray-200 hover:bg-gray-100 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition"
-                        >
-                          Select Image File
+                        <input type="file" ref={logoInputRef}
+                          onChange={(e) => { const file = e.target.files[0]; if (file) { setLogoFile(file); setLogoPreview(URL.createObjectURL(file)); } }}
+                          accept="image/*" className="hidden" />
+                        <button onClick={() => logoInputRef.current.click()}
+                          className="border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition">
+                          Choose File
                         </button>
                         {logoFile && (
-                          <button
-                            onClick={handleLogoUpload}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl ml-2 transition"
-                          >
-                            Save Upload
-                          </button>
+                          <button onClick={handleLogoUpload}
+                            className="sip-btn-dark !w-auto px-4 py-2 text-xs ml-2">Upload</button>
                         )}
                       </div>
                     </div>
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Department Name</label>
-                    <input
-                      type="text"
-                      value={settings.deptName}
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Department Name</label>
+                    <input type="text" value={settings.deptName}
                       onChange={(e) => setSettings(prev => ({ ...prev, deptName: e.target.value }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
+                      className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
                   </div>
-
-                  <button
-                    onClick={async () => {
-                      try {
-                        await api.patch('/admin/settings', { deptName: settings.deptName });
-                        showNotification('Department name branding updated');
-                      } catch (err) {
-                        showNotification('Failed to update brand name', 'error');
-                      }
-                    }}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                  >
-                    Save Branding Text
+                  <button onClick={async () => {
+                    try {
+                      await api.patch('/admin/settings', { deptName: settings.deptName });
+                      showNotification('Department name updated');
+                    } catch (err) { showNotification('Failed to update name', 'error'); }
+                  }} className="sip-btn-dark !w-auto px-5 py-2.5 text-xs">
+                    Save Name
                   </button>
                 </div>
               </div>
 
-              {/* Threshold Parameters */}
-              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
+              {/* Thresholds */}
+              <div className="sip-card p-6 space-y-5">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-base">System Threshold Config</h3>
-                  <p className="text-xs text-[#8392ab]">Calibrate geofence range, late windows, and QR tokens</p>
+                  <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Thresholds</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Calibrate geofence, late window, and QR token settings</p>
                 </div>
-
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Late Grace Period (Minutes)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.lateWindowMinutes}
-                      onChange={(e) => setSettings(prev => ({ ...prev, lateWindowMinutes: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">QR Expiry Span (Seconds)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.qrExpirySeconds}
-                      onChange={(e) => setSettings(prev => ({ ...prev, qrExpirySeconds: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Geofence Radius (Meters)</label>
-                    <input
-                      type="number"
-                      required
-                      value={settings.geofenceRadiusMeters}
-                      onChange={(e) => setSettings(prev => ({ ...prev, geofenceRadiusMeters: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                  >
-                    Save Thresholds
-                  </button>
+                  {[
+                    {label:'Late Grace Period (Minutes)', field:'lateWindowMinutes', val:settings.lateWindowMinutes},
+                    {label:'QR Expiry (Seconds)', field:'qrExpirySeconds', val:settings.qrExpirySeconds},
+                    {label:'Geofence Radius (Meters)', field:'geofenceRadiusMeters', val:settings.geofenceRadiusMeters},
+                  ].map(t => (
+                    <div key={t.field}>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">{t.label}</label>
+                      <input type="number" required value={t.val}
+                        onChange={(e) => setSettings(prev => ({ ...prev, [t.field]: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
+                    </div>
+                  ))}
+                  <button type="submit" className="sip-btn-dark !w-auto px-5 py-2.5 text-xs">Save Thresholds</button>
                 </form>
               </div>
             </div>
@@ -2206,82 +2105,78 @@ export default function SuperAdminDashboard() {
 
           {/* GRIEVANCES PANEL */}
           {activeTab === 'grievances' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <AdminGrievancePanel />
             </div>
           )}
 
           {/* ARCHIVES PANEL */}
           {activeTab === 'reports' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <OfficialArchives />
             </div>
           )}
 
           {/* REPORT SETTINGS PANEL */}
           {activeTab === 'report_settings' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <ReportSettings />
             </div>
           )}
 
           {/* HELP & SETUP GUIDE */}
           {activeTab === 'help' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <HelpGuidePage />
             </div>
           )}
 
           {/* SYSTEM MONITORING PANEL */}
           {activeTab === 'monitoring' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <SystemMonitoring />
             </div>
           )}
 
           {/* PERFORMANCE METRICS PANEL */}
           {activeTab === 'performance' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <PerformanceMetrics />
             </div>
           )}
 
           {/* SECURITY LOGS PANEL */}
           {activeTab === 'security_logs' && !loading && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in-up">
               <SecurityLogs />
             </div>
           )}
 
           {/* NOTIFICATIONS PANEL */}
           {activeTab === 'notifications' && (
-            <div className="animate-fade-in space-y-6">
-              <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                <div className="flex justify-between items-center mb-6">
+            <div className="animate-fade-in-up">
+              <div className="sip-card p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                   <div>
-                    <h3 className="font-bold text-[#344767] text-lg">System Notifications</h3>
-                    <p className="text-xs text-[#8392ab] mt-1">
-                      {notifications.filter(n => !n.isRead).length} unread • {notifications.length} total
+                    <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Notifications</h3>
+                    <p className="text-xs text-[#8392ab] mt-0.5">
+                      {notifications.filter(n => !n.isRead).length} unread &bull; {notifications.length} total
                     </p>
                   </div>
                   <div className="flex gap-2">
                     {notifications.some(n => !n.isRead) && (
-                      <button
-                        onClick={handleMarkAllAsRead}
-                        className="bg-blue-600 hover:bg-blue-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <button onClick={handleMarkAllAsRead}
+                        className="flex items-center gap-2 border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Mark All Read
                       </button>
                     )}
                     {notifications.length > 0 && (
-                      <button
-                        onClick={handleClearAll}
-                        className="bg-rose-600 hover:bg-rose-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <button onClick={handleClearAll}
+                        className="flex items-center gap-2 border border-red-200 bg-red-50 text-red-600 text-xs font-semibold px-4 py-2 rounded-xl hover:bg-red-100 transition">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
                         Clear All
@@ -2291,104 +2186,55 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {notificationsLoading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-16 rounded-xl" />)}
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="text-center py-20 space-y-4">
-                    <div className="inline-flex p-4 bg-gray-200/50 rounded-2xl">
-                      <svg className="w-12 h-12 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0L12 17l-8-4" />
-                      </svg>
-                    </div>
-                    <p className="text-sm font-bold text-[#8392ab]">All caught up!</p>
-                    <p className="text-xs text-[#8392ab]">No notifications to display</p>
+                  <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
+                    <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <p className="text-sm font-semibold text-[#8392ab]">All caught up!</p>
+                    <p className="text-xs text-[#adb5bd] mt-1">No notifications to display</p>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {notifications.map((notification) => {
-                      const getIcon = (type) => {
-                        switch (type) {
-                          case 'SUCCESS':
-                            return (
-                              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                          case 'WARNING':
-                            return (
-                              <div className="p-3 bg-[#344767]/10 text-[#344767] rounded-xl border border-[#344767]/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                              </div>
-                            );
-                          case 'DANGER':
-                            return (
-                              <div className="p-3 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                          default:
-                            return (
-                              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                              </div>
-                            );
-                        }
+                      const iconMap = {
+                        SUCCESS: {bg:'bg-emerald-50', color:'text-emerald-600', path:'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'},
+                        WARNING: {bg:'bg-amber-50', color:'text-amber-600', path:'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'},
+                        DANGER: {bg:'bg-red-50', color:'text-red-600', path:'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'},
                       };
+                      const icon = iconMap[notification.type] || {bg:'bg-blue-50', color:'text-blue-600', path:'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'};
 
                       const formatTime = (dateString) => {
                         const date = new Date(dateString);
                         const now = new Date();
-                        const diffMs = now - date;
-                        const diffMins = Math.floor(diffMs / 60000);
-
+                        const diffMins = Math.floor((now - date) / 60000);
                         if (diffMins < 1) return 'Just now';
                         if (diffMins < 60) return `${diffMins}m ago`;
-                        
                         const diffHours = Math.floor(diffMins / 60);
                         if (diffHours < 24) return `${diffHours}h ago`;
-
-                        return date.toLocaleDateString(undefined, { 
-                          month: 'short', 
-                          day: 'numeric', 
-                          year: 'numeric',
-                          hour: '2-digit', 
-                          minute: '2-digit' 
-                        });
+                        return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                       };
 
                       return (
-                        <div
-                          key={notification.id}
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className={`p-5 rounded-xl border transition-all cursor-pointer flex gap-4 relative ${
-                            !notification.isRead 
-                              ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' 
-                              : 'bg-gray-200/30 border-gray-200 hover:bg-gray-200/50'
-                          }`}
-                        >
+                        <div key={notification.id} onClick={() => handleMarkAsRead(notification.id)}
+                          className={`p-4 rounded-xl border cursor-pointer flex gap-3 relative transition-all ${
+                            !notification.isRead ? 'border-[#17c1e8]/20 bg-[#17c1e8]/5 hover:bg-[#17c1e8]/10' : 'border-[#f0f2f5] bg-[#f8f9fa] hover:bg-[#f0f2f5]'
+                          }`}>
                           {!notification.isRead && (
-                            <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-[#14172B] to-[#3A416F] animate-pulse" />
+                            <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-[#17c1e8] animate-pulse" />
                           )}
-                          {getIcon(notification.type)}
+                          <div className={`p-2 rounded-lg flex-shrink-0 ${icon.bg}`}>
+                            <svg className={`w-4 h-4 ${icon.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon.path} />
+                            </svg>
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold mb-1 ${!notification.isRead ? 'text-[#344767]' : 'text-[#344767]'}`}>
-                              {notification.title}
-                            </p>
-                            <p className="text-sm text-[#8392ab] leading-relaxed mb-2">
-                              {notification.message}
-                            </p>
-                            <span className="text-xs text-[#8392ab] font-medium">
-                              {formatTime(notification.createdAt)}
-                            </span>
+                            <p className="text-sm font-semibold text-[#344767] mb-0.5">{notification.title}</p>
+                            <p className="text-xs text-[#8392ab] leading-relaxed">{notification.message}</p>
+                            <span className="text-[10px] text-[#adb5bd] font-medium mt-1 block">{formatTime(notification.createdAt)}</span>
                           </div>
                         </div>
                       );
@@ -2425,8 +2271,8 @@ export default function SuperAdminDashboard() {
 
       {/* ADD CLASS MODAL (MULTI-STEP) */}
       {showClassModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-md w-full animate-scale-up">
             {/* Steps indicator */}
             <div className="flex justify-between items-center mb-6">
               <span className="text-xs font-bold text-[#8392ab]">Step {classStep} of 3</span>
@@ -2442,11 +2288,11 @@ export default function SuperAdminDashboard() {
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-[#344767]">Create Class Groups</h3>
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Academic Programme</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Academic Programme</label>
                   <select
                     value={newClass.programmeId}
                     onChange={(e) => setNewClass(prev => ({ ...prev, programmeId: e.target.value }))}
-                    className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                   >
                     <option value="" disabled>Select Programme</option>
                     {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -2455,7 +2301,7 @@ export default function SuperAdminDashboard() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Level</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Level</label>
                     <select
                       value={newClass.level}
                       onChange={(e) => setNewClass(prev => ({ ...prev, level: e.target.value }))}
@@ -2469,7 +2315,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Type</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Type</label>
                     <select
                       value={newClass.type}
                       onChange={(e) => setNewClass(prev => ({ ...prev, type: e.target.value }))}
@@ -2481,7 +2327,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Session</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Session</label>
                     <select
                       value={newClass.session}
                       onChange={(e) => setNewClass(prev => ({ ...prev, session: e.target.value }))}
@@ -2497,7 +2343,7 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     onClick={resetClassModal}
-                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                    className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                   >
                     Cancel
                   </button>
@@ -2509,7 +2355,7 @@ export default function SuperAdminDashboard() {
                       }
                       setClassStep(2);
                     }}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                    className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                   >
                     Next Step
                   </button>
@@ -2564,13 +2410,13 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-between pt-4">
                   <button
                     onClick={() => setClassStep(1)}
-                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                    className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleCreateClasses}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                    className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                   >
                     Create All
                   </button>
@@ -2615,67 +2461,67 @@ export default function SuperAdminDashboard() {
 
       {/* CREATE REP MODAL */}
       {showRepModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Create Class Rep</h3>
             <form onSubmit={handleCreateRep} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Full Name</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John Doe"
                   value={newRep.fullName}
                   onChange={(e) => setNewRep(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Index Number</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Index Number</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. 10912345"
                   value={newRep.indexNumber}
                   onChange={(e) => setNewRep(prev => ({ ...prev, indexNumber: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Username (Login ID)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Username (Login ID)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. johndoe"
                   value={newRep.username}
                   onChange={(e) => setNewRep(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Password"
                   value={newRep.password}
                   onChange={(e) => setNewRep(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Confirm Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Repeat password"
                   value={newRep.confirmPassword}
                   onChange={(e) => setNewRep(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
 
@@ -2683,13 +2529,13 @@ export default function SuperAdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowRepModal(false)}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                  className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                 >
                   Save Account
                 </button>
@@ -2701,8 +2547,8 @@ export default function SuperAdminDashboard() {
 
       {/* BULK UPLOAD REPS MODAL */}
       {showBulkUploadModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-lg w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Bulk Upload Class Reps</h3>
             
             <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
@@ -2754,7 +2600,7 @@ export default function SuperAdminDashboard() {
                     setBulkUploadFile(null);
                     setBulkUploadResult(null);
                   }}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
@@ -2785,32 +2631,32 @@ export default function SuperAdminDashboard() {
 
       {/* RESET PASSWORD MODAL */}
       {showResetPwdModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <h3 className="text-lg font-bold text-[#344767] mb-4">Reset Rep Password</h3>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">New Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">New Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors"
                 />
               </div>
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowResetPwdModal(false)}
-                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
+                  className="px-4 py-2.5 bg-[#f8f9fa] border border-[#e9ecef] hover:bg-white rounded-xl text-xs font-semibold text-[#344767] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
+                  className="sip-btn-dark !w-auto px-4 py-2.5 text-xs"
                 >
                   Reset Password
                 </button>
@@ -2866,8 +2712,8 @@ export default function SuperAdminDashboard() {
 
       {/* ASSIGN REPRESENTATIVE MODAL */}
       {showAssignRepModal && selectedClassForRep && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-sm w-full animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Assign Class Rep</h3>
@@ -2919,8 +2765,8 @@ export default function SuperAdminDashboard() {
 
       {/* VIEW STUDENTS MODAL (MANUAL + BULK IMPORT) */}
       {showStudentsModal && selectedClassForStudents && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col animate-scale-up">
             <div className="flex justify-between items-start mb-4 border-b border-gray-200 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Enrollment List</h3>
@@ -3198,8 +3044,8 @@ export default function SuperAdminDashboard() {
 
       {/* CLASS COURSES MODAL */}
       {showClassCoursesModal && selectedClassForCourses && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="sip-card p-6 max-w-md w-full animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-bold text-[#344767]">Linked Class Courses</h3>
