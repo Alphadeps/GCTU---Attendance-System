@@ -154,23 +154,23 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
   if (!session) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#000a18]/80 backdrop-blur-sm z-50 flex items-end justify-center">
+    <div className="fixed inset-0 bg-gray-50 backdrop-blur-sm z-50 flex items-end justify-center">
       {!submitting && (
         <div className="absolute inset-0" onClick={onClose} />
       )}
 
       {/* Sheet */}
-      <div className="w-full max-w-[430px] bg-[#001c44] border-t border-[#002a63] rounded-t-3xl p-6 shadow-2xl relative z-10 space-y-6 animate-[slideUp_0.25s_ease-out]">
+      <div className="w-full max-w-[430px] bg-white border-t border-gray-200 rounded-t-3xl p-6 shadow-2xl relative z-10 space-y-6 animate-[slideUp_0.25s_ease-out]">
         <div className="w-12 h-1 bg-[#002a63] rounded-full mx-auto" />
 
         <div className="text-center">
-          <h3 className="font-extrabold text-white text-base leading-snug">{session.courseName}</h3>
-          <p className="text-xs text-slate-400 mt-1 uppercase font-semibold tracking-wider">
+          <h3 className="font-extrabold text-[#344767] text-base leading-snug">{session.courseName}</h3>
+          <p className="text-xs text-[#8392ab] mt-1 uppercase font-semibold tracking-wider">
             {session.sessionType} Session
           </p>
           
           {(checkInStep === 1 || checkInStep === 2) && (
-            <div className="text-[10px] text-[#D4A017] font-bold uppercase tracking-wider mt-2.5">
+            <div className="text-[10px] text-[#344767] font-bold uppercase tracking-wider mt-2.5">
               Step {checkInStep} of 2
             </div>
           )}
@@ -180,31 +180,31 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
         {checkInStep === 1 && (
           <div className="space-y-4">
             <div className="text-center">
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-[#8392ab]">
                 Scan the QR code displayed by your Class Rep
               </p>
             </div>
 
             {!showManualInput ? (
               <div className="space-y-4">
-                <div className="w-full aspect-square max-w-[240px] mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#D4A017]/40 relative bg-slate-950">
+                <div className="w-full aspect-square max-w-[240px] mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#344767]/20 relative bg-slate-950">
                   <QRScanner onScan={handleQRScanSuccess} />
                 </div>
                 <div className="text-center space-y-3">
                   <button
                     onClick={() => setShowManualInput(true)}
-                    className="text-xs text-[#D4A017] hover:text-[#b88a14] font-bold underline block mx-auto"
+                    className="text-xs text-[#344767] hover:text-[#b88a14] font-bold underline block mx-auto"
                   >
                     Enter code manually
                   </button>
 
                   {session?.sessionType === 'PHYSICAL' && (
-                    <div className="pt-2 border-t border-[#002a63]">
+                    <div className="pt-2 border-t border-gray-200">
                       <button
                         onClick={() => advanceToLocation('', true)}
-                        className="w-full bg-[#003B8E] hover:bg-[#002a63] text-[#D4A017] border border-[#002a63] font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-[#D4A017]/5"
+                        className="w-full bg-[#344767] hover:bg-gray-100 text-[#344767] border border-gray-200 font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-[#344767]/10"
                       >
-                        <svg className="w-4 h-4 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         </svg>
                         Check In via GPS Location (No Scan)
@@ -216,19 +216,19 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
             ) : (
               <form onSubmit={handleManualCodeSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-slate-400 text-xs font-semibold mb-2">Manual Token Code</label>
+                  <label className="block text-[#8392ab] text-xs font-semibold mb-2">Manual Token Code</label>
                   <input
                     type="text"
                     required
                     placeholder="Paste code from representative..."
                     value={manualCode}
                     onChange={(e) => setManualCode(e.target.value)}
-                    className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-[#D4A017] font-mono"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767] font-mono"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#D4A017] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs hover:bg-[#b88a14] transition-colors"
+                  className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white font-extrabold py-3.5 rounded-xl text-xs hover:opacity-90 transition-colors"
                 >
                   Verify Code
                 </button>
@@ -236,7 +236,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                   <button
                     type="button"
                     onClick={() => setShowManualInput(false)}
-                    className="text-xs text-slate-500 hover:text-slate-400"
+                    className="text-xs text-[#8392ab] hover:text-[#8392ab]"
                   >
                     Switch back to camera scanner
                   </button>
@@ -247,7 +247,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
             <button
               onClick={onClose}
               disabled={submitting}
-              className="w-full py-3.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed text-slate-300 font-bold rounded-xl text-xs transition-colors"
+              className="w-full py-3.5 bg-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-[#344767] font-bold rounded-xl text-xs transition-colors"
             >
               Cancel
             </button>
@@ -258,26 +258,26 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
         {checkInStep === 2 && (
           <div className="space-y-6 text-center py-6">
             <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 bg-[#D4A017]/20 rounded-full animate-ping" />
-              <div className="w-10 h-10 bg-[#D4A017] rounded-full flex items-center justify-center shadow-lg shadow-[#D4A017]/10">
-                <svg className="w-5 h-5 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="absolute inset-0 bg-[#344767]/10 rounded-full animate-ping" />
+              <div className="w-10 h-10 bg-gradient-to-br from-[#14172B] to-[#3A416F] rounded-full flex items-center justify-center shadow-lg shadow-[#344767]/10">
+                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-sm font-bold text-white">Verifying location...</h4>
-              <p className="text-xs text-slate-500 px-4">
+              <h4 className="text-sm font-bold text-[#344767]">Verifying location...</h4>
+              <p className="text-xs text-[#8392ab] px-4">
                 Fetching your GPS coordinates. Ensure browser location settings are enabled.
               </p>
             </div>
 
             {submitting && (
-              <div className="flex flex-col items-center gap-3 text-xs text-slate-400 px-4">
+              <div className="flex flex-col items-center gap-3 text-xs text-[#8392ab] px-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin"></div>
-                  <span className="font-semibold text-slate-300">
+                  <div className="w-4 h-4 border-2 border-[#344767] border-t-transparent rounded-full animate-spin"></div>
+                  <span className="font-semibold text-[#344767]">
                     {submittingStatus || 'Submitting check-in report...'}
                   </span>
                 </div>
@@ -289,25 +289,25 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
         {/* STEP 3: SUCCESS ANIMATION & INFO */}
         {checkInStep === 3 && (
           <div className="space-y-6 text-center py-4">
-            <div className="w-16 h-16 bg-[#D4A017]/10 border border-[#D4A017]/20 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-9 h-9 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-[#344767]/10 border border-[#344767]/20 rounded-full flex items-center justify-center mx-auto">
+              <svg className="w-9 h-9 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
 
             <div>
-              <h3 className="text-xl font-black text-white">Attendance Marked!</h3>
-              <p className="text-xs text-slate-400 mt-1">{successDetails.courseName}</p>
+              <h3 className="text-xl font-black text-[#344767]">Attendance Marked!</h3>
+              <p className="text-xs text-[#8392ab] mt-1">{successDetails.courseName}</p>
             </div>
 
-            <div className="bg-slate-950/40 p-4 border border-[#002a63] rounded-2xl flex justify-between items-center text-xs">
+            <div className="bg-slate-950/40 p-4 border border-gray-200 rounded-2xl flex justify-between items-center text-xs">
               <div className="text-left space-y-1">
-                <span className="block text-[10px] text-slate-500 font-bold uppercase">Time Marked</span>
-                <span className="text-slate-300 font-bold font-mono">{successDetails.time}</span>
+                <span className="block text-[10px] text-[#8392ab] font-bold uppercase">Time Marked</span>
+                <span className="text-[#344767] font-bold font-mono">{successDetails.time}</span>
               </div>
               <div className="text-right">
                 <span className={`px-3 py-1 text-xs font-black rounded-full border ${
-                  successDetails.status === 'PRESENT' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  successDetails.status === 'PRESENT' ? 'bg-[#344767]/10 text-[#344767] border-[#344767]/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                 }`}>
                   {successDetails.status}
                 </span>
@@ -316,7 +316,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
 
             <button
               onClick={onClose}
-              className="w-full bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-colors"
+              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors"
             >
               Done
             </button>
@@ -333,7 +333,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-black text-white">Verification Failed</h3>
+              <h3 className="text-lg font-black text-[#344767]">Verification Failed</h3>
               <p className="text-xs text-rose-400 bg-rose-500/5 border border-rose-500/10 p-3 rounded-xl max-w-[290px] mx-auto leading-relaxed">
                 {submitErrorMsg || gpsError || 'Location coordinate check or dynamic QR code validation failed.'}
               </p>
@@ -348,13 +348,13 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                     setCheckInStep(1);
                   }
                 }}
-                className="flex-1 bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-colors"
+                className="flex-1 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors"
               >
                 Try Again
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3.5 rounded-xl text-xs transition-colors"
+                className="flex-1 bg-gray-200 hover:bg-gray-100 text-[#344767] font-bold py-3.5 rounded-xl text-xs transition-colors"
               >
                 Close
               </button>

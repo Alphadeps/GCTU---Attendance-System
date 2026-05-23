@@ -204,7 +204,7 @@ const SecurityLogs = () => {
           )}
           <button
             onClick={fetchLogs}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold"
+            className="px-4 py-2 bg-blue-600 text-[#344767] rounded-lg hover:bg-blue-700 text-sm font-semibold"
           >
             Refresh
           </button>
@@ -220,7 +220,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-[#344767]'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -230,7 +230,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('audit')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'audit'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-[#344767]'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -240,7 +240,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('security')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'security'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-blue-600 text-[#344767]'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -259,7 +259,7 @@ const SecurityLogs = () => {
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 text-sm font-semibold"
+              className="px-4 py-2 bg-gray-700 text-[#344767] rounded-lg hover:bg-gray-800 text-sm font-semibold"
             >
               Search
             </button>

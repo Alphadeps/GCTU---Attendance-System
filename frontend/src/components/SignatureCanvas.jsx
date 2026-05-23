@@ -103,7 +103,7 @@ const SignatureCanvas = ({ onSave, label = 'Signature Pad' }) => {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-2">
-        <label className="text-sm font-semibold text-slate-300">{label}</label>
+        <label className="text-sm font-semibold text-[#344767]">{label}</label>
         <button
           type="button"
           onClick={clearCanvas}
@@ -112,7 +112,7 @@ const SignatureCanvas = ({ onSave, label = 'Signature Pad' }) => {
           Clear
         </button>
       </div>
-      <div className="relative border border-slate-700/60 rounded-lg overflow-hidden bg-slate-900 shadow-inner">
+      <div className="relative border border-gray-300/60 rounded-lg overflow-hidden bg-gray-100 shadow-inner">
         <canvas
           ref={canvasRef}
           width={500}
@@ -127,7 +127,7 @@ const SignatureCanvas = ({ onSave, label = 'Signature Pad' }) => {
           className="w-full cursor-crosshair touch-none"
         />
         {!hasDrawn && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-slate-500 text-sm">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#8392ab] text-sm">
             Sign here using mouse or touch screen
           </div>
         )}

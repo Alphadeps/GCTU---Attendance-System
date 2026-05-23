@@ -1034,63 +1034,63 @@ export default function SuperAdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans antialiased relative">
+    <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex font-sans antialiased relative">
       {/* 0. FORCE PASSWORD CHANGE OVERLAY */}
       {needsPasswordChange && (
-        <div className="fixed inset-0 bg-[#0f172a] z-50 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-red-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
+        <div className="fixed inset-0 bg-gray-50/95 z-50 flex items-center justify-center p-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md w-full shadow-2xl animate-fade-in">
             <div className="flex flex-col items-center text-center mb-6">
               <div className="h-16 w-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-500/20">
                 <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H8m13 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-2">Change Default Password</h2>
-              <p className="text-slate-400 text-sm">
-                For security reasons, you must change the default password (<code className="bg-[#0f172a] px-1.5 py-0.5 rounded text-red-400">admin123</code>) on your first login.
+              <h2 className="text-2xl font-bold text-[#344767] mb-2">Change Default Password</h2>
+              <p className="text-[#8392ab] text-sm">
+                For security reasons, you must change the default password (<code className="bg-[#f0f2f5] px-1.5 py-0.5 rounded text-red-400">admin123</code>) on your first login.
               </p>
             </div>
 
             <form onSubmit={handleForcePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Current Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Current Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Enter your current password"
                   value={pwdChangeForm.currentPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, currentPassword: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
+                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">New Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">New Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Minimum 6 characters"
                   value={pwdChangeForm.newPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, newPassword: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
+                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Confirm New Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Confirm New Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Repeat new password"
                   value={pwdChangeForm.confirmPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, confirmPassword: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
+                  className="w-full bg-[#f0f2f5] border border-gray-300 rounded-xl px-4 py-3 text-[#344767] focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition focus:outline-none"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-red-600 to-indigo-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:from-red-500 hover:to-indigo-500 active:scale-95 transition-transform"
+                className="w-full bg-gradient-to-r from-red-600 to-indigo-600 text-[#344767] font-bold py-3.5 px-4 rounded-xl shadow-lg hover:from-red-500 hover:to-indigo-500 active:scale-95 transition-transform"
               >
                 Change Password & Access System
               </button>
@@ -1111,18 +1111,18 @@ export default function SuperAdminDashboard() {
       )}
 
       {/* 1. LEFT SIDEBAR */}
-      <aside className="w-[260px] bg-[#090d16] border-r border-slate-800 flex flex-col shrink-0 h-screen sticky top-0">
+      <aside className="w-[260px] bg-white border-r border-gray-200 flex flex-col shrink-0 h-screen sticky top-0">
         {/* Header / Brand */}
-        <div className="p-6 border-b border-slate-800 flex items-center space-x-3">
+        <div className="p-6 border-b border-gray-200 flex items-center space-x-3">
           <img
             src={logoPreview || '/logo.jfif'}
             alt="Dept Logo"
             onError={(e) => { e.target.src = '/logo.jfif'; }}
-            className="w-10 h-10 rounded-xl object-cover border border-slate-700 bg-[#1e293b]"
+            className="w-10 h-10 rounded-xl object-cover border border-gray-300 bg-white"
           />
           <div className="overflow-hidden">
-            <h1 className="font-bold text-sm leading-tight text-white truncate">{settings.deptName}</h1>
-            <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Super Admin</span>
+            <h1 className="font-bold text-sm leading-tight text-[#344767] truncate">{settings.deptName}</h1>
+            <span className="text-[10px] text-[#8392ab] font-bold uppercase tracking-wider">Super Admin</span>
           </div>
         </div>
 
@@ -1130,7 +1130,7 @@ export default function SuperAdminDashboard() {
         <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
           {MENU_GROUPS.map((group, groupIdx) => (
             <div key={groupIdx} className="space-y-1">
-              <span className="px-3 text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">
+              <span className="px-3 text-[10px] font-black text-[#8392ab] uppercase tracking-widest block mb-2">
                 {group.title}
               </span>
               {group.items.map(item => (
@@ -1139,8 +1139,8 @@ export default function SuperAdminDashboard() {
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center space-x-3.5 px-4 py-2.5 rounded-xl font-semibold text-[13px] transition-all duration-200 ${
                     activeTab === item.id
-                      ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-lg shadow-indigo-500/10'
-                      : 'text-slate-400 hover:bg-[#111827] hover:text-white'
+                      ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white shadow-lg shadow-indigo-500/10'
+                      : 'text-[#8392ab] hover:bg-gray-100 hover:text-[#344767]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1154,22 +1154,22 @@ export default function SuperAdminDashboard() {
         </nav>
 
         {/* Footer info & Logout */}
-        <div className="p-4 border-t border-slate-800 space-y-3">
+        <div className="p-4 border-t border-gray-200 space-y-3">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center space-x-3">
-              <div className="h-9 w-9 bg-slate-800 rounded-full flex items-center justify-center text-indigo-400 font-bold border border-slate-700">
+              <div className="h-9 w-9 bg-gray-200 rounded-full flex items-center justify-center text-[#8392ab] font-bold border border-gray-300">
                 SA
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-semibold text-white truncate">Administrator</p>
-                <span className="text-[10px] text-slate-400">superadmin</span>
+                <p className="text-xs font-semibold text-[#344767] truncate">Administrator</p>
+                <span className="text-[10px] text-[#8392ab]">superadmin</span>
               </div>
             </div>
             <NotificationPanel />
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-2 px-4 py-2.5 rounded-xl border border-slate-800 text-slate-400 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 active:scale-95 transition-all text-xs font-semibold"
+            className="w-full flex items-center space-x-2 px-4 py-2.5 rounded-xl border border-gray-200 text-[#8392ab] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 active:scale-95 transition-all text-xs font-semibold"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -1180,21 +1180,21 @@ export default function SuperAdminDashboard() {
       </aside>
 
       {/* 2. MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0f172a]">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#f0f2f5]">
         {/* Header */}
-        <header className="h-[76px] border-b border-slate-800 px-8 flex items-center justify-between shrink-0 bg-[#090d16]">
-          <h2 className="text-lg font-bold text-white capitalize">{activeTab.replace('-', ' ')}</h2>
+        <header className="h-[76px] border-b border-gray-200 px-8 flex items-center justify-between shrink-0 bg-white shadow-sm">
+          <h2 className="text-lg font-bold text-[#344767] capitalize">{activeTab.replace('-', ' ')}</h2>
           <div className="flex items-center space-x-4">
             <button
               onClick={() => setShowOnboarding(true)}
-              className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all border border-transparent hover:border-indigo-500/20"
+              className="p-2 text-[#8392ab] hover:text-indigo-400 hover:bg-indigo-500/10 rounded-xl transition-all border border-transparent hover:border-indigo-500/20"
               title="Show setup guide"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
-            <span className="bg-[#1e293b] border border-slate-700 px-3 py-1 rounded-full text-xs text-indigo-400 font-semibold flex items-center space-x-1.5">
+            <span className="bg-white border border-gray-300 px-3 py-1 rounded-full text-xs text-indigo-400 font-semibold flex items-center space-x-1.5">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>System Live</span>
             </span>
@@ -1215,15 +1215,15 @@ export default function SuperAdminDashboard() {
               {/* Stats Row */}
               <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
                 {[
-                  { label: 'Programmes', value: stats.programmesCount, bg: 'border-slate-800', text: 'text-white' },
-                  { label: 'Classes', value: stats.classesCount, bg: 'border-slate-800', text: 'text-white' },
-                  { label: 'Total Students', value: stats.studentsCount, bg: 'border-slate-800', text: 'text-white' },
-                  { label: 'Class Reps', value: stats.repsCount, bg: 'border-slate-800', text: 'text-white' },
-                  { label: 'Global Courses', value: stats.coursesCount, bg: 'border-slate-800', text: 'text-white' },
+                  { label: 'Programmes', value: stats.programmesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
+                  { label: 'Classes', value: stats.classesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
+                  { label: 'Total Students', value: stats.studentsCount, bg: 'border-gray-200', text: 'text-[#344767]' },
+                  { label: 'Class Reps', value: stats.repsCount, bg: 'border-gray-200', text: 'text-[#344767]' },
+                  { label: 'Global Courses', value: stats.coursesCount, bg: 'border-gray-200', text: 'text-[#344767]' },
                   { label: 'Active Sessions', value: stats.activeSessionsCount, bg: 'border-indigo-500/20 bg-indigo-500/5', text: 'text-indigo-400' },
                 ].map((stat, i) => (
-                  <div key={i} className={`bg-[#1e293b] border rounded-2xl p-5 shadow-sm hover:scale-[1.02] transition-transform ${stat.bg}`}>
-                    <span className="text-slate-400 text-xs font-semibold block mb-1">{stat.label}</span>
+                  <div key={i} className={`bg-white border rounded-2xl p-5 shadow-sm hover:scale-[1.02] transition-transform ${stat.bg}`}>
+                    <span className="text-[#8392ab] text-xs font-semibold block mb-1">{stat.label}</span>
                     <span className={`text-2xl font-black ${stat.text}`}>{stat.value}</span>
                   </div>
                 ))}
@@ -1232,83 +1232,83 @@ export default function SuperAdminDashboard() {
               {/* Main Overview Split */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Quick Actions */}
-                <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4">
-                  <h3 className="font-bold text-white text-base">Quick Actions</h3>
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                  <h3 className="font-bold text-[#344767] text-base">Quick Actions</h3>
                   <div className="grid grid-cols-1 gap-3">
                     <button
                       onClick={() => setShowProgModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#0f172a] hover:bg-[#142035] border border-slate-800 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
+                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
                     >
                       <div className="flex items-center space-x-3">
                         <span className="h-9 w-9 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center font-bold">+</span>
                         <div>
-                          <p className="text-xs font-bold text-white">Add Programme</p>
-                          <p className="text-[10px] text-slate-400">Insert new academic course path</p>
+                          <p className="text-xs font-bold text-[#344767]">Add Programme</p>
+                          <p className="text-[10px] text-[#8392ab]">Insert new academic course path</p>
                         </div>
                       </div>
-                      <span className="text-slate-500 group-hover:text-indigo-400 transition-colors">→</span>
+                      <span className="text-[#8392ab] group-hover:text-indigo-400 transition-colors">→</span>
                     </button>
 
                     <button
                       onClick={() => setShowClassModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#0f172a] hover:bg-[#142035] border border-slate-800 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
+                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
                     >
                       <div className="flex items-center space-x-3">
                         <span className="h-9 w-9 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center font-bold">🏫</span>
                         <div>
-                          <p className="text-xs font-bold text-white">Create Classes</p>
-                          <p className="text-[10px] text-slate-400">Initialize new course groups (A-K)</p>
+                          <p className="text-xs font-bold text-[#344767]">Create Classes</p>
+                          <p className="text-[10px] text-[#8392ab]">Initialize new course groups (A-K)</p>
                         </div>
                       </div>
-                      <span className="text-slate-500 group-hover:text-emerald-400 transition-colors">→</span>
+                      <span className="text-[#8392ab] group-hover:text-emerald-400 transition-colors">→</span>
                     </button>
 
                     <button
                       onClick={() => setShowRepModal(true)}
-                      className="w-full flex items-center justify-between p-4 bg-[#0f172a] hover:bg-[#142035] border border-slate-800 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
+                      className="w-full flex items-center justify-between p-4 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 rounded-xl text-left hover:border-indigo-500/30 transition-all group"
                     >
                       <div className="flex items-center space-x-3">
                         <span className="h-9 w-9 bg-rose-500/10 text-rose-400 rounded-lg flex items-center justify-center font-bold">👤</span>
                         <div>
-                          <p className="text-xs font-bold text-white">Create Class Rep</p>
-                          <p className="text-[10px] text-slate-400">Provision representative credentials</p>
+                          <p className="text-xs font-bold text-[#344767]">Create Class Rep</p>
+                          <p className="text-[10px] text-[#8392ab]">Provision representative credentials</p>
                         </div>
                       </div>
-                      <span className="text-slate-500 group-hover:text-rose-400 transition-colors">→</span>
+                      <span className="text-[#8392ab] group-hover:text-rose-400 transition-colors">→</span>
                     </button>
                   </div>
                 </div>
 
                 {/* System Threshold Summary */}
-                <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4">
-                  <h3 className="font-bold text-white text-base">Threshold Settings</h3>
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                  <h3 className="font-bold text-[#344767] text-base">Threshold Settings</h3>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                       <div>
-                        <p className="text-xs font-bold text-white">Late Grace Period</p>
-                        <p className="text-[10px] text-slate-400">Marker status thresholds</p>
+                        <p className="text-xs font-bold text-[#344767]">Late Grace Period</p>
+                        <p className="text-[10px] text-[#8392ab]">Marker status thresholds</p>
                       </div>
-                      <span className="bg-[#0f172a] text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-800">
+                      <span className="bg-[#f0f2f5] text-amber-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
                         {settings.lateWindowMinutes} Mins
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200">
                       <div>
-                        <p className="text-xs font-bold text-white">QR Expiry</p>
-                        <p className="text-[10px] text-slate-400">Dynamic refresh frequency</p>
+                        <p className="text-xs font-bold text-[#344767]">QR Expiry</p>
+                        <p className="text-[10px] text-[#8392ab]">Dynamic refresh frequency</p>
                       </div>
-                      <span className="bg-[#0f172a] text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-800">
+                      <span className="bg-[#f0f2f5] text-blue-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
                         {settings.qrExpirySeconds} Secs
                       </span>
                     </div>
 
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-xs font-bold text-white">Geofence Boundary</p>
-                        <p className="text-[10px] text-slate-400">Check-in location range</p>
+                        <p className="text-xs font-bold text-[#344767]">Geofence Boundary</p>
+                        <p className="text-[10px] text-[#8392ab]">Check-in location range</p>
                       </div>
-                      <span className="bg-[#0f172a] text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-800">
+                      <span className="bg-[#f0f2f5] text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg border border-gray-200">
                         {settings.geofenceRadiusMeters} Meters
                       </span>
                     </div>
@@ -1320,17 +1320,17 @@ export default function SuperAdminDashboard() {
 
           {/* PROGRAMMES PANEL */}
           {activeTab === 'programmes' && !loading && (
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6 animate-fade-in">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-bold text-white text-base">Academic Programmes</h3>
-                  <p className="text-xs text-slate-400">Manage course pipelines that drive student enrollment</p>
+                  <h3 className="font-bold text-[#344767] text-base">Academic Programmes</h3>
+                  <p className="text-xs text-[#8392ab]">Manage course pipelines that drive student enrollment</p>
                 </div>
                 <div className="flex gap-2">
                   {programmes.length > 3 && (
                     <button
                       onClick={handleCleanupDuplicateProgrammes}
-                      className="bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
+                      className="bg-amber-600 hover:bg-amber-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
                       title="Merge duplicate programme names into official programmes"
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1341,7 +1341,7 @@ export default function SuperAdminDashboard() {
                   )}
                   <button
                     onClick={() => setShowProgModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
+                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl flex items-center space-x-2 transition"
                   >
                     <span>+ Add Programme</span>
                   </button>
@@ -1349,14 +1349,14 @@ export default function SuperAdminDashboard() {
               </div>
 
               {programmes.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 border border-dashed border-slate-800 rounded-xl">
+                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
                   No academic programmes configured. Click Add Programme to get started.
                 </div>
               ) : (
-                <div className="overflow-hidden border border-slate-800 rounded-xl">
+                <div className="overflow-hidden border border-gray-200 rounded-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800">
+                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
                         <th className="p-4">Name</th>
                         <th className="p-4">Class Count</th>
                         <th className="p-4 text-right">Actions</th>
@@ -1364,8 +1364,8 @@ export default function SuperAdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {programmes.map(prog => (
-                        <tr key={prog.id} className="hover:bg-[#162238] transition-colors text-slate-200">
-                          <td className="p-4 font-bold text-white text-sm">{prog.name}</td>
+                        <tr key={prog.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
+                          <td className="p-4 font-bold text-[#344767] text-sm">{prog.name}</td>
                           <td className="p-4 text-xs font-semibold">{prog._count?.classes || 0} Class(es)</td>
                           <td className="p-4 text-right space-x-2">
                             <button
@@ -1397,20 +1397,20 @@ export default function SuperAdminDashboard() {
           {activeTab === 'classes' && !loading && (
             <div className="space-y-6 animate-fade-in">
               {/* Filter Bar */}
-              <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-5 flex flex-wrap gap-4 items-center justify-between">
+              <div className="bg-white rounded-2xl border border-gray-200 p-5 flex flex-wrap gap-4 items-center justify-between">
                 <div className="flex flex-wrap gap-3 items-center">
                   <input
                     type="text"
                     placeholder="Search classes..."
                     value={classFilters.search}
                     onChange={(e) => setClassFilters(prev => ({ ...prev, search: e.target.value }))}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors w-48"
+                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2 text-xs text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors w-48"
                   />
 
                   <select
                     value={classFilters.programmeId}
                     onChange={(e) => setClassFilters(prev => ({ ...prev, programmeId: e.target.value }))}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none"
+                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
                   >
                     <option value="">All Programmes</option>
                     {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -1419,7 +1419,7 @@ export default function SuperAdminDashboard() {
                   <select
                     value={classFilters.level}
                     onChange={(e) => setClassFilters(prev => ({ ...prev, level: e.target.value }))}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none"
+                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
                   >
                     <option value="">All Levels</option>
                     <option value="100">Level 100</option>
@@ -1431,7 +1431,7 @@ export default function SuperAdminDashboard() {
                   <select
                     value={classFilters.type}
                     onChange={(e) => setClassFilters(prev => ({ ...prev, type: e.target.value }))}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none"
+                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
                   >
                     <option value="">All Types</option>
                     <option value="REGULAR">Regular</option>
@@ -1441,7 +1441,7 @@ export default function SuperAdminDashboard() {
                   <select
                     value={classFilters.session}
                     onChange={(e) => setClassFilters(prev => ({ ...prev, session: e.target.value }))}
-                    className="bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none"
+                    className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767] focus:outline-none"
                   >
                     <option value="">All Sessions</option>
                     <option value="MORNING">Morning</option>
@@ -1452,24 +1452,24 @@ export default function SuperAdminDashboard() {
 
                 <button
                   onClick={() => setShowClassModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
                 >
                   + Create Classes
                 </button>
               </div>
 
               {classes.length === 0 ? (
-                <div className="bg-[#1e293b] text-center py-16 text-slate-400 border border-slate-800 rounded-2xl">
+                <div className="bg-white text-center py-16 text-[#8392ab] border border-gray-200 rounded-2xl">
                   No classes configured. Click Create Classes to initialize groups.
                 </div>
               ) : (
                 <div className="space-y-6">
                   {getGroupedClasses().map((grouped, groupIdx) => (
-                    <div key={groupIdx} className="bg-[#1e293b] rounded-2xl border border-slate-800 overflow-hidden shadow-sm">
+                    <div key={groupIdx} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                       {/* Section Header */}
-                      <div className="bg-[#0f172a] px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                      <div className="bg-[#f0f2f5] px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                         <h4 className="text-xs font-black text-indigo-400 uppercase tracking-widest">{grouped.header}</h4>
-                        <span className="text-[10px] bg-slate-800 text-slate-300 font-bold px-2.5 py-1 rounded-full border border-slate-700">
+                        <span className="text-[10px] bg-gray-200 text-[#344767] font-bold px-2.5 py-1 rounded-full border border-gray-300">
                           {grouped.items.length} Group(s)
                         </span>
                       </div>
@@ -1485,14 +1485,14 @@ export default function SuperAdminDashboard() {
                           const progressPct = Math.round((readyCount / 3) * 100);
 
                           return (
-                            <div key={cls.id} className={`bg-[#0f172a] rounded-2xl border transition-all duration-200 overflow-hidden ${
-                              isReady ? 'border-emerald-500/20 hover:border-emerald-500/40' : 'border-slate-800 hover:border-amber-500/30'
+                            <div key={cls.id} className={`bg-[#f0f2f5] rounded-2xl border transition-all duration-200 overflow-hidden ${
+                              isReady ? 'border-emerald-500/20 hover:border-emerald-500/40' : 'border-gray-200 hover:border-amber-500/30'
                             }`}>
                               {/* Card Header */}
-                              <div className="flex items-start justify-between p-4 pb-3 border-b border-slate-800/60">
+                              <div className="flex items-start justify-between p-4 pb-3 border-b border-gray-200/60">
                                 <div>
                                   <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm font-black text-white">Group {cls.group}</span>
+                                    <span className="text-sm font-black text-[#344767]">Group {cls.group}</span>
                                     {/* Overall status badge */}
                                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
                                       isReady
@@ -1502,17 +1502,17 @@ export default function SuperAdminDashboard() {
                                       {isReady ? '✓ Ready' : `⚠ ${3 - readyCount} step${3 - readyCount > 1 ? 's' : ''} left`}
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-slate-500 font-mono leading-none">{cls.displayName}</p>
+                                  <p className="text-[10px] text-[#8392ab] font-mono leading-none">{cls.displayName}</p>
                                 </div>
                               </div>
 
                               {/* Setup Progress Bar */}
                               <div className="px-4 pt-3 pb-2">
                                 <div className="flex justify-between items-center mb-1.5">
-                                  <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Setup Progress</span>
+                                  <span className="text-[9px] text-[#8392ab] font-bold uppercase tracking-wider">Setup Progress</span>
                                   <span className={`text-[9px] font-black ${isReady ? 'text-emerald-400' : 'text-amber-400'}`}>{readyCount}/3</span>
                                 </div>
-                                <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
                                   <div
                                     className={`h-full rounded-full transition-all duration-500 ${isReady ? 'bg-emerald-500' : 'bg-amber-500'}`}
                                     style={{ width: `${progressPct}%` }}
@@ -1524,13 +1524,13 @@ export default function SuperAdminDashboard() {
                               <div className="px-4 py-3 grid grid-cols-3 gap-2">
                                 {/* Rep Pill */}
                                 <div className={`rounded-xl p-2.5 border text-center ${
-                                  hasRep ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-slate-800/60 border-slate-700'
+                                  hasRep ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-gray-200/60 border-gray-300'
                                 }`}>
-                                  <div className={`text-base mb-0.5 ${hasRep ? 'text-emerald-400' : 'text-slate-600'}`}>
+                                  <div className={`text-base mb-0.5 ${hasRep ? 'text-emerald-400' : 'text-[#8392ab]'}`}>
                                     {hasRep ? '✓' : '✗'}
                                   </div>
-                                  <div className={`text-[9px] font-black uppercase tracking-wide ${hasRep ? 'text-emerald-400' : 'text-slate-500'}`}>Rep</div>
-                                  <div className={`text-[9px] mt-0.5 truncate ${hasRep ? 'text-emerald-300/70' : 'text-slate-600'}`}>
+                                  <div className={`text-[9px] font-black uppercase tracking-wide ${hasRep ? 'text-emerald-400' : 'text-[#8392ab]'}`}>Rep</div>
+                                  <div className={`text-[9px] mt-0.5 truncate ${hasRep ? 'text-emerald-300/70' : 'text-[#8392ab]'}`}>
                                     {hasRep ? cls.rep.username : 'None'}
                                   </div>
                                 </div>
@@ -1563,7 +1563,7 @@ export default function SuperAdminDashboard() {
                               </div>
 
                               {/* Action Buttons */}
-                              <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 border-t border-slate-800/60 mt-2 pt-3">
+                              <div className="px-4 pb-4 pt-1 flex flex-wrap gap-2 border-t border-gray-200/60 mt-2 pt-3">
                                 <button
                                   onClick={() => { setSelectedClassForRep(cls); setShowAssignRepModal(true); }}
                                   className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10 px-2.5 py-1.5 rounded-lg border border-indigo-500/20 hover:border-indigo-500/40 transition-all"
@@ -1626,11 +1626,11 @@ export default function SuperAdminDashboard() {
 
           {/* CLASS REPS PANEL */}
           {activeTab === 'reps' && !loading && (
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6 animate-fade-in">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-bold text-white text-base">Class Representative Accounts</h3>
-                  <p className="text-xs text-slate-400">Provision and manage rep login credentials</p>
+                  <h3 className="font-bold text-[#344767] text-base">Class Representative Accounts</h3>
+                  <p className="text-xs text-[#8392ab]">Provision and manage rep login credentials</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -1644,7 +1644,7 @@ export default function SuperAdminDashboard() {
                   </button>
                   <button
                     onClick={() => setShowRepModal(true)}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
                   >
                     + Create Rep Account
                   </button>
@@ -1652,14 +1652,14 @@ export default function SuperAdminDashboard() {
               </div>
 
               {reps.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 border border-dashed border-slate-800 rounded-xl">
+                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
                   No representative accounts configured. Click Create Rep Account.
                 </div>
               ) : (
-                <div className="overflow-hidden border border-slate-800 rounded-xl">
+                <div className="overflow-hidden border border-gray-200 rounded-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800">
+                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
                         <th className="p-4">Username</th>
                         <th className="p-4">Assigned Class</th>
                         <th className="p-4">Status</th>
@@ -1668,15 +1668,15 @@ export default function SuperAdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {reps.map(rep => (
-                        <tr key={rep.id} className="hover:bg-[#162238] transition-colors text-slate-200">
+                        <tr key={rep.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
                           <td className="p-4">
-                            <span className="font-bold text-white text-sm block">{rep.username}</span>
+                            <span className="font-bold text-[#344767] text-sm block">{rep.username}</span>
                           </td>
                           <td className="p-4 text-xs font-semibold">
                             {rep.assignedClass ? (
-                              <span className="text-indigo-400 font-bold">{rep.assignedClass.displayName}</span>
+                              <span className="text-[#8392ab] font-bold">{rep.assignedClass.displayName}</span>
                             ) : (
-                              <span className="text-slate-500 italic">No assigned class</span>
+                              <span className="text-[#8392ab] italic">No assigned class</span>
                             )}
                           </td>
                           <td className="p-4">
@@ -1709,7 +1709,7 @@ export default function SuperAdminDashboard() {
                             </button>
                             <button
                               onClick={() => handleToggleRepStatus(rep.id, rep.isActive)}
-                              className={`text-xs font-bold hover:bg-slate-800 px-2.5 py-1.5 rounded-lg transition ${
+                              className={`text-xs font-bold hover:bg-gray-200 px-2.5 py-1.5 rounded-lg transition ${
                                 rep.isActive ? 'text-amber-400 hover:text-amber-300' : 'text-emerald-400 hover:text-emerald-300'
                               }`}
                             >
@@ -1736,8 +1736,8 @@ export default function SuperAdminDashboard() {
             <div className="space-y-6 animate-fade-in">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-white text-base">Lecturer Course & Class Allocations</h3>
-                  <p className="text-xs text-slate-400">Map lecturers to their specific course-class assignments using Excel sheets</p>
+                  <h3 className="font-bold text-[#344767] text-base">Lecturer Course & Class Allocations</h3>
+                  <p className="text-xs text-[#8392ab]">Map lecturers to their specific course-class assignments using Excel sheets</p>
                 </div>
                 <button
                   onClick={() => {
@@ -1754,7 +1754,7 @@ export default function SuperAdminDashboard() {
                     document.body.removeChild(link);
                     showNotification("Template CSV downloaded. Edit and re-upload.");
                   }}
-                  className="bg-slate-800 hover:bg-slate-700 active:scale-95 text-indigo-400 border border-slate-700 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                  className="bg-gray-200 hover:bg-gray-100 active:scale-95 text-indigo-400 border border-gray-300 text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1766,8 +1766,8 @@ export default function SuperAdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 {/* Left Side: Upload Panel */}
                 <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
-                    <h4 className="font-bold text-sm text-white">Upload Allocation Spreadsheets</h4>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
+                    <h4 className="font-bold text-sm text-[#344767]">Upload Allocation Spreadsheets</h4>
                     
                     <form onSubmit={handleLecturerFileUpload} className="space-y-4">
                       {/* Drag & Drop zone */}
@@ -1788,7 +1788,7 @@ export default function SuperAdminDashboard() {
                         className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all cursor-pointer flex flex-col items-center justify-center min-h-[160px] ${
                           lecturerFile 
                             ? 'border-emerald-500 bg-emerald-500/5' 
-                            : 'border-slate-700 hover:border-indigo-500 bg-slate-900/50'
+                            : 'border-gray-300 hover:border-indigo-500 bg-gray-100/50'
                         }`}
                       >
                         <input
@@ -1802,18 +1802,18 @@ export default function SuperAdminDashboard() {
                           }}
                         />
                         <label htmlFor="lecturer-file-upload" className="cursor-pointer w-full flex flex-col items-center justify-center">
-                          <svg className={`w-10 h-10 mb-3 transition-colors ${lecturerFile ? 'text-emerald-400' : 'text-slate-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className={`w-10 h-10 mb-3 transition-colors ${lecturerFile ? 'text-emerald-400' : 'text-[#8392ab]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                           </svg>
                           {lecturerFile ? (
                             <div>
                               <p className="text-xs font-bold text-emerald-400 break-all">{lecturerFile.name}</p>
-                              <p className="text-[10px] text-slate-500 mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
+                              <p className="text-[10px] text-[#8392ab] mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
                             </div>
                           ) : (
                             <div>
-                              <p className="text-xs font-bold text-slate-300">Drag & drop sheet here, or <span className="text-indigo-400 hover:underline">browse</span></p>
-                              <p className="text-[10px] text-slate-500 mt-1.5">Supports Excel (.xlsx, .xls) and CSV files</p>
+                              <p className="text-xs font-bold text-[#344767]">Drag & drop sheet here, or <span className="text-indigo-400 hover:underline">browse</span></p>
+                              <p className="text-[10px] text-[#8392ab] mt-1.5">Supports Excel (.xlsx, .xls) and CSV files</p>
                             </div>
                           )}
                         </label>
@@ -1824,7 +1824,7 @@ export default function SuperAdminDashboard() {
                           <button
                             type="button"
                             onClick={() => setLecturerFile(null)}
-                            className="bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-300 text-xs font-semibold px-3 py-2 rounded-xl transition"
+                            className="bg-gray-200 hover:bg-gray-100 active:scale-95 text-[#344767] text-xs font-semibold px-3 py-2 rounded-xl transition"
                           >
                             Clear
                           </button>
@@ -1832,7 +1832,7 @@ export default function SuperAdminDashboard() {
                         <button
                           type="submit"
                           disabled={uploadingLecturers || !lecturerFile}
-                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 disabled:text-slate-600 active:scale-95 text-white text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:bg-gray-200 disabled:text-[#8392ab] active:scale-95 text-[#344767] text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2"
                         >
                           {uploadingLecturers ? (
                             <>
@@ -1848,52 +1848,52 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   {/* Guide Panel */}
-                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4">
-                    <h5 className="font-bold text-xs uppercase tracking-wider text-[#D4A017] flex items-center gap-2">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
+                    <h5 className="font-bold text-xs uppercase tracking-wider text-[#344767] flex items-center gap-2">
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Allocations Mapping Guide
                     </h5>
-                    <p className="text-[11px] leading-relaxed text-slate-400">
+                    <p className="text-[11px] leading-relaxed text-[#8392ab]">
                       When mapping sheets are uploaded, the GCTU Attendance System automates administrative registration:
                     </p>
-                    <ul className="text-[10px] space-y-2 text-slate-300 list-disc list-inside">
+                    <ul className="text-[10px] space-y-2 text-[#344767] list-disc list-inside">
                       <li>Matches and registers missing <span className="font-bold text-indigo-400">Courses</span> & <span className="font-bold text-indigo-400">Programmes</span>.</li>
                       <li>Ensures exact <span className="font-bold text-indigo-400">Classes</span> are constructed and linked.</li>
-                      <li>Auto-creates <span className="font-bold text-[#D4A017]">Lecturer Accounts</span> using names as usernames (Role: <code className="text-indigo-400">LECTURER</code>).</li>
-                      <li>Default temp password: <code className="bg-[#0f172a] px-1 py-0.5 rounded text-emerald-400 font-mono font-bold">gctuLecturer123!</code>.</li>
+                      <li>Auto-creates <span className="font-bold text-[#344767]">Lecturer Accounts</span> using names as usernames (Role: <code className="text-indigo-400">LECTURER</code>).</li>
+                      <li>Default temp password: <code className="bg-[#f0f2f5] px-1 py-0.5 rounded text-emerald-400 font-mono font-bold">gctuLecturer123!</code>.</li>
                       <li>Accounts can immediately log in and will see customized portals.</li>
                     </ul>
                   </div>
 
                   {/* Parse Results Log */}
                   {lecturerUploadResults && (
-                    <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-4 animate-fade-in">
-                      <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                        <h4 className="font-bold text-xs uppercase text-slate-400">Processing Summary</h4>
+                    <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 animate-fade-in">
+                      <div className="flex justify-between items-center border-b border-gray-200 pb-3">
+                        <h4 className="font-bold text-xs uppercase text-[#8392ab]">Processing Summary</h4>
                         <button 
                           onClick={() => setLecturerUploadResults(null)}
-                          className="text-[10px] text-slate-500 hover:text-slate-300 font-semibold"
+                          className="text-[10px] text-[#8392ab] hover:text-[#344767] font-semibold"
                         >
                           Dismiss
                         </button>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-[#0f172a] rounded-xl p-3 border border-emerald-500/10">
-                          <p className="text-[10px] text-slate-500 font-bold uppercase">Linked Rows</p>
+                        <div className="bg-[#f0f2f5] rounded-xl p-3 border border-emerald-500/10">
+                          <p className="text-[10px] text-[#8392ab] font-bold uppercase">Linked Rows</p>
                           <p className="text-2xl font-black text-emerald-400">{lecturerUploadResults.successCount}</p>
                         </div>
-                        <div className="bg-[#0f172a] rounded-xl p-3 border border-red-500/10">
-                          <p className="text-[10px] text-slate-500 font-bold uppercase">Skipped Rows</p>
+                        <div className="bg-[#f0f2f5] rounded-xl p-3 border border-red-500/10">
+                          <p className="text-[10px] text-[#8392ab] font-bold uppercase">Skipped Rows</p>
                           <p className="text-2xl font-black text-red-400">{lecturerUploadResults.failedCount}</p>
                         </div>
                       </div>
                       
                       {lecturerUploadResults.createdLecturers?.length > 0 && (
                         <div>
-                          <p className="text-[10px] font-bold uppercase text-slate-400 mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
-                          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto bg-[#0f172a] p-2 rounded-xl border border-slate-800">
+                          <p className="text-[10px] font-bold uppercase text-[#8392ab] mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
+                          <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto bg-[#f0f2f5] p-2 rounded-xl border border-gray-200">
                             {lecturerUploadResults.createdLecturers.map((name, i) => (
                               <span key={i} className="text-[9px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded font-bold">
                                 {name}
@@ -1906,7 +1906,7 @@ export default function SuperAdminDashboard() {
                       {lecturerUploadResults.errors?.length > 0 && (
                         <div>
                           <p className="text-[10px] font-bold uppercase text-red-400 mb-1.5">Error Log</p>
-                          <div className="bg-[#0f172a] p-2.5 rounded-xl border border-red-500/10 text-[9px] font-mono text-red-300 space-y-1 max-h-36 overflow-y-auto">
+                          <div className="bg-[#f0f2f5] p-2.5 rounded-xl border border-red-500/10 text-[9px] font-mono text-red-300 space-y-1 max-h-36 overflow-y-auto">
                             {lecturerUploadResults.errors.map((err, i) => (
                               <p key={i} className="leading-tight border-b border-red-500/5 pb-1">{err}</p>
                             ))}
@@ -1919,11 +1919,11 @@ export default function SuperAdminDashboard() {
 
                 {/* Right Side: Active Allocations Database Registry */}
                 <div className="lg:col-span-8 space-y-6">
-                  <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <h4 className="font-bold text-sm text-white">Active Allocation Registry</h4>
-                        <p className="text-xs text-slate-400">Search and prune lecturer distribution assignments</p>
+                        <h4 className="font-bold text-sm text-[#344767]">Active Allocation Registry</h4>
+                        <p className="text-xs text-[#8392ab]">Search and prune lecturer distribution assignments</p>
                       </div>
                       
                       <div className="relative w-full sm:w-64">
@@ -1932,10 +1932,10 @@ export default function SuperAdminDashboard() {
                           placeholder="Search Lecturer or Course..."
                           value={lecturerSearchQuery}
                           onChange={(e) => setLecturerSearchQuery(e.target.value)}
-                          className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-9"
+                          className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2 text-xs text-[#344767] placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all pl-9"
                         />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
@@ -1956,17 +1956,17 @@ export default function SuperAdminDashboard() {
 
                       if (filtered.length === 0) {
                         return (
-                          <div className="text-center py-12 text-slate-400 border border-dashed border-slate-800 rounded-xl">
+                          <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
                             {lecturerSearchQuery ? 'No matching allocations found.' : 'No active lecturer allocations found. Parse spreadsheet to populate.'}
                           </div>
                         );
                       }
 
                       return (
-                        <div className="overflow-hidden border border-slate-800 rounded-xl">
+                        <div className="overflow-hidden border border-gray-200 rounded-xl">
                           <table className="w-full text-left border-collapse">
                             <thead>
-                              <tr className="bg-[#0f172a] text-slate-400 text-[10px] uppercase font-bold border-b border-slate-800">
+                              <tr className="bg-[#f0f2f5] text-[#8392ab] text-[10px] uppercase font-bold border-b border-gray-200">
                                 <th className="p-4">Lecturer</th>
                                 <th className="p-4">Taught Course</th>
                                 <th className="p-4">Assigned Class / Level</th>
@@ -1975,21 +1975,21 @@ export default function SuperAdminDashboard() {
                             </thead>
                             <tbody className="divide-y divide-slate-800">
                               {filtered.map(assignment => (
-                                <tr key={assignment.id} className="hover:bg-[#162238]/60 transition-colors text-slate-200 text-xs">
+                                <tr key={assignment.id} className="hover:bg-[#162238]/60 transition-colors text-[#344767] text-xs">
                                   <td className="p-4">
                                     <div className="flex items-center gap-2">
-                                      <div className="h-6 w-6 rounded-full bg-indigo-500/10 text-indigo-400 font-bold text-[9px] flex items-center justify-center border border-indigo-500/20">
+                                      <div className="h-6 w-6 rounded-full bg-indigo-500/10 text-[#8392ab] font-bold text-[9px] flex items-center justify-center border border-indigo-500/20">
                                         {assignment.lecturerName.charAt(0).toUpperCase()}
                                       </div>
-                                      <span className="font-bold text-white text-sm block">{assignment.lecturerName}</span>
+                                      <span className="font-bold text-[#344767] text-sm block">{assignment.lecturerName}</span>
                                     </div>
                                   </td>
                                   <td className="p-4">
-                                    <span className="font-bold block text-slate-300">{assignment.courseName}</span>
-                                    <span className="text-[9px] text-slate-500 font-mono mt-0.5 block">{assignment.courseCode}</span>
+                                    <span className="font-bold block text-[#344767]">{assignment.courseName}</span>
+                                    <span className="text-[9px] text-[#8392ab] font-mono mt-0.5 block">{assignment.courseCode}</span>
                                   </td>
                                   <td className="p-4">
-                                    <span className="text-indigo-400 font-bold block">{assignment.classDisplayName}</span>
+                                    <span className="text-[#8392ab] font-bold block">{assignment.classDisplayName}</span>
                                   </td>
                                   <td className="p-4 text-right">
                                     <button
@@ -2014,29 +2014,29 @@ export default function SuperAdminDashboard() {
 
           {/* COURSES PANEL */}
           {activeTab === 'courses' && !loading && (
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6 animate-fade-in">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 animate-fade-in">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-bold text-white text-base">Global Courses Database</h3>
-                  <p className="text-xs text-slate-400">Configure courses which can be linked to class sessions</p>
+                  <h3 className="font-bold text-[#344767] text-base">Global Courses Database</h3>
+                  <p className="text-xs text-[#8392ab]">Configure courses which can be linked to class sessions</p>
                 </div>
                 <button
                   onClick={() => setShowCourseModal(true)}
-                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                  className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
                 >
                   + Add Course
                 </button>
               </div>
 
               {courses.length === 0 ? (
-                <div className="text-center py-12 text-slate-400 border border-dashed border-slate-800 rounded-xl">
+                <div className="text-center py-12 text-[#8392ab] border border-dashed border-gray-200 rounded-xl">
                   No courses found in system. Click Add Course to register one.
                 </div>
               ) : (
-                <div className="overflow-hidden border border-slate-800 rounded-xl">
+                <div className="overflow-hidden border border-gray-200 rounded-xl">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800">
+                      <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200">
                         <th className="p-4">Course Name</th>
                         <th className="p-4">Course Code</th>
                         <th className="p-4 text-right">Actions</th>
@@ -2044,8 +2044,8 @@ export default function SuperAdminDashboard() {
                     </thead>
                     <tbody className="divide-y divide-slate-800">
                       {courses.map(course => (
-                        <tr key={course.id} className="hover:bg-[#162238] transition-colors text-slate-200">
-                          <td className="p-4 font-bold text-white text-sm">{course.name}</td>
+                        <tr key={course.id} className="hover:bg-[#162238] transition-colors text-[#344767]">
+                          <td className="p-4 font-bold text-[#344767] text-sm">{course.name}</td>
                           <td className="p-4 font-mono text-xs text-indigo-300">{course.code}</td>
                           <td className="p-4 text-right space-x-2">
                             <button
@@ -2077,21 +2077,21 @@ export default function SuperAdminDashboard() {
           {activeTab === 'settings' && !loading && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
               {/* Branding & Logo */}
-              <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
                 <div>
-                  <h3 className="font-bold text-white text-base">Department Branding</h3>
-                  <p className="text-xs text-slate-400">Customize the department name and banner logo</p>
+                  <h3 className="font-bold text-[#344767] text-base">Department Branding</h3>
+                  <p className="text-xs text-[#8392ab]">Customize the department name and banner logo</p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-2">Logo Preview</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-2">Logo Preview</label>
                     <div className="flex items-center space-x-4">
-                      <div className="h-24 w-24 bg-[#0f172a] rounded-2xl border border-slate-800 flex items-center justify-center overflow-hidden">
+                      <div className="h-24 w-24 bg-[#f0f2f5] rounded-2xl border border-gray-200 flex items-center justify-center overflow-hidden">
                         {logoPreview ? (
                           <img src={logoPreview} alt="Dept Logo" className="h-full w-full object-cover" />
                         ) : (
-                          <span className="text-xs text-slate-500 font-bold">No Logo</span>
+                          <span className="text-xs text-[#8392ab] font-bold">No Logo</span>
                         )}
                       </div>
                       <div className="space-y-2">
@@ -2110,14 +2110,14 @@ export default function SuperAdminDashboard() {
                         />
                         <button
                           onClick={() => logoInputRef.current.click()}
-                          className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+                          className="bg-gray-200 hover:bg-gray-100 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition"
                         >
                           Select Image File
                         </button>
                         {logoFile && (
                           <button
                             onClick={handleLogoUpload}
-                            className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl ml-2 transition"
+                            className="bg-indigo-600 hover:bg-indigo-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl ml-2 transition"
                           >
                             Save Upload
                           </button>
@@ -2127,12 +2127,12 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Department Name</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Department Name</label>
                     <input
                       type="text"
                       value={settings.deptName}
                       onChange={(e) => setSettings(prev => ({ ...prev, deptName: e.target.value }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                   </div>
 
@@ -2145,7 +2145,7 @@ export default function SuperAdminDashboard() {
                         showNotification('Failed to update brand name', 'error');
                       }
                     }}
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
                   >
                     Save Branding Text
                   </button>
@@ -2153,49 +2153,49 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Threshold Parameters */}
-              <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6 space-y-6">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6">
                 <div>
-                  <h3 className="font-bold text-white text-base">System Threshold Config</h3>
-                  <p className="text-xs text-slate-400">Calibrate geofence range, late windows, and QR tokens</p>
+                  <h3 className="font-bold text-[#344767] text-base">System Threshold Config</h3>
+                  <p className="text-xs text-[#8392ab]">Calibrate geofence range, late windows, and QR tokens</p>
                 </div>
 
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Late Grace Period (Minutes)</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Late Grace Period (Minutes)</label>
                     <input
                       type="number"
                       required
                       value={settings.lateWindowMinutes}
                       onChange={(e) => setSettings(prev => ({ ...prev, lateWindowMinutes: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">QR Expiry Span (Seconds)</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">QR Expiry Span (Seconds)</label>
                     <input
                       type="number"
                       required
                       value={settings.qrExpirySeconds}
                       onChange={(e) => setSettings(prev => ({ ...prev, qrExpirySeconds: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Geofence Radius (Meters)</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Geofence Radius (Meters)</label>
                     <input
                       type="number"
                       required
                       value={settings.geofenceRadiusMeters}
                       onChange={(e) => setSettings(prev => ({ ...prev, geofenceRadiusMeters: parseInt(e.target.value) || 0 }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500 transition-colors"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition"
+                    className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-[#344767] text-xs font-bold px-4 py-2.5 rounded-xl transition"
                   >
                     Save Thresholds
                   </button>
@@ -2256,11 +2256,11 @@ export default function SuperAdminDashboard() {
           {/* NOTIFICATIONS PANEL */}
           {activeTab === 'notifications' && (
             <div className="animate-fade-in space-y-6">
-              <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
+              <div className="bg-white rounded-2xl border border-gray-200 p-6">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h3 className="font-bold text-white text-lg">System Notifications</h3>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <h3 className="font-bold text-[#344767] text-lg">System Notifications</h3>
+                    <p className="text-xs text-[#8392ab] mt-1">
                       {notifications.filter(n => !n.isRead).length} unread • {notifications.length} total
                     </p>
                   </div>
@@ -2268,7 +2268,7 @@ export default function SuperAdminDashboard() {
                     {notifications.some(n => !n.isRead) && (
                       <button
                         onClick={handleMarkAllAsRead}
-                        className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                        className="bg-blue-600 hover:bg-blue-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -2279,7 +2279,7 @@ export default function SuperAdminDashboard() {
                     {notifications.length > 0 && (
                       <button
                         onClick={handleClearAll}
-                        className="bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                        className="bg-rose-600 hover:bg-rose-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -2292,17 +2292,17 @@ export default function SuperAdminDashboard() {
 
                 {notificationsLoading ? (
                   <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : notifications.length === 0 ? (
                   <div className="text-center py-20 space-y-4">
-                    <div className="inline-flex p-4 bg-slate-800/50 rounded-2xl">
-                      <svg className="w-12 h-12 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="inline-flex p-4 bg-gray-200/50 rounded-2xl">
+                      <svg className="w-12 h-12 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0L12 17l-8-4" />
                       </svg>
                     </div>
-                    <p className="text-sm font-bold text-slate-400">All caught up!</p>
-                    <p className="text-xs text-slate-500">No notifications to display</p>
+                    <p className="text-sm font-bold text-[#8392ab]">All caught up!</p>
+                    <p className="text-xs text-[#8392ab]">No notifications to display</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -2319,7 +2319,7 @@ export default function SuperAdminDashboard() {
                             );
                           case 'WARNING':
                             return (
-                              <div className="p-3 bg-[#D4A017]/10 text-[#D4A017] rounded-xl border border-[#D4A017]/20">
+                              <div className="p-3 bg-[#344767]/10 text-[#344767] rounded-xl border border-[#344767]/20">
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
@@ -2372,21 +2372,21 @@ export default function SuperAdminDashboard() {
                           className={`p-5 rounded-xl border transition-all cursor-pointer flex gap-4 relative ${
                             !notification.isRead 
                               ? 'bg-blue-500/5 border-blue-500/20 hover:bg-blue-500/10' 
-                              : 'bg-slate-800/30 border-slate-800 hover:bg-slate-800/50'
+                              : 'bg-gray-200/30 border-gray-200 hover:bg-gray-200/50'
                           }`}
                         >
                           {!notification.isRead && (
-                            <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-[#D4A017] animate-pulse" />
+                            <span className="absolute top-5 right-5 h-2.5 w-2.5 rounded-full bg-gradient-to-br from-[#14172B] to-[#3A416F] animate-pulse" />
                           )}
                           {getIcon(notification.type)}
                           <div className="flex-1 min-w-0">
-                            <p className={`text-sm font-bold mb-1 ${!notification.isRead ? 'text-white' : 'text-slate-300'}`}>
+                            <p className={`text-sm font-bold mb-1 ${!notification.isRead ? 'text-[#344767]' : 'text-[#344767]'}`}>
                               {notification.title}
                             </p>
-                            <p className="text-sm text-slate-400 leading-relaxed mb-2">
+                            <p className="text-sm text-[#8392ab] leading-relaxed mb-2">
                               {notification.message}
                             </p>
-                            <span className="text-xs text-slate-500 font-medium">
+                            <span className="text-xs text-[#8392ab] font-medium">
                               {formatTime(notification.createdAt)}
                             </span>
                           </div>
@@ -2426,13 +2426,13 @@ export default function SuperAdminDashboard() {
       {/* ADD CLASS MODAL (MULTI-STEP) */}
       {showClassModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
             {/* Steps indicator */}
             <div className="flex justify-between items-center mb-6">
-              <span className="text-xs font-bold text-slate-400">Step {classStep} of 3</span>
+              <span className="text-xs font-bold text-[#8392ab]">Step {classStep} of 3</span>
               <div className="flex space-x-1.5">
                 {[1, 2, 3].map(s => (
-                  <span key={s} className={`h-1.5 w-1.5 rounded-full ${classStep >= s ? 'bg-indigo-500' : 'bg-slate-800'}`}></span>
+                  <span key={s} className={`h-1.5 w-1.5 rounded-full ${classStep >= s ? 'bg-indigo-500' : 'bg-gray-200'}`}></span>
                 ))}
               </div>
             </div>
@@ -2440,13 +2440,13 @@ export default function SuperAdminDashboard() {
             {/* Step 1: Details */}
             {classStep === 1 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white">Create Class Groups</h3>
+                <h3 className="text-lg font-bold text-[#344767]">Create Class Groups</h3>
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Academic Programme</label>
+                  <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Academic Programme</label>
                   <select
                     value={newClass.programmeId}
                     onChange={(e) => setNewClass(prev => ({ ...prev, programmeId: e.target.value }))}
-                    className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                   >
                     <option value="" disabled>Select Programme</option>
                     {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -2455,11 +2455,11 @@ export default function SuperAdminDashboard() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Level</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Level</label>
                     <select
                       value={newClass.level}
                       onChange={(e) => setNewClass(prev => ({ ...prev, level: e.target.value }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-3 text-[#344767] focus:outline-none"
                     >
                       <option value="100">100</option>
                       <option value="200">200</option>
@@ -2469,11 +2469,11 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Type</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Type</label>
                     <select
                       value={newClass.type}
                       onChange={(e) => setNewClass(prev => ({ ...prev, type: e.target.value }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-3 text-[#344767] focus:outline-none"
                     >
                       <option value="REGULAR">REGULAR</option>
                       <option value="TOP-UP">TOP-UP</option>
@@ -2481,11 +2481,11 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Session</label>
+                    <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Session</label>
                     <select
                       value={newClass.session}
                       onChange={(e) => setNewClass(prev => ({ ...prev, session: e.target.value }))}
-                      className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-3 text-white focus:outline-none"
+                      className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-3 text-[#344767] focus:outline-none"
                     >
                       <option value="MORNING">MORNING</option>
                       <option value="EVENING">EVENING</option>
@@ -2497,7 +2497,7 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     onClick={resetClassModal}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                   >
                     Cancel
                   </button>
@@ -2509,7 +2509,7 @@ export default function SuperAdminDashboard() {
                       }
                       setClassStep(2);
                     }}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
                   >
                     Next Step
                   </button>
@@ -2520,8 +2520,8 @@ export default function SuperAdminDashboard() {
             {/* Step 2: Choose Groups */}
             {classStep === 2 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-white">Select Class Groups</h3>
-                <p className="text-xs text-slate-400">Click to toggle groups you want to create simultaneously</p>
+                <h3 className="text-lg font-bold text-[#344767]">Select Class Groups</h3>
+                <p className="text-xs text-[#8392ab]">Click to toggle groups you want to create simultaneously</p>
 
                 {/* A-K Grid */}
                 <div className="grid grid-cols-4 gap-2">
@@ -2534,7 +2534,7 @@ export default function SuperAdminDashboard() {
                         className={`h-11 rounded-xl text-xs font-black border transition-all ${
                           isSelected
                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-md scale-95'
-                            : 'bg-[#0f172a] text-slate-400 border-slate-800 hover:bg-slate-800/40'
+                            : 'bg-[#f0f2f5] text-[#8392ab] border-gray-200 hover:bg-gray-200/40'
                         }`}
                       >
                         Group {letter}
@@ -2544,12 +2544,12 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {/* Preview text */}
-                <div className="bg-[#0f172a] rounded-xl p-4 border border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold block mb-1">Creation Summary</span>
+                <div className="bg-[#f0f2f5] rounded-xl p-4 border border-gray-200">
+                  <span className="text-[10px] text-[#8392ab] font-bold block mb-1">Creation Summary</span>
                   {newClass.groups.length === 0 ? (
-                    <span className="text-slate-500 italic text-xs">No groups selected yet</span>
+                    <span className="text-[#8392ab] italic text-xs">No groups selected yet</span>
                   ) : (
-                    <p className="text-xs font-semibold text-slate-200">
+                    <p className="text-xs font-semibold text-[#344767]">
                       You are about to create: <br />
                       <span className="text-indigo-400">
                         {newClass.groups.map(g => {
@@ -2564,13 +2564,13 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-between pt-4">
                   <button
                     onClick={() => setClassStep(1)}
-                    className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                    className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleCreateClasses}
-                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
+                    className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
                   >
                     Create All
                   </button>
@@ -2587,8 +2587,8 @@ export default function SuperAdminDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Classes Spawned Successfully</h3>
-                  <p className="text-xs text-slate-400 mt-1">Associated group cards are now live on your classes deck.</p>
+                  <h3 className="text-lg font-bold text-[#344767]">Classes Spawned Successfully</h3>
+                  <p className="text-xs text-[#8392ab] mt-1">Associated group cards are now live on your classes deck.</p>
                 </div>
                 <div className="flex flex-col space-y-2 w-full pt-4">
                   <button
@@ -2596,13 +2596,13 @@ export default function SuperAdminDashboard() {
                       resetClassModal();
                       setActiveTab('reps');
                     }}
-                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white transition-all"
+                    className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767] transition-all"
                   >
                     Assign Representatives Now
                   </button>
                   <button
                     onClick={resetClassModal}
-                    className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                    className="w-full py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                   >
                     Done / Return
                   </button>
@@ -2616,66 +2616,66 @@ export default function SuperAdminDashboard() {
       {/* CREATE REP MODAL */}
       {showRepModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-bold text-white mb-4">Create Class Rep</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+            <h3 className="text-lg font-bold text-[#344767] mb-4">Create Class Rep</h3>
             <form onSubmit={handleCreateRep} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Full Name</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. John Doe"
                   value={newRep.fullName}
                   onChange={(e) => setNewRep(prev => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Index Number</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Index Number</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. 10912345"
                   value={newRep.indexNumber}
                   onChange={(e) => setNewRep(prev => ({ ...prev, indexNumber: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Username (Login ID)</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Username (Login ID)</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. johndoe"
                   value={newRep.username}
                   onChange={(e) => setNewRep(prev => ({ ...prev, username: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Password"
                   value={newRep.password}
                   onChange={(e) => setNewRep(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">Confirm Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Repeat password"
                   value={newRep.confirmPassword}
                   onChange={(e) => setNewRep(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -2683,13 +2683,13 @@ export default function SuperAdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setShowRepModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
                 >
                   Save Account
                 </button>
@@ -2702,24 +2702,24 @@ export default function SuperAdminDashboard() {
       {/* BULK UPLOAD REPS MODAL */}
       {showBulkUploadModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-bold text-white mb-4">Bulk Upload Class Reps</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-lg w-full shadow-2xl animate-scale-up">
+            <h3 className="text-lg font-bold text-[#344767] mb-4">Bulk Upload Class Reps</h3>
             
             <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
               <p className="text-xs text-blue-400 font-semibold mb-2">📋 Excel/CSV Format Required:</p>
-              <p className="text-xs text-slate-400 mb-2">Columns: <span className="font-mono text-blue-400">indexNumber, name, email, programme, level, type, group, session</span></p>
-              <p className="text-xs text-slate-400">Example: <span className="font-mono text-slate-300">10912345, John Doe, john@gctu.edu.gh, BIT, 300, TOP-UP, B, EVENING</span></p>
+              <p className="text-xs text-[#8392ab] mb-2">Columns: <span className="font-mono text-blue-400">indexNumber, name, email, programme, level, type, group, session</span></p>
+              <p className="text-xs text-[#8392ab]">Example: <span className="font-mono text-[#344767]">10912345, John Doe, john@gctu.edu.gh, BIT, 300, TOP-UP, B, EVENING</span></p>
               <p className="text-xs text-amber-400 mt-2">⚠️ Default password: <span className="font-mono font-bold">rep123</span></p>
             </div>
 
             <form onSubmit={handleBulkUploadReps} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-2">Select File</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-2">Select File</label>
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={(e) => setBulkUploadFile(e.target.files[0])}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 file:cursor-pointer"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-[#344767] hover:file:bg-indigo-500 file:cursor-pointer"
                 />
                 {bulkUploadFile && (
                   <p className="text-xs text-emerald-400 mt-2">✓ Selected: {bulkUploadFile.name}</p>
@@ -2732,14 +2732,14 @@ export default function SuperAdminDashboard() {
                     ? 'bg-emerald-500/10 border-emerald-500/20' 
                     : 'bg-amber-500/10 border-amber-500/20'
                 }`}>
-                  <p className="text-xs font-semibold text-white mb-2">Upload Results:</p>
-                  <p className="text-xs text-slate-300">✓ Created: {bulkUploadResult.createdCount}</p>
-                  <p className="text-xs text-slate-300">⊘ Skipped: {bulkUploadResult.skippedCount}</p>
+                  <p className="text-xs font-semibold text-[#344767] mb-2">Upload Results:</p>
+                  <p className="text-xs text-[#344767]">✓ Created: {bulkUploadResult.createdCount}</p>
+                  <p className="text-xs text-[#344767]">⊘ Skipped: {bulkUploadResult.skippedCount}</p>
                   {bulkUploadResult.errors && bulkUploadResult.errors.length > 0 && (
                     <div className="mt-2 max-h-32 overflow-y-auto">
                       <p className="text-xs text-amber-400 font-semibold mb-1">Errors:</p>
                       {bulkUploadResult.errors.map((err, idx) => (
-                        <p key={idx} className="text-xs text-slate-400">• {err}</p>
+                        <p key={idx} className="text-xs text-[#8392ab]">• {err}</p>
                       ))}
                     </div>
                   )}
@@ -2754,7 +2754,7 @@ export default function SuperAdminDashboard() {
                     setBulkUploadFile(null);
                     setBulkUploadResult(null);
                   }}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                 >
                   Cancel
                 </button>
@@ -2786,31 +2786,31 @@ export default function SuperAdminDashboard() {
       {/* RESET PASSWORD MODAL */}
       {showResetPwdModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
-            <h3 className="text-lg font-bold text-white mb-4">Reset Rep Password</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+            <h3 className="text-lg font-bold text-[#344767] mb-4">Reset Rep Password</h3>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">New Password</label>
+                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">New Password</label>
                 <input
                   type="password"
                   required
                   placeholder="Enter new password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
                 />
               </div>
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
                   onClick={() => setShowResetPwdModal(false)}
-                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-300"
+                  className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-white"
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767]"
                 >
                   Reset Password
                 </button>
@@ -2867,10 +2867,10 @@ export default function SuperAdminDashboard() {
       {/* ASSIGN REPRESENTATIVE MODAL */}
       {showAssignRepModal && selectedClassForRep && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-bold text-white">Assign Class Rep</h3>
+                <h3 className="text-lg font-bold text-[#344767]">Assign Class Rep</h3>
                 <span className="text-xs text-indigo-400 font-semibold">{selectedClassForRep.displayName}</span>
               </div>
               <button
@@ -2878,7 +2878,7 @@ export default function SuperAdminDashboard() {
                   setShowAssignRepModal(false);
                   setSelectedClassForRep(null);
                 }}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8392ab] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -2890,7 +2890,7 @@ export default function SuperAdminDashboard() {
                 placeholder="Search unassigned reps..."
                 value={repSearchQuery}
                 onChange={(e) => setRepSearchQuery(e.target.value)}
-                className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2.5 text-xs text-[#344767] focus:outline-none focus:border-indigo-500"
               />
 
               <div className="max-h-60 overflow-y-auto space-y-2">
@@ -2901,15 +2901,15 @@ export default function SuperAdminDashboard() {
                     <button
                       key={rep.id}
                       onClick={() => handleAssignRep(rep.id)}
-                      className="w-full text-left p-3.5 bg-[#0f172a] hover:bg-[#142035] border border-slate-800 hover:border-indigo-500/30 rounded-xl flex items-center justify-between text-xs text-slate-200 transition"
+                      className="w-full text-left p-3.5 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 hover:border-indigo-500/30 rounded-xl flex items-center justify-between text-xs text-[#344767] transition"
                     >
-                      <span className="font-bold text-white">{rep.username}</span>
-                      <span className="text-indigo-400 font-bold">Assign →</span>
+                      <span className="font-bold text-[#344767]">{rep.username}</span>
+                      <span className="text-[#8392ab] font-bold">Assign →</span>
                     </button>
                   ))}
 
                 {reps.filter(r => r.isActive && !r.assignedClass).length === 0 && (
-                  <p className="text-center py-4 text-xs text-slate-500 italic">No unassigned active representatives found.</p>
+                  <p className="text-center py-4 text-xs text-[#8392ab] italic">No unassigned active representatives found.</p>
                 )}
               </div>
             </div>
@@ -2920,10 +2920,10 @@ export default function SuperAdminDashboard() {
       {/* VIEW STUDENTS MODAL (MANUAL + BULK IMPORT) */}
       {showStudentsModal && selectedClassForStudents && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-scale-up">
-            <div className="flex justify-between items-start mb-4 border-b border-slate-800 pb-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-scale-up">
+            <div className="flex justify-between items-start mb-4 border-b border-gray-200 pb-4">
               <div>
-                <h3 className="text-lg font-bold text-white">Enrollment List</h3>
+                <h3 className="text-lg font-bold text-[#344767]">Enrollment List</h3>
                 <span className="text-xs text-indigo-400 font-semibold">{selectedClassForStudents.displayName}</span>
               </div>
               <button
@@ -2933,7 +2933,7 @@ export default function SuperAdminDashboard() {
                   setManualStudents([{ name: '', indexNumber: '', email: '' }]);
                   setCsvPreview([]);
                 }}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8392ab] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -2943,12 +2943,12 @@ export default function SuperAdminDashboard() {
               {/* Existing students list */}
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-sm font-bold text-white">Enrolled Students ({classStudents.length})</h4>
+                  <h4 className="text-sm font-bold text-[#344767]">Enrolled Students ({classStudents.length})</h4>
                   <div className="flex items-center gap-3">
                     {selectedStudentIds.length > 0 && (
                       <button
                         onClick={handleBulkDeleteStudents}
-                        className="bg-red-600 hover:bg-red-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
+                        className="bg-red-600 hover:bg-red-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -2961,18 +2961,18 @@ export default function SuperAdminDashboard() {
                       placeholder="Search enrolled..."
                       value={studentSearch}
                       onChange={(e) => setStudentSearch(e.target.value)}
-                      className="bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"
+                      className="bg-[#f0f2f5] border border-gray-200 rounded-xl px-4 py-2 text-xs text-[#344767] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {classStudents.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic py-6 text-center border border-dashed border-slate-800 rounded-xl">No students registered in this class group.</p>
+                  <p className="text-xs text-[#8392ab] italic py-6 text-center border border-dashed border-gray-200 rounded-xl">No students registered in this class group.</p>
                 ) : (
-                  <div className="overflow-hidden border border-slate-800 rounded-xl max-h-60 overflow-y-auto">
+                  <div className="overflow-hidden border border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#0f172a] text-slate-400 text-xs font-bold border-b border-slate-800 sticky top-0">
+                        <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200 sticky top-0">
                           <th className="p-3 w-10">
                             <input
                               type="checkbox"
@@ -2988,7 +2988,7 @@ export default function SuperAdminDashboard() {
                                 ).length
                               }
                               onChange={handleToggleAllStudents}
-                              className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
+                              className="w-4 h-4 rounded border-slate-600 bg-gray-200 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
                             />
                           </th>
                           <th className="p-3">Index Number</th>
@@ -3001,18 +3001,18 @@ export default function SuperAdminDashboard() {
                         {classStudents
                           .filter(s => s.name.toLowerCase().includes(studentSearch.toLowerCase()) || s.indexNumber.includes(studentSearch))
                           .map(student => (
-                            <tr key={student.id} className={`hover:bg-[#162238] transition-colors ${selectedStudentIds.includes(student.id) ? 'bg-indigo-500/10' : 'text-slate-200'}`}>
+                            <tr key={student.id} className={`hover:bg-[#162238] transition-colors ${selectedStudentIds.includes(student.id) ? 'bg-indigo-500/10' : 'text-[#344767]'}`}>
                               <td className="p-3">
                                 <input
                                   type="checkbox"
                                   checked={selectedStudentIds.includes(student.id)}
                                   onChange={() => handleToggleStudentSelection(student.id)}
-                                  className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
+                                  className="w-4 h-4 rounded border-slate-600 bg-gray-200 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-900 cursor-pointer"
                                 />
                               </td>
                               <td className="p-3 font-mono text-xs text-indigo-300 font-bold">{student.indexNumber}</td>
                               <td className="p-3 text-xs font-semibold">{student.name}</td>
-                              <td className="p-3 text-xs font-semibold text-slate-400">{student.email || 'N/A'}</td>
+                              <td className="p-3 text-xs font-semibold text-[#8392ab]">{student.email || 'N/A'}</td>
                               <td className="p-3 text-right space-x-2">
                                 <button
                                   onClick={() => {
@@ -3039,12 +3039,12 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Add students section */}
-              <div className="border-t border-slate-800 pt-6 space-y-4">
+              <div className="border-t border-gray-200 pt-6 space-y-4">
                 <div className="flex border-b border-slate-850">
                   <button
                     onClick={() => setStudentAddTab('manual')}
                     className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all ${
-                      studentAddTab === 'manual' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-400 hover:text-white'
+                      studentAddTab === 'manual' ? 'border-indigo-500 text-[#344767]' : 'border-transparent text-[#8392ab] hover:text-[#344767]'
                     }`}
                   >
                     ✍️ Manual Entry
@@ -3052,7 +3052,7 @@ export default function SuperAdminDashboard() {
                   <button
                     onClick={() => setStudentAddTab('csv')}
                     className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all ${
-                      studentAddTab === 'csv' ? 'border-indigo-500 text-white' : 'border-transparent text-slate-400 hover:text-white'
+                      studentAddTab === 'csv' ? 'border-indigo-500 text-[#344767]' : 'border-transparent text-[#8392ab] hover:text-[#344767]'
                     }`}
                   >
                     📂 Bulk Import (CSV/Excel/PDF)
@@ -3072,7 +3072,7 @@ export default function SuperAdminDashboard() {
                               placeholder="Index Number"
                               value={s.indexNumber}
                               onChange={(e) => handleManualStudentChange(idx, 'indexNumber', e.target.value)}
-                              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+                              className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767]"
                             />
                           </div>
                           <div className="col-span-4">
@@ -3082,7 +3082,7 @@ export default function SuperAdminDashboard() {
                               placeholder="Full Name"
                               value={s.name}
                               onChange={(e) => handleManualStudentChange(idx, 'name', e.target.value)}
-                              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+                              className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767]"
                             />
                           </div>
                           <div className="col-span-4">
@@ -3091,7 +3091,7 @@ export default function SuperAdminDashboard() {
                               placeholder="Email (Optional)"
                               value={s.email}
                               onChange={(e) => handleManualStudentChange(idx, 'email', e.target.value)}
-                              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+                              className="w-full bg-[#f0f2f5] border border-gray-200 rounded-xl px-3 py-2 text-xs text-[#344767]"
                             />
                           </div>
                           <div className="col-span-1 text-center">
@@ -3117,7 +3117,7 @@ export default function SuperAdminDashboard() {
                       </button>
                       <button
                         onClick={handleSaveManualStudents}
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+                        className="bg-indigo-600 hover:bg-indigo-500 text-[#344767] text-xs font-bold px-4 py-2 rounded-xl transition"
                       >
                         Enroll Selected Students
                       </button>
@@ -3128,7 +3128,7 @@ export default function SuperAdminDashboard() {
                 {/* CSV upload tab */}
                 {studentAddTab === 'csv' && (
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center text-xs text-slate-400">
+                    <div className="flex justify-between items-center text-xs text-[#8392ab]">
                       <span>Import student database using CSV (.csv), Excel (.xlsx, .xls) or PDF (.pdf) files.</span>
                       <a
                         href="/students_template.csv"
@@ -3142,7 +3142,7 @@ export default function SuperAdminDashboard() {
                     <div
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={handleCsvFileDrop}
-                      className="border-2 border-dashed border-slate-800 rounded-xl p-8 text-center bg-[#0f172a] hover:border-indigo-500/30 transition cursor-pointer"
+                      className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center bg-[#f0f2f5] hover:border-indigo-500/30 transition cursor-pointer"
                     >
                       <input
                         type="file"
@@ -3152,8 +3152,8 @@ export default function SuperAdminDashboard() {
                         id="csv-file-selector"
                       />
                       <label htmlFor="csv-file-selector" className="cursor-pointer">
-                        <span className="block text-slate-300 font-bold text-sm">Drag and drop file here, or click to browse</span>
-                        <span className="block text-[10px] text-slate-500 mt-1">Supports CSV, Excel sheets, and class registers in PDF format</span>
+                        <span className="block text-[#344767] font-bold text-sm">Drag and drop file here, or click to browse</span>
+                        <span className="block text-[10px] text-[#8392ab] mt-1">Supports CSV, Excel sheets, and class registers in PDF format</span>
                       </label>
                     </div>
 
@@ -3168,19 +3168,19 @@ export default function SuperAdminDashboard() {
                             Import Previewed Students
                           </button>
                         </div>
-                        <div className="overflow-hidden border border-slate-800 rounded-xl max-h-40 overflow-y-auto">
+                        <div className="overflow-hidden border border-gray-200 rounded-xl max-h-40 overflow-y-auto">
                           <table className="w-full text-left border-collapse">
-                            <tbody className="divide-y divide-slate-800 text-slate-300">
+                            <tbody className="divide-y divide-slate-800 text-[#344767]">
                               {csvPreview.slice(0, 10).map((row, i) => (
                                 <tr key={i} className="text-xs bg-[#1a2335]/30">
                                   <td className="p-2 font-mono">{row.indexNumber}</td>
                                   <td className="p-2">{row.name}</td>
-                                  <td className="p-2 text-slate-400">{row.email}</td>
+                                  <td className="p-2 text-[#8392ab]">{row.email}</td>
                                 </tr>
                               ))}
                               {csvPreview.length > 10 && (
                                 <tr>
-                                  <td colSpan="3" className="p-2 text-center text-slate-500 text-[10px] italic">...and {csvPreview.length - 10} more rows</td>
+                                  <td colSpan="3" className="p-2 text-center text-[#8392ab] text-[10px] italic">...and {csvPreview.length - 10} more rows</td>
                                 </tr>
                               )}
                             </tbody>
@@ -3199,10 +3199,10 @@ export default function SuperAdminDashboard() {
       {/* CLASS COURSES MODAL */}
       {showClassCoursesModal && selectedClassForCourses && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-          <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h3 className="text-lg font-bold text-white">Linked Class Courses</h3>
+                <h3 className="text-lg font-bold text-[#344767]">Linked Class Courses</h3>
                 <span className="text-xs text-indigo-400 font-semibold">{selectedClassForCourses.displayName}</span>
               </div>
               <button
@@ -3211,7 +3211,7 @@ export default function SuperAdminDashboard() {
                   setSelectedClassForCourses(null);
                   setClassCourses([]);
                 }}
-                className="text-slate-400 hover:text-white"
+                className="text-[#8392ab] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -3220,14 +3220,14 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4">
               {/* Linked courses */}
               <div className="space-y-2">
-                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Currently Linked</span>
+                <span className="text-[10px] text-[#8392ab] font-bold block uppercase tracking-wider">Currently Linked</span>
                 {classCourses.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic py-2">No courses linked to this class group yet.</p>
+                  <p className="text-xs text-[#8392ab] italic py-2">No courses linked to this class group yet.</p>
                 ) : (
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {classCourses.map(cc => (
-                      <div key={cc.id} className="flex justify-between items-center p-2.5 bg-[#0f172a] rounded-lg border border-slate-800 text-xs">
-                        <span className="text-slate-200 font-semibold">{cc.name} ({cc.code})</span>
+                      <div key={cc.id} className="flex justify-between items-center p-2.5 bg-[#f0f2f5] rounded-lg border border-gray-200 text-xs">
+                        <span className="text-[#344767] font-semibold">{cc.name} ({cc.code})</span>
                         <button
                           onClick={() => handleUnlinkCourseFromClass(cc.id)}
                           className="text-red-400 hover:text-red-300 font-bold text-[10px] uppercase"
@@ -3241,8 +3241,8 @@ export default function SuperAdminDashboard() {
               </div>
 
               {/* Link new courses dropdown */}
-              <div className="border-t border-slate-800 pt-4 space-y-2">
-                <span className="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Link Available Course</span>
+              <div className="border-t border-gray-200 pt-4 space-y-2">
+                <span className="text-[10px] text-[#8392ab] font-bold block uppercase tracking-wider">Link Available Course</span>
                 <div className="max-h-40 overflow-y-auto space-y-1.5">
                   {courses
                     .filter(c => !classCourses.some(cc => cc.courseId === c.id))
@@ -3250,15 +3250,15 @@ export default function SuperAdminDashboard() {
                       <button
                         key={course.id}
                         onClick={() => handleLinkCourseToClass(course.id)}
-                        className="w-full text-left p-3.5 bg-[#0f172a] hover:bg-[#142035] border border-slate-800 hover:border-indigo-500/30 rounded-xl flex items-center justify-between text-xs text-slate-200 transition"
+                        className="w-full text-left p-3.5 bg-[#f0f2f5] hover:bg-[#142035] border border-gray-200 hover:border-indigo-500/30 rounded-xl flex items-center justify-between text-xs text-[#344767] transition"
                       >
-                        <span className="font-bold text-white">{course.name} ({course.code})</span>
-                        <span className="text-indigo-400 font-bold">Link +</span>
+                        <span className="font-bold text-[#344767]">{course.name} ({course.code})</span>
+                        <span className="text-[#8392ab] font-bold">Link +</span>
                       </button>
                     ))}
 
                   {courses.filter(c => !classCourses.some(cc => cc.courseId === c.id)).length === 0 && (
-                    <p className="text-center py-2 text-xs text-slate-500 italic">All database courses are linked.</p>
+                    <p className="text-center py-2 text-xs text-[#8392ab] italic">All database courses are linked.</p>
                   )}
                 </div>
               </div>

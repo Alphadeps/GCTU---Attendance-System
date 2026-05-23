@@ -8,7 +8,7 @@ const ConfirmModal = ({
 }) => {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-[#001c44] border border-[#002a63] rounded-2xl p-6 max-w-md w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-[fadeIn_0.2s_ease-out]">
         {/* Icon */}
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
@@ -20,21 +20,21 @@ const ConfirmModal = ({
 
         {/* Message */}
         <div className="text-center mb-6">
-          <h3 className="text-lg font-bold text-white mb-2">Confirm Action</h3>
-          <p className="text-sm text-slate-300 leading-relaxed">{message}</p>
+          <h3 className="text-lg font-bold text-[#344767] mb-2">Confirm Action</h3>
+          <p className="text-sm text-[#344767] leading-relaxed">{message}</p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onCancel}
-            className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold py-3 px-4 rounded-xl transition-all text-sm"
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#344767] font-bold py-3 px-4 rounded-xl transition-all text-sm"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-bold py-3 px-4 rounded-xl transition-all text-sm shadow-lg shadow-[#D4A017]/20"
+            className="flex-1 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-bold py-3 px-4 rounded-xl transition-all text-sm shadow-lg shadow-[#344767]/10"
           >
             {confirmLabel}
           </button>

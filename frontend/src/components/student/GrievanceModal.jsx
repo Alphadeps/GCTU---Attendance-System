@@ -61,12 +61,12 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
-      <div className="bg-[#00122c] border-t border-[#002a63] w-full max-w-[430px] rounded-t-[32px] p-6 space-y-5 max-h-[90vh] overflow-y-auto animate-[slideUp_0.3s_cubic-bezier(0.16,1,0.3,1)] shadow-2xl relative">
-        <div className="flex justify-between items-center pb-2 border-b border-[#002a63]/40">
-          <h3 className="text-lg font-black text-white">New Support Case</h3>
+      <div className="bg-[#f0f2f5] border-t border-gray-200 w-full max-w-[430px] rounded-t-[32px] p-6 space-y-5 max-h-[90vh] overflow-y-auto animate-[slideUp_0.3s_cubic-bezier(0.16,1,0.3,1)] shadow-2xl relative">
+        <div className="flex justify-between items-center pb-2 border-b border-gray-200/40">
+          <h3 className="text-lg font-black text-[#344767]">New Support Case</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800/40 text-slate-400 hover:text-white transition-colors"
+            className="p-1.5 rounded-lg bg-gray-200/40 text-[#8392ab] hover:text-[#344767] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -77,7 +77,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
         <form onSubmit={handleGrievanceSubmit} className="space-y-4 text-left">
           {/* Type */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Category</label>
+            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Category</label>
             <select
               value={grievanceType}
               onChange={(e) => {
@@ -88,7 +88,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
                   setGrievanceAnonymous(false);
                 }
               }}
-              className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-[#D4A017] font-semibold"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-xs focus:outline-none focus:border-[#344767] font-semibold"
             >
               <option value="ABSENCE_EXCUSE">Absence / Sickness Excuse</option>
               <option value="SYSTEM_ISSUE">System / GPS / WiFi Issue</option>
@@ -99,11 +99,11 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* Course Selector (Optional) */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Associated Course (Optional)</label>
+            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Associated Course (Optional)</label>
             <select
               value={grievanceCourse}
               onChange={(e) => setGrievanceCourse(e.target.value)}
-              className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-[#D4A017] font-medium"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-xs focus:outline-none focus:border-[#344767] font-medium"
             >
               <option value="">No specific course</option>
               {courses.map(c => (
@@ -114,38 +114,38 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* Subject */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Subject</label>
+            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Subject</label>
             <input
               type="text"
               required
               placeholder="e.g. GPS Coordinate Error, Sick Leave Request"
               value={grievanceSubject}
               onChange={(e) => setGrievanceSubject(e.target.value)}
-              className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-[#D4A017]"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-xs focus:outline-none focus:border-[#344767]"
             />
           </div>
 
           {/* Message */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Description</label>
+            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Description</label>
             <textarea
               required
               rows={4}
               placeholder="Describe your issue in detail. If reporting cheating, please provide dates and details..."
               value={grievanceMessage}
               onChange={(e) => setGrievanceMessage(e.target.value)}
-              className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-3 text-white text-xs focus:outline-none focus:border-[#D4A017] resize-none"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-xs focus:outline-none focus:border-[#344767] resize-none"
             />
           </div>
 
           {/* File evidence */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Evidence Attachment (PDF/Images - Optional)</label>
+            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Evidence Attachment (PDF/Images - Optional)</label>
             <input
               type="file"
               accept="image/*,application/pdf"
               onChange={(e) => setEvidenceFile(e.target.files[0])}
-              className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#002a63] file:text-[#D4A017] hover:file:bg-[#001c44] cursor-pointer"
+              className="w-full text-xs text-[#8392ab] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#002a63] file:text-[#344767] hover:file:bg-white cursor-pointer"
             />
           </div>
 
@@ -157,7 +157,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
                 id="anonymousCheck"
                 checked={grievanceAnonymous}
                 onChange={(e) => setGrievanceAnonymous(e.target.checked)}
-                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 bg-[#000a18] border-[#002a63] cursor-pointer"
+                className="w-4 h-4 rounded text-rose-500 focus:ring-rose-500 bg-gray-50 border-gray-200 cursor-pointer"
               />
               <label htmlFor="anonymousCheck" className="text-xs text-rose-400 font-bold select-none cursor-pointer">
                 Submit anonymously (Hides name/index number)
@@ -170,7 +170,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
             <button
               type="submit"
               disabled={submittingGrievance}
-              className="flex-1 bg-[#D4A017] hover:bg-[#b88a14] disabled:opacity-50 text-slate-950 font-extrabold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+              className="flex-1 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 disabled:opacity-50 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
             >
               {submittingGrievance ? (
                 <>
@@ -184,7 +184,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3.5 rounded-xl text-xs transition-colors"
+              className="flex-1 bg-gray-200 hover:bg-gray-100 text-[#344767] font-bold py-3.5 rounded-xl text-xs transition-colors"
             >
               Cancel
             </button>

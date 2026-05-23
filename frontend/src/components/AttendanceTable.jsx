@@ -16,46 +16,46 @@ const AttendanceTable = ({ attendances }) => {
       case 'ABSENT':
         return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">Absent</span>;
       default:
-        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20">{status}</span>;
+        return <span className="px-3 py-1 text-xs font-semibold rounded-full bg-slate-500/10 text-[#8392ab] border border-slate-500/20">{status}</span>;
     }
   };
 
   if (!attendances || attendances.length === 0) {
     return (
-      <div className="text-center py-8 text-slate-400 bg-slate-900/50 rounded-xl border border-slate-800/80">
+      <div className="text-center py-8 text-[#8392ab] bg-gray-100/50 rounded-xl border border-slate-800/80">
         No attendance records found.
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-900/40 backdrop-blur-md shadow-lg">
+    <div className="overflow-x-auto rounded-xl border border-slate-800/80 bg-gray-100/40 backdrop-blur-md shadow-lg">
       <table className="w-full text-left border-collapse min-w-[600px]">
         <thead>
-          <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-300 text-sm font-semibold">
+          <tr className="border-b border-slate-800 bg-slate-950/40 text-[#344767] text-sm font-semibold">
             <th className="p-4">Name</th>
             <th className="p-4">Index Number</th>
             <th className="p-4">Status</th>
             <th className="p-4">Check-in Time</th>
-            <th className="p-4 hidden md:table-cell font-normal text-slate-500">Device</th>
+            <th className="p-4 hidden md:table-cell font-normal text-[#8392ab]">Device</th>
           </tr>
         </thead>
-        <tbody className="text-slate-300 divide-y divide-slate-800/60">
+        <tbody className="text-[#344767] divide-y divide-slate-800/60">
           {attendances.map((att) => (
-            <tr key={att.id} className="hover:bg-slate-800/20 transition-colors text-sm">
-              <td className="p-4 font-medium text-slate-200">
+            <tr key={att.id} className="hover:bg-gray-200/20 transition-colors text-sm">
+              <td className="p-4 font-medium text-[#344767]">
                 {att.student?.name || 'Unknown Student'}
               </td>
-              <td className="p-4 font-mono text-slate-400">
+              <td className="p-4 font-mono text-[#8392ab]">
                 {att.student?.indexNumber || 'N/A'}
               </td>
               <td className="p-4">
                 {getStatusBadge(att.status)}
               </td>
-              <td className="p-4 text-slate-400">
+              <td className="p-4 text-[#8392ab]">
                 {att.status === 'ABSENT' ? '-' : formatTime(att.checkInTime)}
               </td>
-              <td className="p-4 text-slate-500 text-xs hidden md:table-cell truncate max-w-[150px]" title={att.deviceInfo}>
+              <td className="p-4 text-[#8392ab] text-xs hidden md:table-cell truncate max-w-[150px]" title={att.deviceInfo}>
                 {att.deviceInfo}
               </td>
             </tr>

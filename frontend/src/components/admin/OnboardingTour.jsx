@@ -8,13 +8,13 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Welcome to GCTU Attendance System! 🎓",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Welcome, SuperAdmin! This system helps you manage class attendance efficiently. 
             Let's walk through the setup process to get your institution up and running.
           </p>
           <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4">
             <p className="text-indigo-400 text-sm font-semibold mb-2">📋 What you'll learn:</p>
-            <ul className="text-slate-400 text-sm space-y-1.5 ml-4">
+            <ul className="text-[#8392ab] text-sm space-y-1.5 ml-4">
               <li>• How to create academic programmes</li>
               <li>• Setting up classes and groups</li>
               <li>• Managing class representatives</li>
@@ -22,7 +22,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>• Configuring system settings</li>
             </ul>
           </div>
-          <p className="text-slate-500 text-xs italic">
+          <p className="text-[#8392ab] text-xs italic">
             This tour takes about 5 minutes. You can skip it and access help anytime from the dashboard.
           </p>
         </div>
@@ -33,13 +33,13 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 1: Create Academic Programmes 📚",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Start by creating your academic programmes (e.g., BIT, BSc Computer Science, etc.). 
             These are the main degree programs your institution offers.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to create a programme:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Navigate to <span className="text-indigo-400 font-semibold">"Programmes"</span> tab in the sidebar</li>
               <li>2. Click <span className="text-indigo-400 font-semibold">"+ Add Programme"</span> button</li>
               <li>3. Enter the programme name (e.g., "Bachelor of Information Technology")</li>
@@ -59,12 +59,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 2: Create Classes & Groups 🏫",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             After creating programmes, set up classes for each level (100, 200, 300, 400) and their groups (A-K).
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to create classes:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Go to <span className="text-indigo-400 font-semibold">"Classes Control"</span> tab</li>
               <li>2. Click <span className="text-indigo-400 font-semibold">"+ Create Classes"</span></li>
               <li>3. Select the programme, level (100-400), type (Regular/Top-Up), and session (Morning/Evening/Weekend)</li>
@@ -85,21 +85,21 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 3: Add Class Representatives 👥",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Class reps manage attendance sessions for their assigned classes. You can create them individually or bulk upload.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ Option 1: Create Individual Rep</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Navigate to <span className="text-indigo-400 font-semibold">"Class Reps"</span> tab</li>
               <li>2. Click <span className="text-indigo-400 font-semibold">"+ Create Class Rep"</span></li>
               <li>3. Fill in: Full Name, Index Number, Username, Password</li>
               <li>4. Click <span className="text-indigo-400 font-semibold">"Save Account"</span></li>
             </ol>
           </div>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ Option 2: Bulk Upload (Recommended)</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Click <span className="text-indigo-400 font-semibold">"Bulk Upload"</span> button</li>
               <li>2. Prepare Excel/CSV with columns: indexNumber, name, email, programme, level, type, group, session</li>
               <li>3. Upload the file</li>
@@ -119,12 +119,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 4: Assign Reps to Classes 🔗",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             After creating reps, assign them to their respective classes so they can manage attendance.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to assign a rep:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Go to <span className="text-indigo-400 font-semibold">"Classes Control"</span> tab</li>
               <li>2. Find the class card you want to assign a rep to</li>
               <li>3. Click <span className="text-indigo-400 font-semibold">"👤 Assign Rep"</span> button</li>
@@ -145,12 +145,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 5: Add Students to Classes 📝",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Add students to each class so they can check in during attendance sessions.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to add students:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. In <span className="text-indigo-400 font-semibold">"Classes Control"</span>, click <span className="text-indigo-400 font-semibold">"👥 Manage Students"</span> on a class card</li>
               <li>2. Choose method:
                 <ul className="ml-4 mt-1 space-y-1">
@@ -175,12 +175,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 6: Add Global Courses 📖",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Create a database of all courses offered by your institution. These can then be linked to specific classes.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to add courses:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. Navigate to <span className="text-indigo-400 font-semibold">"Global Courses"</span> tab</li>
               <li>2. Click <span className="text-indigo-400 font-semibold">"+ Add Course"</span></li>
               <li>3. Enter course name (e.g., "Software Engineering") and code (e.g., "BIT 301")</li>
@@ -200,12 +200,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 7: Link Courses to Classes 🔗",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             After creating courses, link them to the appropriate classes so reps can create attendance sessions.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ How to link courses:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
               <li>1. In <span className="text-indigo-400 font-semibold">"Classes Control"</span>, click <span className="text-indigo-400 font-semibold">"📚 Manage Courses"</span> on a class card</li>
               <li>2. Select courses from the dropdown menu</li>
               <li>3. Click <span className="text-indigo-400 font-semibold">"Link Course"</span></li>
@@ -225,29 +225,29 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "Step 8: Configure System Settings ⚙️",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Customize system behavior to match your institution's attendance policies.
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">✓ Available settings:</p>
-            <div className="text-slate-400 text-sm space-y-3 ml-4">
+            <div className="text-[#8392ab] text-sm space-y-3 ml-4">
               <div>
-                <p className="font-semibold text-white">Late Grace Period</p>
+                <p className="font-semibold text-[#344767]">Late Grace Period</p>
                 <p className="text-xs">How many minutes after session start before marking as "LATE" (default: 15 mins)</p>
               </div>
               <div>
-                <p className="font-semibold text-white">QR Code Expiry</p>
+                <p className="font-semibold text-[#344767]">QR Code Expiry</p>
                 <p className="text-xs">How often QR codes refresh for security (default: 30 seconds)</p>
               </div>
               <div>
-                <p className="font-semibold text-white">Geofence Radius</p>
+                <p className="font-semibold text-[#344767]">Geofence Radius</p>
                 <p className="text-xs">Maximum distance from class location for check-in (default: 100 meters)</p>
               </div>
             </div>
           </div>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-2">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-2">
             <p className="text-emerald-400 text-sm font-bold">✓ How to configure:</p>
-            <ol className="text-slate-400 text-sm space-y-1 ml-4">
+            <ol className="text-[#8392ab] text-sm space-y-1 ml-4">
               <li>1. Go to <span className="text-indigo-400 font-semibold">"Thresholds & Settings"</span> tab</li>
               <li>2. Adjust values as needed</li>
               <li>3. Click <span className="text-indigo-400 font-semibold">"Save Settings"</span></li>
@@ -261,22 +261,22 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       title: "You're All Set! 🎉",
       content: (
         <div className="space-y-4">
-          <p className="text-slate-300 leading-relaxed">
+          <p className="text-[#344767] leading-relaxed">
             Congratulations! You've completed the system setup. Here's what happens next:
           </p>
-          <div className="bg-[#0f172a] border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="bg-[#0f172a] border border-gray-300 rounded-xl p-4 space-y-3">
             <p className="text-emerald-400 text-sm font-bold">📋 The Attendance Workflow:</p>
-            <ol className="text-slate-400 text-sm space-y-2 ml-4">
-              <li>1. <strong className="text-white">Rep</strong> logs in and creates an attendance session for a course</li>
-              <li>2. <strong className="text-white">Students</strong> scan QR code or check in via portal</li>
-              <li>3. <strong className="text-white">Rep</strong> closes session and generates attendance report</li>
-              <li>4. <strong className="text-white">Lecturer</strong> reviews and signs the report</li>
-              <li>5. <strong className="text-white">Admin</strong> views signed reports in Official Archives</li>
+            <ol className="text-[#8392ab] text-sm space-y-2 ml-4">
+              <li>1. <strong className="text-[#344767]">Rep</strong> logs in and creates an attendance session for a course</li>
+              <li>2. <strong className="text-[#344767]">Students</strong> scan QR code or check in via portal</li>
+              <li>3. <strong className="text-[#344767]">Rep</strong> closes session and generates attendance report</li>
+              <li>4. <strong className="text-[#344767]">Lecturer</strong> reviews and signs the report</li>
+              <li>5. <strong className="text-[#344767]">Admin</strong> views signed reports in Official Archives</li>
             </ol>
           </div>
           <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 space-y-2">
             <p className="text-indigo-400 text-sm font-bold">🚀 Quick Access:</p>
-            <ul className="text-slate-400 text-sm space-y-1 ml-4">
+            <ul className="text-[#8392ab] text-sm space-y-1 ml-4">
               <li>• <strong>Overview:</strong> See system statistics at a glance</li>
               <li>• <strong>Grievance Desk:</strong> Handle student complaints and issues</li>
               <li>• <strong>Lecturer Allocations:</strong> Assign lecturers to courses</li>
@@ -315,7 +315,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-[#1e293b] border border-slate-700 rounded-2xl max-w-3xl w-full shadow-2xl animate-scale-up overflow-hidden">
+      <div className="bg-[#1e293b] border border-gray-300 rounded-2xl max-w-3xl w-full shadow-2xl animate-scale-up overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 p-6 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
@@ -326,12 +326,12 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
           <div className="relative flex items-start justify-between">
             <div className="flex items-center space-x-4">
               <div className="p-3 bg-white/10 rounded-xl border border-white/20">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-8 h-8 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={currentStepData.icon} />
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">{currentStepData.title}</h2>
+                <h2 className="text-2xl font-bold text-[#344767]">{currentStepData.title}</h2>
                 <p className="text-indigo-200 text-sm mt-1">
                   Step {currentStep + 1} of {steps.length}
                 </p>
@@ -339,7 +339,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             </div>
             <button
               onClick={onSkip}
-              className="text-white/60 hover:text-white transition-colors p-2"
+              className="text-[#344767]/60 hover:text-[#344767] transition-colors p-2"
               title="Skip tour"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -350,7 +350,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
         </div>
 
         {/* Progress Bar */}
-        <div className="h-2 bg-slate-800">
+        <div className="h-2 bg-gray-200">
           <div
             className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-300"
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
@@ -367,7 +367,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
           <button
             onClick={handlePrevious}
             disabled={isFirstStep}
-            className="px-4 py-2 text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+            className="px-4 py-2 text-[#8392ab] hover:text-[#344767] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -385,7 +385,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
                     ? 'w-8 bg-indigo-500'
                     : index < currentStep
                     ? 'w-2 bg-emerald-500'
-                    : 'w-2 bg-slate-700'
+                    : 'w-2 bg-gray-100'
                 }`}
                 title={`Go to step ${index + 1}`}
               />
@@ -394,7 +394,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
 
           <button
             onClick={handleNext}
-            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-colors flex items-center space-x-2"
+            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-[#344767] font-bold rounded-xl transition-colors flex items-center space-x-2"
           >
             <span>{isLastStep ? 'Get Started' : 'Next'}</span>
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

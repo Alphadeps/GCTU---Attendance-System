@@ -17,12 +17,9 @@ const LoginPage = () => {
     e.preventDefault();
     setErrorMsg('');
     setLoading(true);
-
     try {
       const response = await api.post('/auth/login', { username, password });
       const { token, user } = response.data;
-
-      // Use auth context to store user data
       auth.login({
         token,
         role: user.role,
@@ -30,21 +27,13 @@ const LoginPage = () => {
         needsPasswordChange: user.needsPasswordChange,
         assignedClass: user.assignedClass || null,
         dept_name: user.dept_name || null,
-        dept_logo: user.dept_logo || null
+        dept_logo: user.dept_logo || null,
       });
-
-      // Redirect based on role
-      if (user.role === 'SUPERADMIN') {
-        navigate('/admin');
-      } else if (user.role === 'LECTURER') {
-        navigate('/lecturer');
-      } else if (user.role === 'REP' || user.role === 'ADMIN') {
-        navigate('/rep/dashboard');
-      } else {
-        setErrorMsg('Unauthorized role. Contact support.');
-      }
+      if (user.role === 'SUPERADMIN') navigate('/admin');
+      else if (user.role === 'LECTURER') navigate('/lecturer');
+      else if (user.role === 'REP' || user.role === 'ADMIN') navigate('/rep/dashboard');
+      else setErrorMsg('Unauthorized role. Contact support.');
     } catch (err) {
-      console.error('Login error:', err);
       setErrorMsg(err.response?.data?.error || 'Invalid credentials or connection error');
     } finally {
       setLoading(false);
@@ -52,127 +41,188 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col justify-center items-center p-6 relative overflow-hidden">
-      {/* Background logo watermark */}
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
-        <img 
-          src="/logo2.png" 
-          alt="GCTU Crest Watermark" 
-          className="w-[380px] h-[380px] object-contain" 
-          onError={(e) => {
-            console.error('Logo failed to load');
-            e.target.style.display = 'none';
-          }} 
+    <div className="min-h-screen flex flex-col" style={{ background: '#f0f2f5', fontFamily: "'Open Sans', sans-serif" }}>
+
+      {/* ── Hero banner ────────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden flex items-center justify-center"
+        style={{
+          background: 'linear-gradient(310deg, #141727, #3A416F)',
+          minHeight: '280px',
+          borderRadius: '0 0 12px 12px',
+          margin: '0 0 -100px 0',
+        }}
+      >
+        {/* Watermark */}
+        <img
+          src="/logo2.png"
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none"
+          style={{ objectPosition: 'center' }}
         />
-      </div>
-
-      {/* Background mesh/gradients */}
-      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-[#D4A017]/5 blur-[150px] pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-[#003B8E]/10 blur-[150px] pointer-events-none"></div>
-
-      <div className="w-full max-w-md bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] rounded-2xl p-8 shadow-2xl relative z-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 rounded-xl bg-[#D4A017]/10 text-[#D4A017] mb-4 border border-[#D4A017]/20">
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">GCTU Attendance & Reports</h1>
-          <p className="text-slate-400 mt-2 text-sm">Sign in to manage classes and records</p>
-        </div>
-
-        {accessDenied && (
-          <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm flex gap-2 items-center">
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-            </svg>
-            <span>Access denied — insufficient permissions</span>
-          </div>
-        )}
-
-        {errorMsg && (
-          <div className="mb-6 p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm flex gap-2 items-center">
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>{errorMsg}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-slate-300 text-sm font-semibold mb-2">Username</label>
-            <input
-              type="text"
-              required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              className="w-full bg-[#000a18]/60 border border-[#002a63] rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all font-medium"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-300 text-sm font-semibold mb-2">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full bg-[#000a18]/60 border border-[#002a63] rounded-lg px-4 py-3 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-[#D4A017] focus:ring-1 focus:ring-[#D4A017] transition-all font-medium"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#D4A017] hover:bg-[#b88a14] active:scale-[0.98] text-slate-950 font-bold py-3 px-4 rounded-lg shadow-lg shadow-[#D4A017]/20 hover:shadow-[#D4A017]/30 transition-all flex items-center justify-center gap-2"
+        <div className="relative z-10 text-center px-6 pb-16">
+          <h1
+            style={{
+              fontSize: '48px',
+              fontWeight: 700,
+              color: '#fff',
+              letterSpacing: '-0.8px',
+              lineHeight: 1.2,
+              margin: 0,
+              textShadow: '0 2px 12px rgba(0,0,0,.3)',
+            }}
           >
-            {loading ? (
-              <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        <div className="mt-8 border-t border-[#002a63] pt-6 text-center">
-          <p className="text-slate-500 text-xs mb-3">
-            Are you a student?{' '}
-            <button
-              onClick={() => navigate('/student-login')}
-              className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
-            >
-              Student Login
-            </button>
-          </p>
-          <p className="text-slate-500 text-xs">
-            Just checking in?{' '}
-            <button
-              onClick={() => navigate('/student')}
-              className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
-            >
-              Go to Check-In Portal
-            </button>
-          </p>
-        </div>
-
-        {/* Team Credit */}
-        <div className="mt-6 text-center">
-          <p className="text-slate-600 text-xs">
-            Built with ❤️ by{' '}
-            <a
-              href="https://alphagroupofdevelopers.github.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#D4A017] hover:text-[#b88a14] font-semibold underline transition-colors"
-            >
-              Alpha Group of Developers
-            </a>
+            Welcome!
+          </h1>
+          <p className="mt-3 text-slate-300 text-sm font-semibold tracking-wide">
+            GCTU Smart Attendance System
           </p>
         </div>
       </div>
+
+      {/* ── Login card ─────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center px-4 pb-12">
+        <div
+          className="w-full max-w-md relative z-10"
+          style={{
+            background: '#fff',
+            borderRadius: '16px',
+            boxShadow: '0 20px 27px 0 rgba(0,0,0,.08)',
+            padding: '32px',
+          }}
+        >
+          {/* Logo + Name */}
+          <div className="text-center mb-8">
+            <img
+              src="/logo2.png"
+              alt="GCTU Crest"
+              className="mx-auto mb-4 object-contain"
+              style={{ width: '72px', height: '72px' }}
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <h5
+              style={{
+                fontSize: '20px',
+                fontWeight: 700,
+                color: 'rgb(52,71,103)',
+                margin: 0,
+              }}
+            >
+              Staff / Admin Sign In
+            </h5>
+            <p
+              style={{
+                fontSize: '13px',
+                color: 'rgb(131,146,171)',
+                marginTop: '4px',
+              }}
+            >
+              Ghana Communication Technology University
+            </p>
+          </div>
+
+          {/* Alerts */}
+          {accessDenied && (
+            <div
+              className="mb-5 p-3 rounded-lg flex gap-2 items-center text-sm"
+              style={{ background: 'rgba(251,207,51,.1)', border: '1px solid rgba(251,207,51,.3)', color: '#b45309' }}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+              Access denied — insufficient permissions
+            </div>
+          )}
+          {errorMsg && (
+            <div
+              className="mb-5 p-3 rounded-lg flex gap-2 items-center text-sm"
+              style={{ background: 'rgba(234,6,6,.07)', border: '1px solid rgba(234,6,6,.2)', color: '#ea0606' }}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              {errorMsg}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Username"
+                className="sip-input"
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="sip-input"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="sip-btn-dark flex items-center justify-center gap-2">
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+
+          {/* Links */}
+          <div
+            className="mt-6 pt-5 text-center space-y-2"
+            style={{ borderTop: '1px solid #e9ecef' }}
+          >
+            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+              Are you a student?{' '}
+              <button
+                onClick={() => navigate('/student-login')}
+                style={{ color: 'rgb(52,71,103)', fontWeight: 700 }}
+                className="hover:underline transition-all"
+              >
+                Student Login
+              </button>
+            </p>
+            <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+              Just checking in?{' '}
+              <button
+                onClick={() => navigate('/student')}
+                style={{ color: 'rgb(52,71,103)', fontWeight: 700 }}
+                className="hover:underline transition-all"
+              >
+                Go to Check-In Portal
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      <footer className="text-center pb-6 px-4">
+        <nav className="flex flex-wrap justify-center gap-4 mb-2">
+          {['GCTU', 'Learning Platform', 'Library', 'Programmes'].map((l) => (
+            <span
+              key={l}
+              style={{ fontSize: '14px', color: 'rgb(131,146,171)', cursor: 'default' }}
+            >
+              {l}
+            </span>
+          ))}
+        </nav>
+        <p style={{ fontSize: '13px', color: 'rgb(131,146,171)' }}>
+          Copyright © {new Date().getFullYear()} Software Unit | Msquare | GCTU.
+        </p>
+      </footer>
     </div>
   );
 };
