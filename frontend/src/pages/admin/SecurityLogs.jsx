@@ -27,7 +27,8 @@ const SecurityLogs = () => {
         }
       };
 
-      const response = await axios.get('http://localhost:5000/api/monitoring/logs/all', config);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await axios.get(`${API_BASE_URL}/monitoring/logs/all`, config);
       
       setLogs(response.data.logs || []);
       setPagination(prev => ({

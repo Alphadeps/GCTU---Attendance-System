@@ -17,14 +17,16 @@ const SystemMonitoring = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
       const [health, metrics, database, cache, blocked, suspicious, system] = await Promise.all([
-        axios.get('http://localhost:5000/api/monitoring/health', config),
-        axios.get('http://localhost:5000/api/monitoring/metrics', config),
-        axios.get('http://localhost:5000/api/monitoring/database', config),
-        axios.get('http://localhost:5000/api/monitoring/cache', config),
-        axios.get('http://localhost:5000/api/monitoring/security/blocked-ips', config),
-        axios.get('http://localhost:5000/api/monitoring/security/suspicious-ips', config),
-        axios.get('http://localhost:5000/api/monitoring/system', config)
+        axios.get(`${API_BASE_URL}/monitoring/health`, config),
+        axios.get(`${API_BASE_URL}/monitoring/metrics`, config),
+        axios.get(`${API_BASE_URL}/monitoring/database`, config),
+        axios.get(`${API_BASE_URL}/monitoring/cache`, config),
+        axios.get(`${API_BASE_URL}/monitoring/security/blocked-ips`, config),
+        axios.get(`${API_BASE_URL}/monitoring/security/suspicious-ips`, config),
+        axios.get(`${API_BASE_URL}/monitoring/system`, config)
       ]);
 
       setHealthData(health.data);
@@ -50,8 +52,10 @@ const SystemMonitoring = () => {
   const handleUnblockIP = async (ip) => {
     try {
       const token = localStorage.getItem('token');
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      
       await axios.post(
-        'http://localhost:5000/api/monitoring/security/unblock-ip',
+        `${API_BASE_URL}/monitoring/security/unblock-ip`,
         { ip },
         { headers: { Authorization: `Bearer ${token}` } }
       );

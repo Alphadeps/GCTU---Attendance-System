@@ -3,6 +3,9 @@ import axios from 'axios';
 // Use environment variable or fallback to localhost
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+// Export the base URL without /api for file uploads and direct URLs
+export const BASE_URL = API_BASE_URL.replace('/api', '');
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -52,7 +55,7 @@ api.interceptors.response.use(
       try {
         // Attempt to request a new access token using the HTTP-only refresh token cookie
         const res = await axios.post(
-          'http://localhost:5000/api/auth/refresh',
+          `${API_BASE_URL}/auth/refresh`,
           {},
           { withCredentials: true }
         );

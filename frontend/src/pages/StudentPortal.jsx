@@ -598,7 +598,7 @@ const StudentPortal = () => {
                       {g.evidenceUrl && (
                         <div className="pt-2 border-t border-gray-200/40 flex justify-between items-center text-[10px]">
                           <span className="text-[#8392ab]">Attachment:</span>
-                          <a href={`http://localhost:5000${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer" className="text-[#344767] underline hover:text-[#b88a14]">
+                          <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer" className="text-[#344767] underline hover:text-[#b88a14]">
                             View Evidence Document
                           </a>
                         </div>
