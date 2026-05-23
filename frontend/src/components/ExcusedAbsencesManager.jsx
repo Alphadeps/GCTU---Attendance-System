@@ -284,7 +284,7 @@ const ExcusedAbsencesManager = () => {
 
                   {request.evidenceUrl && (
                     <a
-                      href={`http://localhost:5000${request.evidenceUrl}`}
+                      href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${request.evidenceUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-xs text-blue-400 hover:text-blue-300"
@@ -369,7 +369,7 @@ const ExcusedAbsencesManager = () => {
                 <div className="bg-white border border-gray-200 rounded-xl p-4">
                   <div className="text-xs text-[#8392ab] mb-2">Evidence Attached</div>
                   <a
-                    href={`http://localhost:5000${selectedRequest.evidenceUrl}`}
+                    href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${selectedRequest.evidenceUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300"

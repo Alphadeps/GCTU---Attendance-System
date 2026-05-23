@@ -554,6 +554,21 @@ const StudentPortal = () => {
               Report GPS failures, request attendance overrides for excusable absences, or flag academic dishonesty.
             </p>
 
+            <button
+              onClick={() => {
+                if (uniqueCourses.length > 0 && !grievanceCourse) {
+                  setGrievanceCourse(uniqueCourses[0].code);
+                }
+                setShowGrievanceModal(true);
+              }}
+              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-[#344767]/10"
+            >
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Submit Support Case / Request
+            </button>
+
             {/* Grievance list */}
             {loadingGrievances ? (
               <div className="space-y-3">
@@ -602,7 +617,7 @@ const StudentPortal = () => {
                     )}
                     {g.evidenceUrl && (
                       <div className="mt-2 flex justify-end">
-                        <a href={`http://localhost:5000${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer"
+                        <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer"
                           className="text-[10px] text-[#17c1e8] font-semibold hover:underline">
                           View Evidence
                         </a>

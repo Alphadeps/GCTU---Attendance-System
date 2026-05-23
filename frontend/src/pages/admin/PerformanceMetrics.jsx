@@ -12,7 +12,8 @@ const PerformanceMetrics = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.get('http://localhost:5000/api/monitoring/metrics', config);
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const response = await axios.get(`${API_BASE_URL}/monitoring/metrics`, config);
       setMetricsData(response.data);
       setLoading(false);
     } catch (error) {

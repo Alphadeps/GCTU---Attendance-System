@@ -237,7 +237,7 @@ const AdminGrievancePanel = () => {
                       {selectedGrievance.evidenceUrl.split('/').pop()}
                     </span>
                     <a
-                      href={`http://localhost:5000${selectedGrievance.evidenceUrl}`}
+                      href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${selectedGrievance.evidenceUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold px-3 py-1.5 rounded-lg text-[10px] transition-colors"
