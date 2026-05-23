@@ -90,7 +90,7 @@ const RepDashboard = () => {
 
   const fetchStudents = async () => {
     if (!assignedClass?.id) return;
-    
+
     setStudentsLoading(true);
     try {
       const response = await api.get('/admin/rep/my-class-students');
@@ -241,108 +241,130 @@ const RepDashboard = () => {
   const hasNoStudents = classStudentCount === 0;
   const isSetupIncomplete = hasNoCourses || hasNoStudents;
 
+  const navItems = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'courses',
+      label: 'Courses',
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+    },
+    {
+      id: 'students',
+      label: 'Students',
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'excused',
+      label: 'Attendance',
+      icon: (
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex relative overflow-hidden">
-      {/* Mesh gradients */}
-      <div className="absolute top-0 right-0 w-[40%] h-[40%] rounded-full bg-[#344767]/3 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full bg-[#8392ab]/5 blur-[100px] pointer-events-none" />
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
-        <img src="/logo2.png" alt="" className="w-[450px] h-[450px] object-contain" />
-      </div>
+    <div className="min-h-screen bg-[#f8f9fa] flex relative">
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
-      {/* SIDEBAR */}
-      <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-40 transition-transform duration-300 md:translate-x-0 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="p-6 space-y-8 flex-1 flex flex-col overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center gap-3 relative">
-            <img src={displayDeptLogo} alt="Logo" className="w-10 h-10 object-contain bg-white rounded-xl p-1 border border-gray-200" />
-            <div className="truncate flex-1">
-              <h2 className="text-sm font-bold text-[#344767] truncate">{displayDeptName}</h2>
-              <span className="text-[10px] text-[#8392ab] font-mono tracking-wider uppercase">Class Representative</span>
-            </div>
-            {/* Mobile close button */}
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-2 text-[#8392ab] hover:text-[#344767] hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Close sidebar"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      {/* ─── SIDEBAR ─── */}
+      <aside
+        className={`fixed top-0 left-0 h-screen w-[240px] bg-white z-40 flex flex-col
+          shadow-[1px_0_0_0_rgba(0,0,0,.06)]
+          transition-transform duration-300
+          md:sticky md:translate-x-0
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        {/* Logo + name */}
+        <div className="px-5 py-5 flex items-center gap-3 border-b border-gray-100">
+          <div className="w-9 h-9 rounded-xl bg-[#f0f2f5] flex items-center justify-center shrink-0">
+            <img src={displayDeptLogo} alt="Logo" className="w-7 h-7 object-contain" />
           </div>
-
-          {/* Class Info card */}
-          {assignedClass ? (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">My Class</p>
-              <p className="text-xs font-bold text-[#344767] leading-snug">{assignedClass.displayName}</p>
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <div className="text-center">
-                  <span className={`block text-lg font-black font-mono ${hasNoStudents ? 'text-rose-400' : 'text-white'}`}>
-                    {classStudentCount}
-                  </span>
-                  <span className="text-[9px] text-slate-500 uppercase font-bold">Students</span>
-                </div>
-                <div className="text-center">
-                  <span className={`block text-lg font-black font-mono ${hasNoCourses ? 'text-rose-400' : 'text-white'}`}>
-                    {courses.length}
-                  </span>
-                  <span className="text-[9px] text-slate-500 uppercase font-bold">Courses</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-4">
-              <p className="text-xs text-rose-400 font-semibold">No class assigned yet.</p>
-              <p className="text-[10px] text-slate-500 mt-1">Contact your administrator to assign you to a class.</p>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <nav className="space-y-1.5 flex-1">
-            {[
-              { id: 'dashboard', label: 'Dashboard & Sessions', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
-              { id: 'courses', label: 'My Class Courses', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-              { id: 'students', label: 'Class Students', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-              { id: 'excused', label: 'Excused Absences', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === item.id
-                    ? 'bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white shadow-lg rounded-lg'
-                    : 'text-[#67748e] hover:bg-gray-100 hover:text-[#344767]'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d={item.icon} />
-                </svg>
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          <div className="min-w-0">
+            <p className="text-[13px] font-bold text-[#344767] truncate leading-tight">{displayDeptName}</p>
+            <p className="text-[10px] text-[#8392ab] font-medium uppercase tracking-wider">Rep Portal</p>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="ml-auto md:hidden p-1 rounded-lg text-[#8392ab] hover:text-[#344767] hover:bg-gray-100"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* Sidebar footer */}
-        <div className="p-6 border-t border-gray-200 bg-white">
-          <div className="flex items-center justify-between gap-2">
-            <div className="truncate">
-              <p className="text-xs font-bold text-[#344767] truncate">{username}</p>
-              <p className="text-[10px] text-[#8392ab] truncate uppercase font-mono">{role}</p>
+        {/* Class info pill */}
+        {assignedClass && (
+          <div className="mx-4 mt-4 px-3 py-2.5 rounded-xl bg-[#f8f9fa] border border-gray-100">
+            <p className="text-[9px] font-bold text-[#8392ab] uppercase tracking-wider mb-1">My Class</p>
+            <p className="text-[12px] font-bold text-[#344767] truncate">{assignedClass.displayName}</p>
+            <div className="flex gap-3 mt-1.5">
+              <span className="text-[10px] text-[#17c1e8] font-semibold">{classStudentCount} students</span>
+              <span className="text-[10px] text-[#8392ab]">•</span>
+              <span className="text-[10px] text-[#17c1e8] font-semibold">{courses.length} courses</span>
+            </div>
+          </div>
+        )}
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 pt-4 space-y-0.5 overflow-y-auto">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all
+                ${activeTab === item.id
+                  ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white shadow-md'
+                  : 'text-[#67748e] hover:bg-[#f8f9fa] hover:text-[#344767]'
+                }`}
+            >
+              {item.icon}
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* User footer */}
+        <div className="px-4 py-4 border-t border-gray-100">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+              {(username || 'R')[0].toUpperCase()}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[12px] font-bold text-[#344767] truncate">{username}</p>
+              <p className="text-[10px] text-[#8392ab] uppercase tracking-wider">{role}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-[#8392ab] hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
               title="Sign Out"
+              className="p-1.5 rounded-lg text-[#8392ab] hover:text-rose-500 hover:bg-rose-50 transition-all"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
@@ -350,120 +372,119 @@ const RepDashboard = () => {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10 overflow-y-auto">
-        {/* Top Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+      {/* ─── MAIN CONTENT ─── */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+        {/* Top header */}
+        <header className="bg-white sticky top-0 z-20 px-5 py-3.5 flex items-center justify-between border-b border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 -ml-2 text-[#8392ab] hover:text-[#344767] rounded-lg md:hidden"
+              className="md:hidden p-2 -ml-1 rounded-lg text-[#8392ab] hover:text-[#344767]"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <h1 className="text-lg font-bold text-[#344767] leading-tight">
-                {activeTab === 'dashboard' && 'Dashboard & Sessions'}
-                {activeTab === 'courses' && 'My Class Courses'}
+              <h1 className="text-[15px] font-bold text-[#344767] leading-tight">
+                {activeTab === 'dashboard' && 'Dashboard'}
+                {activeTab === 'courses' && 'Class Courses'}
                 {activeTab === 'students' && 'Class Students'}
                 {activeTab === 'excused' && 'Excused Absences'}
               </h1>
               {assignedClass && (
-                <span className="text-xs text-[#8392ab] font-bold">{assignedClass.displayName}</span>
+                <p className="text-[11px] text-[#8392ab]">{assignedClass.displayName}</p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <NotificationPanel />
-            <span className="text-xs bg-[#344767]/10 text-[#344767] px-3 py-1.5 rounded-full font-semibold border border-[#344767]/20 uppercase tracking-wider">
-              {role} Account
+            <span className="hidden sm:inline text-[11px] bg-[#f8f9fa] border border-gray-200 text-[#67748e] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wider">
+              {role}
             </span>
           </div>
         </header>
 
-        {/* Body */}
-        <div className="p-6 flex-1 space-y-6 max-w-6xl w-full mx-auto">
+        {/* Page body */}
+        <div className="flex-1 p-5 md:p-6 space-y-5 max-w-5xl w-full mx-auto pb-24 md:pb-6">
+
+          {/* Error */}
           {errorMsg && (
-            <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-sm">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-sm">
               {errorMsg}
             </div>
           )}
 
-          {/* Setup Warning Banner */}
+          {/* Setup warning */}
           {!loading && assignedClass && isSetupIncomplete && (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 flex gap-4 items-start">
-              <svg className="w-5 h-5 text-amber-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start animate-fade-in">
+              <svg className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
-                <p className="text-amber-400 font-bold text-sm">Class setup incomplete</p>
-                <ul className="text-xs text-slate-400 mt-1 space-y-0.5">
+                <p className="text-[13px] font-bold text-amber-700">Class setup incomplete</p>
+                <ul className="text-[12px] text-amber-600 mt-1 space-y-0.5">
                   {hasNoCourses && <li>• No courses have been linked to your class yet</li>}
                   {hasNoStudents && <li>• No student list has been uploaded for your class yet</li>}
                 </ul>
-                <p className="text-xs text-slate-500 mt-1.5">Contact your administrator to complete the setup before you can open sessions.</p>
               </div>
             </div>
           )}
 
-          {/* No class assigned warning */}
+          {/* No class assigned */}
           {!loading && !assignedClass && (
-            <div className="bg-rose-500/5 border border-rose-500/20 rounded-xl p-8 text-center">
-              <svg className="w-12 h-12 text-rose-400/40 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="bg-white rounded-2xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,.08)]">
+              <svg className="w-10 h-10 text-[#8392ab] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
               </svg>
-              <h3 className="text-sm font-bold text-slate-300">No Class Assigned</h3>
-              <p className="text-xs text-slate-500 mt-2 max-w-xs mx-auto">You are not assigned to any class yet. Please contact your administrator.</p>
+              <p className="text-[14px] font-bold text-[#344767]">No Class Assigned</p>
+              <p className="text-[12px] text-[#8392ab] mt-1">Contact your administrator.</p>
             </div>
           )}
 
-          {/* TAB 1: DASHBOARD & SESSIONS */}
+          {/* ── TAB: DASHBOARD ── */}
           {activeTab === 'dashboard' && (
-            <div className="space-y-6">
-              {/* Stats row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
-                  <div>
-                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Total Sessions</p>
-                    <p className="text-3xl font-extrabold text-[#344767] mt-1.5">{sessions.length}</p>
-                  </div>
-                  <div className="p-3 bg-[#344767]/10 rounded-xl border border-[#344767]/20">
-                    <svg className="w-6 h-6 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+            <div className="space-y-5">
+
+              {/* Stat cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="stat-card-teal animate-fade-in-up">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80">Total Students</p>
+                  <p className="text-3xl font-extrabold mt-1">{classStudentCount}</p>
                 </div>
-                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
-                  <div>
-                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Active Sessions</p>
-                    <p className="text-3xl font-extrabold text-[#344767] mt-1.5">{sessions.filter(s => s.status === 'OPEN').length}</p>
-                  </div>
-                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <svg className="w-6 h-6 text-emerald-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.828a5 5 0 117.07 0M12 11a1 1 0 100-2 1 1 0 000 2z" />
-                    </svg>
-                  </div>
+
+                <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-100">
+                  <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Active Courses</p>
+                  <p className="text-3xl font-extrabold text-[#344767] mt-1">{courses.length}</p>
+                  <div className="mt-2 w-8 h-1 rounded-full bg-[#17c1e8]" />
                 </div>
-                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
-                  <div>
-                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Class Courses</p>
-                    <p className={`text-3xl font-extrabold mt-1.5 ${hasNoCourses ? 'text-rose-400' : 'text-white'}`}>{courses.length}</p>
+
+                <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-200">
+                  <div className="flex items-center gap-2">
+                    <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Live Sessions</p>
+                    {sessions.filter(s => s.status === 'OPEN').length > 0 && (
+                      <span className="pulse-dot" />
+                    )}
                   </div>
-                  <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                    <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
+                  <p className="text-3xl font-extrabold text-emerald-500 mt-1">
+                    {sessions.filter(s => s.status === 'OPEN').length}
+                  </p>
+                  <div className="mt-2 w-8 h-1 rounded-full bg-emerald-400" />
+                </div>
+
+                <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-300">
+                  <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Total Sessions</p>
+                  <p className="text-3xl font-extrabold text-[#cb0c9f] mt-1">{sessions.length}</p>
+                  <div className="mt-2 w-8 h-1 rounded-full bg-[#cb0c9f]" />
                 </div>
               </div>
 
-              {/* Action ribbon */}
-              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
+              {/* Action bar */}
+              <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-200">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-sm">Attendance Operations</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Start a new session for your class.</p>
+                  <p className="text-[13px] font-bold text-[#344767]">Attendance Operations</p>
+                  <p className="text-[11px] text-[#8392ab] mt-0.5">Open a session for your class to begin taking attendance.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -472,7 +493,7 @@ const RepDashboard = () => {
                     setShowSessionModal(true);
                   }}
                   disabled={!assignedClass || hasNoCourses}
-                  className="bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center gap-1.5 shadow-md"
+                  className="sip-btn-dark flex items-center gap-1.5"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -481,11 +502,14 @@ const RepDashboard = () => {
                 </button>
               </div>
 
-              {/* Recent Sessions */}
-              <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)] min-h-[300px]">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-[#8392ab]">Recent Sessions</h2>
-                  <button onClick={fetchData} className="text-xs text-[#8392ab] hover:text-[#344767] transition-colors flex items-center gap-1">
+              {/* Sessions list */}
+              <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden animate-fade-in-up delay-300">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                  <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider">Recent Sessions</p>
+                  <button
+                    onClick={fetchData}
+                    className="text-[11px] text-[#17c1e8] hover:text-[#0ea5c9] font-semibold flex items-center gap-1 transition-colors"
+                  >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
                     </svg>
@@ -494,235 +518,251 @@ const RepDashboard = () => {
                 </div>
 
                 {loading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+                  <div className="p-6 space-y-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="skeleton h-16 rounded-xl" />
+                    ))}
                   </div>
                 ) : sessions.length === 0 ? (
-                  <div className="text-center py-20 text-[#8392ab] bg-gray-50 rounded-xl border border-dashed border-gray-300 text-sm">
-                    No sessions yet. Click "Open New Session" to start.
+                  <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                    <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-[13px] font-semibold text-[#8392ab]">No sessions yet</p>
+                    <p className="text-[11px] text-[#8392ab] mt-1">Click "Open New Session" to start.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {sessions.map((s) => (
-                      <div
-                        key={s.id}
-                        className="p-4 bg-gray-50 border border-gray-200 rounded-xl transition-all hover:border-gray-300"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div 
-                            onClick={() => navigate(`/rep/session/${s.id}`)}
-                            className="flex-1 cursor-pointer hover:opacity-80 transition-opacity"
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="font-bold text-[#344767] text-sm hover:text-[#344767]/70 transition-colors">{s.courseName}</span>
-                              <span className="font-mono text-xs text-[#8392ab]">({s.courseCode})</span>
-                            </div>
-                            <div className="flex items-center gap-4 text-xs text-[#8392ab] mt-2">
-                              <span>{new Date(s.startTime).toLocaleDateString()} {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                              <span className="bg-gray-200 text-[#344767] px-2 py-0.5 rounded text-[10px] uppercase font-semibold">{s.sessionType}</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
-                              s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 animate-pulse' :
-                              s.status === 'CLOSED' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                              'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                            }`}>
+                  <table className="sip-table">
+                    <thead>
+                      <tr>
+                        <th>Course</th>
+                        <th className="hidden sm:table-cell">Date</th>
+                        <th className="hidden md:table-cell">Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sessions.map((s) => (
+                        <tr key={s.id}>
+                          <td>
+                            <p className="font-semibold text-[#344767] text-[13px]">{s.courseName}</p>
+                            <p className="text-[11px] text-[#8392ab] font-mono">{s.courseCode}</p>
+                          </td>
+                          <td className="hidden sm:table-cell text-[12px] text-[#8392ab]">
+                            {new Date(s.startTime).toLocaleDateString()}
+                            <span className="block text-[11px]">{new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </td>
+                          <td className="hidden md:table-cell">
+                            <span className="badge badge-info">{s.sessionType}</span>
+                          </td>
+                          <td>
+                            <span className={`badge ${s.status === 'OPEN' ? 'badge-success' : 'badge-dark'}`}>
                               {s.status}
                             </span>
-                            {s.status === 'OPEN' && (
+                          </td>
+                          <td>
+                            <div className="flex items-center gap-2">
+                              {s.status === 'OPEN' && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); handleRepSelfCheckIn(s.id); }}
+                                  className="text-[11px] text-emerald-600 font-semibold hover:text-emerald-700 transition-colors"
+                                >
+                                  Check In
+                                </button>
+                              )}
                               <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRepSelfCheckIn(s.id);
-                                }}
-                                className="bg-emerald-600/10 hover:bg-emerald-600 text-emerald-500 hover:text-white font-bold py-1.5 px-3 rounded-lg border border-emerald-500/20 transition-all text-[11px] flex items-center gap-1"
+                                onClick={() => navigate(`/rep/session/${s.id}`)}
+                                className="text-[11px] text-[#17c1e8] font-semibold hover:text-[#0ea5c9] transition-colors"
                               >
-                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Check In
+                                View
                               </button>
-                            )}
-                            <button
-                              onClick={() => navigate(`/rep/session/${s.id}`)}
-                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                              <svg className="w-4 h-4 text-[#8392ab] hover:text-[#344767] transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </div>
           )}
 
-          {/* TAB 2: MY CLASS COURSES */}
+          {/* ── TAB: COURSES ── */}
           {activeTab === 'courses' && (
-            <div className="space-y-6">
-              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex justify-between items-center shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
-                <div>
-                  <h3 className="font-bold text-[#344767] text-sm">Class Courses</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Courses assigned to your class by the administrator.</p>
-                </div>
-                <span className="text-xs text-[#8392ab] bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
-                  {courses.length} course{courses.length !== 1 ? 's' : ''}
-                </span>
+            <div className="space-y-5 animate-slide-left">
+              <div className="flex items-center justify-between">
+                <p className="text-[13px] font-bold text-[#344767]">Class Courses</p>
+                <span className="badge badge-info">{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
               </div>
 
-              <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
-                {loading ? (
-                  <div className="flex justify-center items-center py-16">
-                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : courses.length === 0 ? (
-                  <div className="text-center py-16 space-y-3">
-                    <svg className="w-12 h-12 text-[#8392ab] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                    <p className="text-sm font-bold text-[#8392ab]">No courses assigned yet</p>
-                    <p className="text-xs text-[#8392ab] max-w-xs mx-auto">Your administrator needs to link courses to your class before you can run sessions.</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {courses.map((c) => (
-                      <div key={c.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-[#344767] text-sm">{c.name}</p>
-                          <p className="font-mono text-xs text-[#8392ab] mt-1">{c.code}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleGenerateReport(c.id)}
-                            disabled={generatingReportId === c.id}
-                            className="bg-emerald-600/10 hover:bg-emerald-600 hover:text-white text-emerald-500 font-bold py-1.5 px-3 rounded-lg border border-emerald-500/20 transition-all text-[11px] disabled:opacity-50"
-                          >
-                            {generatingReportId === c.id ? 'Generating...' : '📄 Generate Report'}
-                          </button>
-                          <button
-                            onClick={() => handleOpenAnalytics(c.id)}
-                            className="bg-[#344767]/10 hover:bg-[#344767] hover:text-white text-[#344767] font-bold py-1.5 px-3 rounded-lg border border-[#344767]/20 transition-all text-[11px]"
-                          >
-                            📊 Analytics
-                          </button>
-                        </div>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map(i => <div key={i} className="skeleton h-28 rounded-2xl" />)}
+                </div>
+              ) : courses.length === 0 ? (
+                <div className="bg-white rounded-2xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,.08)]">
+                  <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                  <p className="text-[13px] font-semibold text-[#8392ab]">No courses assigned yet</p>
+                  <p className="text-[11px] text-[#8392ab] mt-1 max-w-xs mx-auto">Your administrator needs to link courses to your class.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {courses.map((c, idx) => (
+                    <div
+                      key={c.id}
+                      className={`bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)] hover-lift animate-fade-in-up`}
+                      style={{ animationDelay: `${idx * 80}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <span className="badge badge-info font-mono">{c.code}</span>
+                        {c.level && <span className="badge badge-dark">{c.level}</span>}
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                      <p className="text-[14px] font-bold text-[#344767] leading-snug">{c.name}</p>
+                      {c.type && <p className="text-[11px] text-[#8392ab] mt-1">{c.type}</p>}
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => handleGenerateReport(c.id)}
+                          disabled={generatingReportId === c.id}
+                          className="sip-btn-primary flex-1 text-[11px] py-2 px-3 disabled:opacity-50"
+                        >
+                          {generatingReportId === c.id ? 'Generating...' : 'Generate Report'}
+                        </button>
+                        <button
+                          onClick={() => handleOpenAnalytics(c.id)}
+                          className="sip-btn-dark flex-1 text-[11px] py-2 px-3"
+                        >
+                          Analytics
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* TAB 3: CLASS STUDENTS */}
+          {/* ── TAB: STUDENTS ── */}
           {activeTab === 'students' && (
-            <div className="space-y-6">
-              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex justify-between items-center shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
+            <div className="space-y-5 animate-slide-left">
+              <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)]">
                 <div>
-                  <h3 className="font-bold text-[#344767] text-sm">Class Students</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Complete list of students enrolled in your class.</p>
+                  <p className="text-[13px] font-bold text-[#344767]">Class Students</p>
+                  <p className="text-[11px] text-[#8392ab]">All enrolled students in your class</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Search by name or index..."
+                    placeholder="Search name or index..."
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
-                    className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-[#344767] focus:outline-none focus:border-[#344767] w-64"
+                    className="sip-input w-52 text-[12px] py-2"
                   />
-                  <span className="text-xs text-[#8392ab] bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
-                    {students.length} student{students.length !== 1 ? 's' : ''}
-                  </span>
+                  <span className="badge badge-dark">{students.length}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)] overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden">
                 {studentsLoading ? (
-                  <div className="flex justify-center items-center py-16">
-                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+                  <div className="p-6 space-y-3">
+                    {[1, 2, 3, 4, 5].map(i => <div key={i} className="skeleton h-12 rounded-xl" />)}
                   </div>
                 ) : students.length === 0 ? (
-                  <div className="text-center py-16 space-y-3 p-6">
-                    <svg className="w-12 h-12 text-[#8392ab] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  <div className="flex flex-col items-center py-14">
+                    <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <p className="text-sm font-bold text-[#8392ab]">No students enrolled yet</p>
-                    <p className="text-xs text-[#8392ab] max-w-xs mx-auto">Your administrator needs to add students to your class.</p>
+                    <p className="text-[13px] font-semibold text-[#8392ab]">No students enrolled yet</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
+                  <>
+                    <table className="sip-table">
+                      <thead>
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">#</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Index Number</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Name</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Email</th>
+                          <th>#</th>
+                          <th>Index Number</th>
+                          <th>Name</th>
+                          <th className="hidden md:table-cell">Email</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-100">
+                      <tbody>
                         {students
-                          .filter(student => 
+                          .filter(student =>
                             student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                             student.indexNumber.includes(studentSearch)
                           )
                           .map((student, index) => (
-                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
-                              <td className="px-6 py-4 text-sm text-[#8392ab]">{index + 1}</td>
-                              <td className="px-6 py-4">
-                                <span className="font-mono text-sm font-bold text-[#344767]">{student.indexNumber}</span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="text-sm font-semibold text-[#344767]">{student.name}</span>
-                              </td>
-                              <td className="px-6 py-4">
-                                <span className="text-sm text-[#8392ab]">{student.email || 'N/A'}</span>
-                              </td>
+                            <tr key={student.id}>
+                              <td className="text-[#8392ab] text-[12px]">{index + 1}</td>
+                              <td><span className="font-mono text-[12px] font-bold text-[#344767]">{student.indexNumber}</span></td>
+                              <td><span className="text-[13px] font-semibold text-[#344767]">{student.name}</span></td>
+                              <td className="hidden md:table-cell text-[12px] text-[#8392ab]">{student.email || 'N/A'}</td>
                             </tr>
                           ))}
                       </tbody>
                     </table>
-                    {students.filter(student => 
+                    {students.filter(student =>
                       student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                       student.indexNumber.includes(studentSearch)
                     ).length === 0 && (
-                      <div className="text-center py-8 text-slate-400 text-sm">
-                        No students match your search criteria
-                      </div>
+                      <div className="py-8 text-center text-[12px] text-[#8392ab]">No students match your search.</div>
                     )}
-                  </div>
+                  </>
                 )}
               </div>
             </div>
           )}
 
-          {/* TAB 4: EXCUSED ABSENCES */}
+          {/* ── TAB: EXCUSED ABSENCES ── */}
           {activeTab === 'excused' && (
-            <ExcusedAbsencesManager />
+            <div className="animate-slide-left">
+              <ExcusedAbsencesManager />
+            </div>
           )}
         </div>
       </main>
 
-      {/* SESSION CREATION MODAL */}
+      {/* ─── MOBILE BOTTOM TAB BAR ─── */}
+      <nav className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 flex md:hidden shadow-[0_-1px_4px_rgba(0,0,0,.07)]">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors
+              ${activeTab === item.id ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+          >
+            {item.icon}
+            {item.label}
+          </button>
+        ))}
+      </nav>
+
+      {/* ─── SESSION CREATION MODAL ─── */}
       {showSessionModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-[#344767] mb-1">Open New Attendance Session</h3>
-            {assignedClass && (
-              <p className="text-xs text-[#8392ab] font-semibold mb-4">{assignedClass.displayName}</p>
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-scale-in">
+            <div className="mb-5">
+              <h3 className="text-[16px] font-bold text-[#344767]">Open New Attendance Session</h3>
+              {assignedClass && (
+                <p className="text-[11px] text-[#8392ab] mt-1">{assignedClass.displayName}</p>
+              )}
+            </div>
+
+            {errorMsg && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-[12px]">
+                {errorMsg}
+              </div>
             )}
+
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div>
-                <label className="block text-[#344767] text-sm font-semibold mb-2">Select Course</label>
+                <label className="block text-[12px] font-semibold text-[#344767] mb-1.5">Select Course</label>
                 <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-[#344767] focus:outline-none focus:border-[#344767]"
+                  className="sip-input w-full"
                 >
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
@@ -731,49 +771,49 @@ const RepDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-[#344767] text-sm font-semibold mb-2">Session Type</label>
+                <label className="block text-[12px] font-semibold text-[#344767] mb-1.5">Session Type</label>
                 <div className="flex gap-4">
                   {['PHYSICAL', 'ONLINE'].map(type => (
-                    <label key={type} className="flex items-center gap-2 text-[#344767] cursor-pointer">
+                    <label key={type} className="flex items-center gap-2 text-[13px] text-[#344767] cursor-pointer">
                       <input
                         type="radio"
                         name="sessionType"
                         checked={sessionType === type}
                         onChange={() => setSessionType(type)}
-                        className="accent-[#344767]"
+                        className="accent-[#17c1e8]"
                       />
-                      {type === 'PHYSICAL' ? 'Physical Class' : 'Online Class'}
+                      {type === 'PHYSICAL' ? 'Physical' : 'Online'}
                     </label>
                   ))}
                 </div>
               </div>
 
               {sessionType === 'PHYSICAL' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[#8392ab] text-xs font-semibold mb-1">Latitude</label>
+                      <label className="block text-[11px] text-[#8392ab] font-semibold mb-1">Latitude</label>
                       <input type="number" step="0.000001" placeholder="5.6037" value={latitude}
                         onChange={(e) => setLatitude(e.target.value)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
+                        className="sip-input w-full"
                       />
                     </div>
                     <div>
-                      <label className="block text-[#8392ab] text-xs font-semibold mb-1">Longitude</label>
+                      <label className="block text-[11px] text-[#8392ab] font-semibold mb-1">Longitude</label>
                       <input type="number" step="0.000001" placeholder="-0.1870" value={longitude}
                         onChange={(e) => setLongitude(e.target.value)}
-                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
+                        className="sip-input w-full"
                       />
                     </div>
                   </div>
                   <button type="button" onClick={getGPSLocation}
-                    className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-[#344767] font-semibold rounded-lg border border-gray-300 text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-[#f8f9fa] hover:bg-gray-100 text-[#344767] font-semibold rounded-xl border border-gray-200 text-[12px] transition-all flex items-center justify-center gap-2"
                   >
                     {gpsLoading ? (
-                      <div className="w-4 h-4 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-[#17c1e8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -782,19 +822,19 @@ const RepDashboard = () => {
                     )}
                   </button>
                   <div>
-                    <label className="block text-[#344767] text-sm font-semibold mb-1">Network Wi-Fi SSID (Optional)</label>
+                    <label className="block text-[12px] font-semibold text-[#344767] mb-1">Wi-Fi SSID (Optional)</label>
                     <input type="text" placeholder="e.g. LectureHall_A" value={networkSSID}
                       onChange={(e) => setNetworkSSID(e.target.value)}
-                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
+                      className="sip-input w-full"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-[#344767] text-sm font-semibold mb-2">Duration</label>
+                <label className="block text-[12px] font-semibold text-[#344767] mb-1.5">Duration</label>
                 <select value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-[#344767] focus:outline-none focus:border-[#344767]"
+                  className="sip-input w-full"
                 >
                   <option value="15">15 Minutes</option>
                   <option value="30">30 Minutes</option>
@@ -804,15 +844,13 @@ const RepDashboard = () => {
                 </select>
               </div>
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowSessionModal(false)}
-                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#344767] font-semibold rounded-xl border border-gray-300 transition-all text-sm"
+                  className="flex-1 py-2.5 bg-[#f8f9fa] hover:bg-gray-100 text-[#344767] font-semibold rounded-xl border border-gray-200 transition-all text-[13px]"
                 >
                   Cancel
                 </button>
-                <button type="submit"
-                  className="flex-1 py-2.5 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-bold rounded-xl transition-all text-sm"
-                >
+                <button type="submit" className="sip-btn-dark flex-1 py-2.5">
                   Create & Open
                 </button>
               </div>
@@ -821,57 +859,57 @@ const RepDashboard = () => {
         </div>
       )}
 
-      {/* COURSE ANALYTICS MODAL */}
+      {/* ─── ANALYTICS MODAL ─── */}
       {showAnalyticsModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-start pb-4 border-b border-gray-200">
+          <div className="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl max-h-[88vh] flex flex-col animate-scale-in">
+            <div className="flex justify-between items-start pb-4 border-b border-gray-100 mb-4">
               <div>
-                <h3 className="text-lg font-bold text-[#344767]">Course Attendance Analytics</h3>
+                <h3 className="text-[16px] font-bold text-[#344767]">Course Attendance Analytics</h3>
                 {analyticsData && (
-                  <p className="text-xs text-[#8392ab] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
+                  <p className="text-[11px] text-[#8392ab] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
                 )}
               </div>
-              <button onClick={() => { setShowAnalyticsModal(false); setAnalyticsData(null); }}
-                className="text-[#8392ab] hover:text-[#344767] transition-colors"
+              <button
+                onClick={() => { setShowAnalyticsModal(false); setAnalyticsData(null); }}
+                className="p-1.5 rounded-lg text-[#8392ab] hover:text-[#344767] hover:bg-gray-100 transition-all"
               >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {analyticsLoading ? (
-              <div className="flex-1 flex flex-col justify-center items-center py-20">
-                <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin mb-3" />
-                <span className="text-xs text-slate-400">Loading student attendance metrics...</span>
+              <div className="flex-1 flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-8 h-8 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[12px] text-[#8392ab]">Loading attendance metrics…</span>
               </div>
             ) : analyticsData ? (
-              <div className="flex-1 overflow-y-auto space-y-6 pt-4 pr-1">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-center">
+              <div className="flex-1 overflow-y-auto space-y-5 pr-1">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-[#f8f9fa] rounded-xl p-4 text-center">
                     <span className="block text-2xl font-bold text-[#344767] font-mono">{analyticsData.totalSessionsCount}</span>
-                    <span className="text-[10px] text-[#8392ab] font-semibold uppercase tracking-wider">Concluded Lectures</span>
+                    <span className="text-[10px] text-[#8392ab] font-semibold uppercase">Concluded</span>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-center">
-                    <span className="block text-2xl font-bold text-rose-400 font-mono">
+                  <div className="bg-[#f8f9fa] rounded-xl p-4 text-center">
+                    <span className="block text-2xl font-bold text-rose-500 font-mono">
                       {analyticsData.analytics.filter(s => s.isAtRisk).length}
                     </span>
-                    <span className="text-[10px] text-rose-400/80 font-semibold uppercase tracking-wider">At-Risk (&lt;75%)</span>
+                    <span className="text-[10px] text-rose-400 font-semibold uppercase">At-Risk (&lt;75%)</span>
                   </div>
-                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center justify-center">
+                  <div className="bg-[#f8f9fa] rounded-xl p-4 flex items-center justify-center">
                     <button
                       onClick={() => handleSendWarnings(analyticsData.course.id)}
                       disabled={broadcasting || analyticsData.totalSessionsCount === 0}
-                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-gray-50 text-rose-400 disabled:text-[#8392ab] border border-rose-500/20 disabled:border-transparent py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+                      className="w-full py-2 px-3 rounded-xl text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-500 border border-rose-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                     >
-                      {broadcasting ? (
-                        <div className="w-4 h-4 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.003 6.003 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </svg>
-                      )}
+                      {broadcasting
+                        ? <div className="w-3.5 h-3.5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
+                        : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.003 6.003 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                          </svg>
+                      }
                       Broadcast Warnings
                     </button>
                   </div>
@@ -882,59 +920,56 @@ const RepDashboard = () => {
                   placeholder="Search by student name or index number..."
                   value={analyticsSearch}
                   onChange={(e) => setAnalyticsSearch(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-[#344767] text-xs focus:outline-none focus:border-[#344767]"
+                  className="sip-input w-full"
                 />
 
-                <div className="border border-gray-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-gray-50 text-[10px] font-extrabold uppercase text-[#8392ab] border-b border-gray-200">
-                        <th className="p-3">Student Name</th>
-                        <th className="p-3">Lectures</th>
-                        <th className="p-3">Attendance Rate</th>
-                        <th className="p-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100/20">
-                      {analyticsData.analytics
-                        .filter(s =>
-                          s.name.toLowerCase().includes(analyticsSearch.toLowerCase()) ||
-                          s.indexNumber.includes(analyticsSearch)
-                        )
-                        .map((student) => {
-                          const rate = student.attendanceRate ?? 0;
-                          const barColor = rate >= 75 ? 'bg-emerald-500' : rate >= 60 ? 'bg-amber-500' : 'bg-rose-500';
-                          const textColor = rate >= 75 ? 'text-emerald-400' : rate >= 60 ? 'text-amber-400' : 'text-rose-400';
-                          const badgeBg = rate >= 75 ? 'bg-emerald-500/10 border-emerald-500/20' : rate >= 60 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-rose-500/10 border-rose-500/20';
-                          return (
-                            <tr key={student.id} className="hover:bg-gray-50 text-xs transition-colors">
-                              <td className="p-3">
-                                <div className="font-bold text-[#344767]">{student.name}</div>
-                                <div className="text-[10px] text-[#8392ab] font-mono mt-0.5">{student.indexNumber}</div>
-                              </td>
-                              <td className="p-3 text-[#344767] font-mono">{student.presentCount} / {student.totalConcluded}</td>
-                              <td className="p-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                    <div className={`h-full ${barColor}`} style={{ width: `${rate}%` }} />
-                                  </div>
-                                  <span className={`font-bold font-mono ${textColor}`}>{rate}%</span>
+                <table className="sip-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Lectures</th>
+                      <th>Rate</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analyticsData.analytics
+                      .filter(s =>
+                        s.name.toLowerCase().includes(analyticsSearch.toLowerCase()) ||
+                        s.indexNumber.includes(analyticsSearch)
+                      )
+                      .map((student) => {
+                        const rate = student.attendanceRate ?? 0;
+                        const barColor = rate >= 75 ? 'bg-emerald-500' : rate >= 60 ? 'bg-amber-400' : 'bg-rose-500';
+                        const badgeClass = rate >= 75 ? 'badge-success' : rate >= 60 ? 'badge-warning' : 'badge-danger';
+                        return (
+                          <tr key={student.id}>
+                            <td>
+                              <p className="font-semibold text-[#344767] text-[13px]">{student.name}</p>
+                              <p className="text-[10px] text-[#8392ab] font-mono">{student.indexNumber}</p>
+                            </td>
+                            <td className="text-[12px] text-[#344767] font-mono">{student.presentCount} / {student.totalConcluded}</td>
+                            <td>
+                              <div className="flex items-center gap-2">
+                                <div className="w-20 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                  <div className={`h-full ${barColor}`} style={{ width: `${rate}%` }} />
                                 </div>
-                              </td>
-                              <td className="p-3">
-                                <span className={`inline-block px-2 py-0.5 rounded-full border text-[9px] font-black uppercase ${badgeBg} ${textColor}`}>
-                                  {rate >= 75 ? 'SAFE' : rate >= 60 ? 'WARNING' : 'AT RISK'}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-                </div>
+                                <span className="text-[12px] font-bold font-mono text-[#344767]">{rate}%</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`badge ${badgeClass}`}>
+                                {rate >= 75 ? 'SAFE' : rate >= 60 ? 'WARNING' : 'AT RISK'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
               </div>
             ) : (
-              <div className="text-center py-20 text-[#8392ab] text-xs">No analytics data available.</div>
+              <div className="text-center py-16 text-[12px] text-[#8392ab]">No analytics data available.</div>
             )}
           </div>
         </div>
