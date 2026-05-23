@@ -35,32 +35,32 @@ const icons = {
 
 const styles = {
   success: {
-    border: 'border-emerald-500/40',
-    bg: 'bg-emerald-500/10',
-    icon: 'text-emerald-400',
+    border: 'border-emerald-200',
+    bg: 'bg-white',
+    icon: 'text-emerald-500',
     bar: 'bg-emerald-500',
-    title: 'text-emerald-300',
+    title: 'text-emerald-700',
   },
   error: {
-    border: 'border-rose-500/40',
-    bg: 'bg-rose-500/10',
-    icon: 'text-rose-400',
+    border: 'border-rose-200',
+    bg: 'bg-white',
+    icon: 'text-rose-500',
     bar: 'bg-rose-500',
-    title: 'text-rose-300',
+    title: 'text-rose-700',
   },
   warning: {
-    border: 'border-amber-500/40',
-    bg: 'bg-amber-500/10',
-    icon: 'text-amber-400',
+    border: 'border-amber-200',
+    bg: 'bg-white',
+    icon: 'text-amber-500',
     bar: 'bg-amber-500',
-    title: 'text-amber-300',
+    title: 'text-amber-700',
   },
   info: {
-    border: 'border-sky-500/40',
-    bg: 'bg-sky-500/10',
-    icon: 'text-sky-400',
+    border: 'border-sky-200',
+    bg: 'bg-white',
+    icon: 'text-sky-500',
     bar: 'bg-sky-500',
-    title: 'text-sky-300',
+    title: 'text-sky-700',
   },
 };
 
@@ -116,11 +116,11 @@ const Toast = ({ toast, onDismiss }) => {
           {toast.title && (
             <p className={`text-sm font-bold mb-0.5 ${s.title}`}>{toast.title}</p>
           )}
-          <p className="text-sm text-slate-300 leading-relaxed break-words">{toast.message}</p>
+          <p className="text-sm text-[#344767] leading-relaxed break-words">{toast.message}</p>
         </div>
         <button
           onClick={handleClose}
-          className="flex-shrink-0 text-slate-500 hover:text-slate-300 transition-colors mt-0.5"
+          className="flex-shrink-0 text-[#8392ab] hover:text-[#344767] transition-colors mt-0.5"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -512,18 +512,18 @@ const SessionManager = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#00122c] text-slate-100 flex justify-center items-center">
-        <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex justify-center items-center">
+        <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (errorMsg || !session) {
     return (
-      <div className="min-h-screen bg-[#00122c] text-slate-100 flex flex-col justify-center items-center p-6 text-center">
-        <div className="bg-[#001c44]/60 border border-[#002a63] p-6 rounded-2xl max-w-sm">
+      <div className="min-h-screen bg-[#f0f2f5] text-[#344767] flex flex-col justify-center items-center p-6 text-center">
+        <div className="bg-white border border-gray-200 p-6 rounded-2xl max-w-sm">
           <p className="text-rose-400 mb-4">{errorMsg || 'Session not found'}</p>
-          <button onClick={() => navigate('/rep/dashboard')} className="bg-[#D4A017] text-slate-950 font-bold px-4 py-2 rounded-lg">
+          <button onClick={() => navigate('/rep/dashboard')} className="bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white font-bold px-4 py-2 rounded-lg">
             Back to Dashboard
           </button>
         </div>
@@ -532,29 +532,29 @@ const SessionManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#00122c] text-slate-100 p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f0f2f5] text-[#344767] p-6 relative overflow-hidden">
       {/* Background logo watermark */}
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none flex items-center justify-center">
         <img src="/logo2.png" alt="GCTU Crest Watermark" className="w-[450px] h-[450px] object-contain" />
       </div>
 
-      <div className="absolute top-[-30%] left-[-10%] w-[70%] h-[70%] rounded-full bg-[#D4A017]/5 blur-[150px] pointer-events-none"></div>
+      <div className="absolute top-[-30%] left-[-10%] w-[70%] h-[70%] rounded-full bg-[#344767]/10 blur-[150px] pointer-events-none"></div>
 
       {/* Header */}
-      <div className="max-w-6xl mx-auto flex justify-between items-center mb-8 pb-4 border-b border-[#002a63] relative z-10">
+      <div className="max-w-6xl mx-auto flex justify-between items-center mb-8 pb-4 border-b border-gray-200 relative z-10">
         <div className="flex items-center gap-3">
-          <img src={displayDeptLogo} alt="Logo" className="w-12 h-12 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
+          <img src={displayDeptLogo} alt="Logo" className="w-12 h-12 object-contain bg-gray-50 rounded-xl p-1 border border-gray-200" />
           <div>
             <button
               onClick={() => navigate('/rep/dashboard')}
-              className="text-xs text-[#D4A017] hover:text-[#b88a14] font-semibold mb-1.5 inline-flex items-center gap-1.5 transition-colors"
+              className="text-xs text-[#344767] hover:text-[#b88a14] font-semibold mb-1.5 inline-flex items-center gap-1.5 transition-colors"
             >
               ← Back to {displayDeptName}
             </button>
-            <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2.5">
+            <h1 className="text-xl md:text-2xl font-bold text-[#344767] flex items-center gap-2.5">
               {session.course.name} ({session.course.code})
               <span className={`text-xs px-2.5 py-0.5 rounded-full border uppercase ${
-                session.status === 'OPEN' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20 animate-pulse' :
+                session.status === 'OPEN' ? 'bg-[#344767]/10 text-[#344767] border-[#344767]/20 animate-pulse' :
                 session.status === 'CLOSED' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                 'bg-blue-500/10 text-blue-400 border-blue-500/20'
               }`}>
@@ -569,16 +569,16 @@ const SessionManager = () => {
             <>
               <button
                 onClick={handleGenerateReport}
-                className="bg-[#003B8E] hover:bg-[#002a63] text-white font-bold px-4 py-2.5 rounded-xl border border-[#002a63] transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-[#003b8e]/10"
+                className="bg-[#344767] hover:bg-gray-100 text-[#344767] font-bold px-4 py-2.5 rounded-xl border border-gray-200 transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-[#003b8e]/10"
               >
-                <svg className="w-4 h-4 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 PDF Report
               </button>
               <button
                 onClick={generateGctuExcel}
-                className="bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-bold px-4 py-2.5 rounded-xl transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-[#D4A017]/10"
+                className="bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-bold px-4 py-2.5 rounded-xl transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-[#344767]/10"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -603,8 +603,8 @@ const SessionManager = () => {
         {/* Left Side: Live QR and Session Stats */}
         <div className="lg:col-span-1 space-y-6">
           {session.status === 'OPEN' && (
-            <div className="bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] p-6 rounded-2xl shadow-xl text-center">
-              <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide">Live Check-in QR Code</h3>
+            <div className="bg-white backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-xl text-center">
+              <h3 className="text-sm font-bold text-[#344767] mb-4 uppercase tracking-wide">Live Check-in QR Code</h3>
               
               <div className="bg-white p-4 rounded-xl inline-block shadow-inner mb-4 relative group">
                 {qrImage ? (
@@ -617,55 +617,55 @@ const SessionManager = () => {
               </div>
 
               {/* Dynamic countdown badge */}
-              <div className="flex items-center justify-center gap-2 mb-3 bg-[#001432]/60 border border-[#002a63] py-2 px-4 rounded-xl w-fit mx-auto shadow-inner">
+              <div className="flex items-center justify-center gap-2 mb-3 bg-[#001432]/60 border border-gray-200 py-2 px-4 rounded-xl w-fit mx-auto shadow-inner">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A017] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D4A017]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gradient-to-br from-[#14172B] to-[#3A416F] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gradient-to-br from-[#14172B] to-[#3A416F]"></span>
                 </span>
-                <span className="text-xs font-bold text-slate-200">
-                  Auto-rotating in <span className="text-[#D4A017] font-mono">{countdown}s</span>
+                <span className="text-xs font-bold text-[#344767]">
+                  Auto-rotating in <span className="text-[#344767] font-mono">{countdown}s</span>
                 </span>
               </div>
               
-              <p className="text-xs text-slate-400 px-4">
+              <p className="text-xs text-[#8392ab] px-4">
                 This QR Code secures attendance by refreshing every 25 seconds. Screenshots will fail checks.
               </p>
             </div>
           )}
 
           {/* Quick Stats Grid */}
-          <div className="bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] p-6 rounded-2xl shadow-xl">
-            <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wide">Session Statistics</h3>
+          <div className="bg-white backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-xl">
+            <h3 className="text-sm font-bold text-[#344767] mb-4 uppercase tracking-wide">Session Statistics</h3>
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="p-3 bg-[#000a18]/40 border border-[#002a63]/80 rounded-xl">
-                <span className="block text-xl font-bold text-[#D4A017] font-mono">{presentCount}</span>
-                <span className="text-[10px] text-slate-500 font-semibold uppercase">Present</span>
+              <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-xl">
+                <span className="block text-xl font-bold text-[#344767] font-mono">{presentCount}</span>
+                <span className="text-[10px] text-[#8392ab] font-semibold uppercase">Present</span>
               </div>
-              <div className="p-3 bg-[#000a18]/40 border border-[#002a63]/80 rounded-xl">
+              <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-xl">
                 <span className="block text-xl font-bold text-amber-400 font-mono">{lateCount}</span>
-                <span className="text-[10px] text-slate-500 font-semibold uppercase">Late</span>
+                <span className="text-[10px] text-[#8392ab] font-semibold uppercase">Late</span>
               </div>
-              <div className="p-3 bg-[#000a18]/40 border border-[#002a63]/80 rounded-xl">
+              <div className="p-3 bg-gray-50 border border-gray-200/80 rounded-xl">
                 <span className="block text-xl font-bold text-rose-400 font-mono">{absentCount}</span>
-                <span className="text-[10px] text-slate-500 font-semibold uppercase">Absent</span>
+                <span className="text-[10px] text-[#8392ab] font-semibold uppercase">Absent</span>
               </div>
             </div>
 
-            <div className="border-t border-[#002a63] mt-6 pt-4 space-y-2 text-xs text-slate-400">
+            <div className="border-t border-gray-200 mt-6 pt-4 space-y-2 text-xs text-[#8392ab]">
               <div className="flex justify-between">
                 <span>Session Type:</span>
-                <span className="font-semibold text-slate-200 uppercase">{session.sessionType}</span>
+                <span className="font-semibold text-[#344767] uppercase">{session.sessionType}</span>
               </div>
               <div className="flex justify-between">
                 <span>Start Time:</span>
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-[#344767]">
                   {new Date(session.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
               {session.networkSSID && (
                 <div className="flex justify-between">
                   <span>Target Wi-Fi SSID:</span>
-                  <span className="font-semibold text-[#D4A017]">{session.networkSSID}</span>
+                  <span className="font-semibold text-[#344767]">{session.networkSSID}</span>
                 </div>
               )}
             </div>
@@ -673,15 +673,15 @@ const SessionManager = () => {
 
           {/* LECTURER SIGN-OFF AND APPROVAL */}
           {session.status === 'CLOSED' && (
-            <div className="bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] p-6 rounded-2xl shadow-xl space-y-6">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide">Lecturer Approval Required</h3>
+            <div className="bg-white backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-xl space-y-6">
+              <h3 className="text-sm font-bold text-[#344767] uppercase tracking-wide">Lecturer Approval Required</h3>
               
               <SignatureCanvas onSave={setSignature} label="Class Rep Sign-off" />
 
               <button
                 onClick={handleApproveSession}
                 disabled={approving || !signature}
-                className="w-full bg-[#D4A017] hover:bg-[#b88a14] disabled:bg-[#000a18] disabled:text-slate-500 active:scale-[0.98] text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 disabled:bg-gray-50 disabled:text-[#8392ab] active:scale-[0.98] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all text-sm flex items-center justify-center gap-2"
               >
                 {approving ? (
                   <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
@@ -693,7 +693,7 @@ const SessionManager = () => {
           )}
 
           {session.status === 'APPROVED' && (
-            <div className="bg-[#001c44]/60 backdrop-blur-xl border border-emerald-500/20 p-6 rounded-2xl shadow-xl space-y-4">
+            <div className="bg-white backdrop-blur-xl border border-emerald-500/20 p-6 rounded-2xl shadow-xl space-y-4">
               <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold uppercase tracking-wide">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -705,7 +705,7 @@ const SessionManager = () => {
                   <img src={session.lecturerSignature} alt="Lecturer Signature" className="h-16 object-contain mx-auto" />
                 </div>
               )}
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-[#8392ab]">
                 Approved At: {new Date(session.approvedAt).toLocaleString()}
               </div>
             </div>
@@ -714,17 +714,17 @@ const SessionManager = () => {
 
         {/* Right Side: Real-time Attendance List */}
         <div className="lg:col-span-2">
-          <div className="bg-[#001c44]/60 backdrop-blur-xl border border-[#002a63] p-6 rounded-2xl shadow-xl min-h-[400px] flex flex-col">
+          <div className="bg-white backdrop-blur-xl border border-gray-200 p-6 rounded-2xl shadow-xl min-h-[400px] flex flex-col">
             
             {/* Header Tabs */}
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-[#002a63]/40 mb-6">
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-gray-200/40 mb-6">
               <div className="flex gap-2">
                 <button
                   onClick={() => setActivePanelTab('logs')}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     activePanelTab === 'logs'
-                      ? 'bg-[#003B8E] text-[#D4A017] border border-[#003B8E]'
-                      : 'bg-transparent text-slate-400 hover:text-slate-200 border border-transparent'
+                      ? 'bg-[#344767] text-[#344767] border border-[#003B8E]'
+                      : 'bg-transparent text-[#8392ab] hover:text-[#344767] border border-transparent'
                   }`}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -736,8 +736,8 @@ const SessionManager = () => {
                   onClick={() => setActivePanelTab('security')}
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 relative ${
                     activePanelTab === 'security'
-                      ? 'bg-[#003B8E] text-rose-400 border border-[#003B8E]'
-                      : 'bg-transparent text-slate-400 hover:text-slate-200 border border-transparent'
+                      ? 'bg-[#344767] text-rose-400 border border-[#003B8E]'
+                      : 'bg-transparent text-[#8392ab] hover:text-[#344767] border border-transparent'
                   }`}
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -745,14 +745,14 @@ const SessionManager = () => {
                   </svg>
                   Anti-Cheat Shield
                   {securityAlerts.length > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-[#001c44] animate-pulse">
+                    <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white animate-pulse">
                       {securityAlerts.length}
                     </span>
                   )}
                 </button>
               </div>
-              <span className="text-xs text-slate-500 font-mono">
-                Session Status: <span className="text-slate-300 font-bold">{session.status}</span>
+              <span className="text-xs text-[#8392ab] font-mono">
+                Session Status: <span className="text-[#344767] font-bold">{session.status}</span>
               </span>
             </div>
 
@@ -766,7 +766,7 @@ const SessionManager = () => {
             {/* Tab 2: Security Shield */}
             {activePanelTab === 'security' && (
               <div className="space-y-6 flex-1">
-                <div className="bg-[#001432]/60 border border-[#002a63] p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="bg-[#001432]/60 border border-gray-200 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 bg-rose-500/10 text-rose-400 rounded-xl border border-rose-500/20">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -774,8 +774,8 @@ const SessionManager = () => {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">Proxy & Fraud Detection Engine</h4>
-                      <p className="text-xs text-slate-400">Comparing IP signatures, GPS outliers, and device fingerprint tokens.</p>
+                      <h4 className="text-sm font-bold text-[#344767]">Proxy & Fraud Detection Engine</h4>
+                      <p className="text-xs text-[#8392ab]">Comparing IP signatures, GPS outliers, and device fingerprint tokens.</p>
                     </div>
                   </div>
                   <div className="text-xs font-mono bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3.5 py-1.5 rounded-lg font-bold">
@@ -790,31 +790,31 @@ const SessionManager = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                       </svg>
                     </div>
-                    <h4 className="text-sm font-bold text-slate-200">No security issues detected</h4>
-                    <p className="text-xs text-slate-500 mt-1 max-w-sm">Every active check-in meets unique IP, device token, and geofencing criteria.</p>
+                    <h4 className="text-sm font-bold text-[#344767]">No security issues detected</h4>
+                    <p className="text-xs text-[#8392ab] mt-1 max-w-sm">Every active check-in meets unique IP, device token, and geofencing criteria.</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto border border-[#002a63]/40 rounded-xl">
+                  <div className="overflow-x-auto border border-gray-200/40 rounded-xl">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#001c44]/80 text-[10px] font-extrabold uppercase text-slate-400 border-b border-[#002a63]">
+                        <tr className="bg-white text-[10px] font-extrabold uppercase text-[#8392ab] border-b border-gray-200">
                           <th className="p-4">Student Info</th>
                           <th className="p-4">Flag Reason</th>
                           <th className="p-4 text-center">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#002a63]/20">
+                      <tbody className="divide-y divide-gray-200/20">
                         {securityAlerts.map(({ attendance, alerts }) => (
-                          <tr key={attendance.id} className="hover:bg-[#002a63]/10 text-xs transition-colors">
+                          <tr key={attendance.id} className="hover:bg-gray-100 text-xs transition-colors">
                             <td className="p-4">
-                              <div className="font-bold text-white">{attendance.student?.name || 'N/A'}</div>
-                              <div className="text-[10px] text-[#D4A017] font-mono mt-0.5">{attendance.student?.indexNumber || 'N/A'}</div>
+                              <div className="font-bold text-[#344767]">{attendance.student?.name || 'N/A'}</div>
+                              <div className="text-[10px] text-[#344767] font-mono mt-0.5">{attendance.student?.indexNumber || 'N/A'}</div>
                             </td>
                             <td className="p-4 space-y-1.5 max-w-[280px]">
                               {alerts.map((alert, idx) => (
                                 <div key={idx} className="flex items-start gap-1.5">
                                   <span className={`inline-block mt-1 h-1.5 w-1.5 rounded-full ${alert.severity === 'HIGH' ? 'bg-rose-500' : 'bg-amber-400'}`} />
-                                  <span className="text-[11px] leading-relaxed text-slate-300">
+                                  <span className="text-[11px] leading-relaxed text-[#344767]">
                                     {alert.message}
                                   </span>
                                 </div>

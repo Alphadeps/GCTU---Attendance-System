@@ -1,1 +1,118 @@
 @import "tailwindcss";
+
+/* ─── GCTU SIP Design System ─────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --sip-primary:   #cb0c9f;
+  --sip-dark:      #344767;
+  --sip-secondary: #8392ab;
+  --sip-success:   #82d616;
+  --sip-info:      #17c1e8;
+  --sip-warning:   #fbcf33;
+  --sip-danger:    #ea0606;
+  --sip-light:     #e9ecef;
+  --sip-white:     #ffffff;
+
+  /* Text */
+  --sip-text-body:      rgb(103, 116, 142);
+  --sip-text-heading:   rgb(52,  71,  103);
+  --sip-text-footer:    rgb(131, 146, 171);
+
+  /* Gradients — all 310 deg */
+  --sip-grad-dark:      linear-gradient(310deg, #14172B, #3A416F);
+  --sip-grad-primary:   linear-gradient(310deg, #7928CA, #FF0080);
+  --sip-grad-info:      linear-gradient(310deg, #2152FF, #21D4FD);
+  --sip-grad-success:   linear-gradient(310deg, #17AD37, #98EC2D);
+  --sip-grad-warning:   linear-gradient(310deg, #F53939, #FBCF33);
+  --sip-grad-danger:    linear-gradient(310deg, #EA0606, #FF667C);
+
+  /* Shadows */
+  --sip-shadow-card:    0 20px 27px 0 rgba(0,0,0,.05);
+  --sip-shadow-btn:     0 4px 7px -1px rgba(0,0,0,.11), 0 2px 4px -1px rgba(0,0,0,.07);
+
+  /* Radius */
+  --sip-radius-card:  16px;
+  --sip-radius-input:  8px;
+  --sip-radius-hero:  12px;
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--sip-text-body);
+  background: #f0f2f5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Reusable SIP helpers (usable as className strings) ─────────────────── */
+
+/* Card */
+.sip-card {
+  background: #fff;
+  border-radius: var(--sip-radius-card);
+  box-shadow: var(--sip-shadow-card);
+}
+
+/* Dark gradient button */
+.sip-btn-dark {
+  background: var(--sip-grad-dark);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -.4px;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: var(--sip-radius-input);
+  border: none;
+  box-shadow: var(--sip-shadow-btn);
+  cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  width: 100%;
+}
+.sip-btn-dark:hover  { opacity: .88; }
+.sip-btn-dark:active { transform: scale(.98); }
+.sip-btn-dark:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Input */
+.sip-input {
+  width: 100%;
+  border: 1px solid #d2d6da;
+  border-radius: var(--sip-radius-input);
+  padding: .5rem .75rem;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--sip-text-heading);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  background: #fff;
+}
+.sip-input:focus {
+  border-color: var(--sip-dark);
+  box-shadow: 0 0 0 2px rgba(52,71,103,.12);
+}
+.sip-input::placeholder { color: var(--sip-secondary); }
+
+/* Sidebar link active / hover */
+.sip-nav-active {
+  background: var(--sip-grad-dark);
+  color: #fff !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,.12);
+}
+.sip-nav-item {
+  color: var(--sip-text-body);
+  border-radius: 8px;
+  transition: background .15s, color .15s;
+}
+.sip-nav-item:hover { background: #f0f2f5; color: var(--sip-text-heading); }
+
+/* ─── Scrollbar (subtle) ──────────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 9px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

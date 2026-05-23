@@ -149,17 +149,17 @@ const ExcusedAbsencesManager = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl">
+      <div className="bg-white border border-gray-200 p-5 rounded-2xl">
         <div className="flex justify-between items-center">
           <div>
-            <h3 className="font-bold text-white text-sm">Manage Excused Absences</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h3 className="font-bold text-[#344767] text-sm">Manage Excused Absences</h3>
+            <p className="text-xs text-[#8392ab] mt-0.5">
               Review and approve/reject student absence excuse requests
             </p>
           </div>
           <button
             onClick={fetchExcusedRequests}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[#344767] text-xs font-bold rounded-lg transition"
           >
             Refresh
           </button>
@@ -168,26 +168,26 @@ const ExcusedAbsencesManager = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
-          <div className="text-xs text-slate-400 mb-1">Total Requests</div>
-          <div className="text-2xl font-bold text-white">{stats.total}</div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4">
+          <div className="text-xs text-[#8392ab] mb-1">Total Requests</div>
+          <div className="text-2xl font-bold text-[#344767]">{stats.total}</div>
         </div>
-        <div className="bg-[#001c44]/55 border border-yellow-500/30 rounded-xl p-4">
+        <div className="bg-white border border-yellow-500/30 rounded-xl p-4">
           <div className="text-xs text-yellow-400 mb-1">Pending</div>
           <div className="text-2xl font-bold text-yellow-400">{stats.pending}</div>
         </div>
-        <div className="bg-[#001c44]/55 border border-green-500/30 rounded-xl p-4">
+        <div className="bg-white border border-green-500/30 rounded-xl p-4">
           <div className="text-xs text-green-400 mb-1">Approved</div>
           <div className="text-2xl font-bold text-green-400">{stats.resolved}</div>
         </div>
-        <div className="bg-[#001c44]/55 border border-red-500/30 rounded-xl p-4">
+        <div className="bg-white border border-red-500/30 rounded-xl p-4">
           <div className="text-xs text-red-400 mb-1">Rejected</div>
           <div className="text-2xl font-bold text-red-400">{stats.rejected}</div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
         <div className="flex flex-wrap gap-4 items-center">
           {/* Status Filter */}
           <div className="flex gap-2">
@@ -197,8 +197,8 @@ const ExcusedAbsencesManager = () => {
                 onClick={() => setFilter(status)}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
                   filter === status
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-[#0a2540] text-slate-400 hover:bg-[#0d2f4f]'
+                    ? 'bg-blue-600 text-[#344767]'
+                    : 'bg-[#0a2540] text-[#8392ab] hover:bg-[#0d2f4f]'
                 }`}
               >
                 {status}
@@ -212,7 +212,7 @@ const ExcusedAbsencesManager = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by student name, index, subject, or course..."
-            className="flex-1 px-4 py-2 bg-[#0a2540] border border-[#002a63] rounded-lg text-white text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="flex-1 px-4 py-2 bg-[#0a2540] border border-gray-200 rounded-lg text-[#344767] text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
           />
         </div>
       </div>
@@ -220,8 +220,8 @@ const ExcusedAbsencesManager = () => {
       {/* Requests List */}
       <div className="space-y-3">
         {filteredRequests.length === 0 ? (
-          <div className="bg-[#001c44]/55 border border-dashed border-[#002a63] rounded-xl p-12 text-center">
-            <p className="text-slate-400 text-sm">
+          <div className="bg-white border border-dashed border-gray-200 rounded-xl p-12 text-center">
+            <p className="text-[#8392ab] text-sm">
               {search ? 'No requests match your search' : `No ${filter.toLowerCase()} requests found`}
             </p>
           </div>
@@ -229,7 +229,7 @@ const ExcusedAbsencesManager = () => {
           filteredRequests.map(request => (
             <div
               key={request.id}
-              className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4 hover:border-blue-500/30 transition"
+              className="bg-white border border-gray-200 rounded-xl p-4 hover:border-blue-500/30 transition"
             >
               <div className="flex items-start justify-between gap-4">
                 {/* Left: Request Info */}
@@ -237,45 +237,45 @@ const ExcusedAbsencesManager = () => {
                   <div className="flex items-center gap-3 mb-2">
                     <span className="text-2xl">{getStatusIcon(request.status)}</span>
                     <div>
-                      <h4 className="font-bold text-white text-sm">{request.subject}</h4>
+                      <h4 className="font-bold text-[#344767] text-sm">{request.subject}</h4>
                       <div className="flex items-center gap-2 mt-1">
                         {!request.anonymous && (
                           <>
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-[#8392ab]">
                               {request.studentName} ({request.studentIndex})
                             </span>
-                            <span className="text-slate-600">•</span>
+                            <span className="text-[#8392ab]">•</span>
                           </>
                         )}
                         {request.anonymous && (
                           <>
-                            <span className="text-xs text-slate-400 italic">Anonymous</span>
-                            <span className="text-slate-600">•</span>
+                            <span className="text-xs text-[#8392ab] italic">Anonymous</span>
+                            <span className="text-[#8392ab]">•</span>
                           </>
                         )}
                         {request.courseCode && (
                           <>
                             <span className="text-xs text-blue-400">{request.courseCode}</span>
-                            <span className="text-slate-600">•</span>
+                            <span className="text-[#8392ab]">•</span>
                           </>
                         )}
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-[#8392ab]">
                           {new Date(request.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-300 line-clamp-2 mb-3">
+                  <p className="text-xs text-[#344767] line-clamp-2 mb-3">
                     {request.message}
                   </p>
 
                   {request.adminResponse && (
-                    <div className="bg-[#0a2540] border border-[#002a63] rounded-lg p-3 mb-3">
-                      <div className="text-xs text-slate-400 mb-1">Response:</div>
-                      <p className="text-xs text-slate-300">{request.adminResponse}</p>
+                    <div className="bg-[#0a2540] border border-gray-200 rounded-lg p-3 mb-3">
+                      <div className="text-xs text-[#8392ab] mb-1">Response:</div>
+                      <p className="text-xs text-[#344767]">{request.adminResponse}</p>
                       {request.resolvedBy && (
-                        <div className="text-xs text-slate-500 mt-2">
+                        <div className="text-xs text-[#8392ab] mt-2">
                           — {request.resolvedBy.username} ({request.resolvedBy.role})
                         </div>
                       )}
@@ -305,7 +305,7 @@ const ExcusedAbsencesManager = () => {
 
                   <button
                     onClick={() => openDetailsModal(request)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition"
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[#344767] text-xs font-bold rounded-lg transition"
                   >
                     {request.status === 'PENDING' ? 'Review' : 'View Details'}
                   </button>
@@ -319,13 +319,13 @@ const ExcusedAbsencesManager = () => {
       {/* Details Modal */}
       {showDetailsModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0a1929] border border-[#002a63] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#0a1929] border border-gray-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-[#0a1929] border-b border-[#002a63] p-6 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Excused Absence Request</h3>
+            <div className="sticky top-0 bg-[#0a1929] border-b border-gray-200 p-6 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-[#344767]">Excused Absence Request</h3>
               <button
                 onClick={closeDetailsModal}
-                className="text-slate-400 hover:text-white transition"
+                className="text-[#8392ab] hover:text-[#344767] transition"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -336,38 +336,38 @@ const ExcusedAbsencesManager = () => {
             {/* Modal Body */}
             <div className="p-6 space-y-4">
               {/* Student Info */}
-              <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
-                <div className="text-xs text-slate-400 mb-2">Student Information</div>
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-xs text-[#8392ab] mb-2">Student Information</div>
                 {!selectedRequest.anonymous ? (
                   <div className="space-y-1">
-                    <div className="text-sm text-white font-semibold">{selectedRequest.studentName}</div>
-                    <div className="text-xs text-slate-400">Index: {selectedRequest.studentIndex}</div>
+                    <div className="text-sm text-[#344767] font-semibold">{selectedRequest.studentName}</div>
+                    <div className="text-xs text-[#8392ab]">Index: {selectedRequest.studentIndex}</div>
                   </div>
                 ) : (
-                  <div className="text-sm text-slate-400 italic">Anonymous Request</div>
+                  <div className="text-sm text-[#8392ab] italic">Anonymous Request</div>
                 )}
               </div>
 
               {/* Request Details */}
-              <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
-                <div className="text-xs text-slate-400 mb-2">Subject</div>
-                <div className="text-sm text-white font-semibold mb-3">{selectedRequest.subject}</div>
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-xs text-[#8392ab] mb-2">Subject</div>
+                <div className="text-sm text-[#344767] font-semibold mb-3">{selectedRequest.subject}</div>
                 
                 {selectedRequest.courseCode && (
                   <>
-                    <div className="text-xs text-slate-400 mb-2">Course</div>
+                    <div className="text-xs text-[#8392ab] mb-2">Course</div>
                     <div className="text-sm text-blue-400 mb-3">{selectedRequest.courseCode}</div>
                   </>
                 )}
 
-                <div className="text-xs text-slate-400 mb-2">Reason for Absence</div>
-                <div className="text-sm text-slate-300 whitespace-pre-wrap">{selectedRequest.message}</div>
+                <div className="text-xs text-[#8392ab] mb-2">Reason for Absence</div>
+                <div className="text-sm text-[#344767] whitespace-pre-wrap">{selectedRequest.message}</div>
               </div>
 
               {/* Evidence */}
               {selectedRequest.evidenceUrl && (
-                <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
-                  <div className="text-xs text-slate-400 mb-2">Evidence Attached</div>
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="text-xs text-[#8392ab] mb-2">Evidence Attached</div>
                   <a
                     href={`http://localhost:5000${selectedRequest.evidenceUrl}`}
                     target="_blank"
@@ -383,8 +383,8 @@ const ExcusedAbsencesManager = () => {
               )}
 
               {/* Response Section */}
-              <div className="bg-[#001c44]/55 border border-[#002a63] rounded-xl p-4">
-                <div className="text-xs text-slate-400 mb-2">
+              <div className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="text-xs text-[#8392ab] mb-2">
                   {selectedRequest.status === 'PENDING' ? 'Your Response' : 'Response Given'}
                 </div>
                 <textarea
@@ -393,12 +393,12 @@ const ExcusedAbsencesManager = () => {
                   disabled={selectedRequest.status !== 'PENDING'}
                   placeholder="Provide your decision and comments..."
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#0a2540] border border-[#002a63] rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-[#0a2540] border border-gray-200 rounded-lg text-[#344767] text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
               {/* Metadata */}
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-[#8392ab]">
                 <span>Submitted: {new Date(selectedRequest.createdAt).toLocaleString()}</span>
                 <span className={`px-3 py-1 rounded-full font-bold border ${getStatusBadge(selectedRequest.status)}`}>
                   {selectedRequest.status}
@@ -408,25 +408,25 @@ const ExcusedAbsencesManager = () => {
 
             {/* Modal Footer */}
             {selectedRequest.status === 'PENDING' && (
-              <div className="sticky bottom-0 bg-[#0a1929] border-t border-[#002a63] p-6 flex gap-3">
+              <div className="sticky bottom-0 bg-[#0a1929] border-t border-gray-200 p-6 flex gap-3">
                 <button
                   onClick={closeDetailsModal}
                   disabled={processing}
-                  className="flex-1 px-4 py-3 bg-[#0a2540] hover:bg-[#0d2f4f] text-white text-sm font-bold rounded-lg transition disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-[#0a2540] hover:bg-[#0d2f4f] text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleReject(selectedRequest)}
                   disabled={processing || !adminResponse.trim()}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? 'Processing...' : 'Reject'}
                 </button>
                 <button
                   onClick={() => handleApprove(selectedRequest)}
                   disabled={processing || !adminResponse.trim()}
-                  className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? 'Processing...' : 'Approve'}
                 </button>

@@ -100,7 +100,7 @@ const SystemMonitoring = () => {
           </select>
           <button
             onClick={fetchAllData}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-blue-600 text-[#344767] rounded-lg hover:bg-blue-700"
           >
             Refresh Now
           </button>
@@ -318,7 +318,7 @@ const SystemMonitoring = () => {
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleUnblockIP(blocked.ip)}
-                        className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                        className="px-3 py-1 bg-green-600 text-[#344767] text-sm rounded hover:bg-green-700"
                       >
                         Unblock
                       </button>

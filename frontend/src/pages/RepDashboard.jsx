@@ -242,10 +242,10 @@ const RepDashboard = () => {
   const isSetupIncomplete = hasNoCourses || hasNoStudents;
 
   return (
-    <div className="min-h-screen bg-[#00122c] text-slate-100 flex relative overflow-hidden">
+    <div className="min-h-screen bg-[#f0f2f5] flex relative overflow-hidden">
       {/* Mesh gradients */}
-      <div className="absolute top-[-30%] right-[-10%] w-[70%] h-[70%] rounded-full bg-[#D4A017]/5 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-[-30%] left-[-10%] w-[70%] h-[70%] rounded-full bg-[#003B8E]/10 blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[40%] h-[40%] rounded-full bg-[#344767]/3 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[40%] h-[40%] rounded-full bg-[#8392ab]/5 blur-[100px] pointer-events-none" />
       <div className="absolute inset-0 opacity-[0.08] pointer-events-none flex items-center justify-center">
         <img src="/logo2.png" alt="" className="w-[450px] h-[450px] object-contain" />
       </div>
@@ -256,19 +256,19 @@ const RepDashboard = () => {
       )}
 
       {/* SIDEBAR */}
-      <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-[#001c44]/95 border-r border-[#002a63] z-40 transition-transform duration-300 md:translate-x-0 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-white border-r border-gray-200 z-40 transition-transform duration-300 md:translate-x-0 flex flex-col justify-between ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-6 space-y-8 flex-1 flex flex-col overflow-y-auto">
           {/* Header */}
           <div className="flex items-center gap-3 relative">
-            <img src={displayDeptLogo} alt="Logo" className="w-10 h-10 object-contain bg-[#000a18]/40 rounded-xl p-1 border border-[#002a63]" />
+            <img src={displayDeptLogo} alt="Logo" className="w-10 h-10 object-contain bg-white rounded-xl p-1 border border-gray-200" />
             <div className="truncate flex-1">
-              <h2 className="text-sm font-bold text-white truncate">{displayDeptName}</h2>
-              <span className="text-[10px] text-slate-400 font-mono tracking-wider uppercase">Class Representative</span>
+              <h2 className="text-sm font-bold text-[#344767] truncate">{displayDeptName}</h2>
+              <span className="text-[10px] text-[#8392ab] font-mono tracking-wider uppercase">Class Representative</span>
             </div>
             {/* Mobile close button */}
             <button
               onClick={() => setSidebarOpen(false)}
-              className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-[#002a63] rounded-lg transition-colors"
+              className="md:hidden p-2 text-[#8392ab] hover:text-[#344767] hover:bg-gray-100 rounded-lg transition-colors"
               aria-label="Close sidebar"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -279,9 +279,9 @@ const RepDashboard = () => {
 
           {/* Class Info card */}
           {assignedClass ? (
-            <div className="bg-[#000a18]/50 border border-[#002a63] rounded-xl p-4 space-y-3">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">My Class</p>
-              <p className="text-xs font-bold text-[#D4A017] leading-snug">{assignedClass.displayName}</p>
+              <p className="text-xs font-bold text-[#344767] leading-snug">{assignedClass.displayName}</p>
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="text-center">
                   <span className={`block text-lg font-black font-mono ${hasNoStudents ? 'text-rose-400' : 'text-white'}`}>
@@ -317,8 +317,8 @@ const RepDashboard = () => {
                 onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${
                   activeTab === item.id
-                    ? 'bg-[#003B8E] text-[#D4A017] border-l-4 border-[#D4A017] shadow-lg shadow-[#003B8E]/20'
-                    : 'text-slate-300 hover:bg-[#002a63]/40 hover:text-white'
+                    ? 'bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white shadow-lg rounded-lg'
+                    : 'text-[#67748e] hover:bg-gray-100 hover:text-[#344767]'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -331,15 +331,15 @@ const RepDashboard = () => {
         </div>
 
         {/* Sidebar footer */}
-        <div className="p-6 border-t border-[#002a63] bg-[#001432]/60">
+        <div className="p-6 border-t border-gray-200 bg-white">
           <div className="flex items-center justify-between gap-2">
             <div className="truncate">
-              <p className="text-xs font-bold text-white truncate">{username}</p>
-              <p className="text-[10px] text-slate-500 truncate uppercase font-mono">{role}</p>
+              <p className="text-xs font-bold text-[#344767] truncate">{username}</p>
+              <p className="text-[10px] text-[#8392ab] truncate uppercase font-mono">{role}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all"
+              className="p-2 text-[#8392ab] hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
               title="Sign Out"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -353,31 +353,31 @@ const RepDashboard = () => {
       {/* MAIN CONTENT */}
       <main className="flex-1 flex flex-col min-w-0 min-h-screen relative z-10 overflow-y-auto">
         {/* Top Header */}
-        <header className="bg-[#001c44]/65 backdrop-blur-md border-b border-[#002a63] px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 -ml-2 text-slate-400 hover:text-white rounded-lg md:hidden"
+              className="p-2 -ml-2 text-[#8392ab] hover:text-[#344767] rounded-lg md:hidden"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <div>
-              <h1 className="text-lg font-bold text-white leading-tight">
+              <h1 className="text-lg font-bold text-[#344767] leading-tight">
                 {activeTab === 'dashboard' && 'Dashboard & Sessions'}
                 {activeTab === 'courses' && 'My Class Courses'}
                 {activeTab === 'students' && 'Class Students'}
                 {activeTab === 'excused' && 'Excused Absences'}
               </h1>
               {assignedClass && (
-                <span className="text-xs text-[#D4A017] font-bold">{assignedClass.displayName}</span>
+                <span className="text-xs text-[#8392ab] font-bold">{assignedClass.displayName}</span>
               )}
             </div>
           </div>
           <div className="flex items-center gap-4">
             <NotificationPanel />
-            <span className="text-xs bg-[#D4A017]/10 text-[#D4A017] px-3 py-1.5 rounded-full font-semibold border border-[#D4A017]/20 uppercase tracking-wider">
+            <span className="text-xs bg-[#344767]/10 text-[#344767] px-3 py-1.5 rounded-full font-semibold border border-[#344767]/20 uppercase tracking-wider">
               {role} Account
             </span>
           </div>
@@ -424,21 +424,21 @@ const RepDashboard = () => {
             <div className="space-y-6">
               {/* Stats row */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex items-center justify-between">
+                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                   <div>
-                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Sessions</p>
-                    <p className="text-3xl font-extrabold text-white mt-1.5">{sessions.length}</p>
+                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Total Sessions</p>
+                    <p className="text-3xl font-extrabold text-[#344767] mt-1.5">{sessions.length}</p>
                   </div>
-                  <div className="p-3 bg-[#003B8E]/30 rounded-xl border border-[#002a63]">
-                    <svg className="w-6 h-6 text-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="p-3 bg-[#344767]/10 rounded-xl border border-[#344767]/20">
+                    <svg className="w-6 h-6 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
-                <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex items-center justify-between">
+                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                   <div>
-                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Active Sessions</p>
-                    <p className="text-3xl font-extrabold text-white mt-1.5">{sessions.filter(s => s.status === 'OPEN').length}</p>
+                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Active Sessions</p>
+                    <p className="text-3xl font-extrabold text-[#344767] mt-1.5">{sessions.filter(s => s.status === 'OPEN').length}</p>
                   </div>
                   <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                     <svg className="w-6 h-6 text-emerald-400 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,9 +446,9 @@ const RepDashboard = () => {
                     </svg>
                   </div>
                 </div>
-                <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex items-center justify-between">
+                <div className="bg-white border border-gray-200 p-5 rounded-2xl flex items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                   <div>
-                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Class Courses</p>
+                    <p className="text-xs text-[#8392ab] font-semibold uppercase tracking-wider">Class Courses</p>
                     <p className={`text-3xl font-extrabold mt-1.5 ${hasNoCourses ? 'text-rose-400' : 'text-white'}`}>{courses.length}</p>
                   </div>
                   <div className="p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
@@ -460,10 +460,10 @@ const RepDashboard = () => {
               </div>
 
               {/* Action ribbon */}
-              <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-xl">
+              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex flex-wrap gap-4 items-center justify-between shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                 <div>
-                  <h3 className="font-bold text-white text-sm">Attendance Operations</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Start a new session for your class.</p>
+                  <h3 className="font-bold text-[#344767] text-sm">Attendance Operations</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Start a new session for your class.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -472,7 +472,7 @@ const RepDashboard = () => {
                     setShowSessionModal(true);
                   }}
                   disabled={!assignedClass || hasNoCourses}
-                  className="bg-[#D4A017] hover:bg-[#b88a14] disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed text-slate-950 font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center gap-1.5 shadow-md shadow-[#D4A017]/10"
+                  className="bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center gap-1.5 shadow-md"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -482,10 +482,10 @@ const RepDashboard = () => {
               </div>
 
               {/* Recent Sessions */}
-              <div className="bg-[#001c44]/55 border border-[#002a63] p-6 rounded-2xl shadow-xl min-h-[300px]">
+              <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)] min-h-[300px]">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">Recent Sessions</h2>
-                  <button onClick={fetchData} className="text-xs text-slate-500 hover:text-[#D4A017] transition-colors flex items-center gap-1">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-[#8392ab]">Recent Sessions</h2>
+                  <button onClick={fetchData} className="text-xs text-[#8392ab] hover:text-[#344767] transition-colors flex items-center gap-1">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
                     </svg>
@@ -495,10 +495,10 @@ const RepDashboard = () => {
 
                 {loading ? (
                   <div className="flex justify-center items-center py-20">
-                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : sessions.length === 0 ? (
-                  <div className="text-center py-20 text-slate-400 bg-[#000a18]/10 rounded-xl border border-dashed border-[#002a63] text-sm">
+                  <div className="text-center py-20 text-[#8392ab] bg-gray-50 rounded-xl border border-dashed border-gray-300 text-sm">
                     No sessions yet. Click "Open New Session" to start.
                   </div>
                 ) : (
@@ -506,7 +506,7 @@ const RepDashboard = () => {
                     {sessions.map((s) => (
                       <div
                         key={s.id}
-                        className="p-4 bg-[#000a18]/30 border border-[#002a63]/80 rounded-xl transition-all"
+                        className="p-4 bg-gray-50 border border-gray-200 rounded-xl transition-all hover:border-gray-300"
                       >
                         <div className="flex justify-between items-center">
                           <div 
@@ -514,17 +514,17 @@ const RepDashboard = () => {
                             className="flex-1 cursor-pointer hover:opacity-80 transition-opacity"
                           >
                             <div className="flex items-center gap-3">
-                              <span className="font-bold text-slate-200 text-sm hover:text-[#D4A017] transition-colors">{s.courseName}</span>
-                              <span className="font-mono text-xs text-slate-500">({s.courseCode})</span>
+                              <span className="font-bold text-[#344767] text-sm hover:text-[#344767]/70 transition-colors">{s.courseName}</span>
+                              <span className="font-mono text-xs text-[#8392ab]">({s.courseCode})</span>
                             </div>
-                            <div className="flex items-center gap-4 text-xs text-slate-400 mt-2">
+                            <div className="flex items-center gap-4 text-xs text-[#8392ab] mt-2">
                               <span>{new Date(s.startTime).toLocaleDateString()} {new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                              <span className="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">{s.sessionType}</span>
+                              <span className="bg-gray-200 text-[#344767] px-2 py-0.5 rounded text-[10px] uppercase font-semibold">{s.sessionType}</span>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
                             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
-                              s.status === 'OPEN' ? 'bg-[#D4A017]/10 text-[#D4A017] border-[#D4A017]/20 animate-pulse' :
+                              s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 animate-pulse' :
                               s.status === 'CLOSED' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                               'bg-blue-500/10 text-blue-400 border-blue-500/20'
                             }`}>
@@ -546,9 +546,9 @@ const RepDashboard = () => {
                             )}
                             <button
                               onClick={() => navigate(`/rep/session/${s.id}`)}
-                              className="p-2 hover:bg-[#002a63] rounded-lg transition-colors"
+                              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                              <svg className="w-4 h-4 text-slate-500 hover:text-[#D4A017] transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-4 h-4 text-[#8392ab] hover:text-[#344767] transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
                             </button>
@@ -565,36 +565,36 @@ const RepDashboard = () => {
           {/* TAB 2: MY CLASS COURSES */}
           {activeTab === 'courses' && (
             <div className="space-y-6">
-              <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex justify-between items-center">
+              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex justify-between items-center shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                 <div>
-                  <h3 className="font-bold text-white text-sm">Class Courses</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Courses assigned to your class by the administrator.</p>
+                  <h3 className="font-bold text-[#344767] text-sm">Class Courses</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Courses assigned to your class by the administrator.</p>
                 </div>
-                <span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full">
+                <span className="text-xs text-[#8392ab] bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
                   {courses.length} course{courses.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
-              <div className="bg-[#001c44]/55 border border-[#002a63] p-6 rounded-2xl shadow-xl">
+              <div className="bg-white border border-gray-200 p-6 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                 {loading ? (
                   <div className="flex justify-center items-center py-16">
-                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : courses.length === 0 ? (
                   <div className="text-center py-16 space-y-3">
-                    <svg className="w-12 h-12 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-12 h-12 text-[#8392ab] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <p className="text-sm font-bold text-slate-400">No courses assigned yet</p>
-                    <p className="text-xs text-slate-500 max-w-xs mx-auto">Your administrator needs to link courses to your class before you can run sessions.</p>
+                    <p className="text-sm font-bold text-[#8392ab]">No courses assigned yet</p>
+                    <p className="text-xs text-[#8392ab] max-w-xs mx-auto">Your administrator needs to link courses to your class before you can run sessions.</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {courses.map((c) => (
-                      <div key={c.id} className="p-4 bg-[#000a18]/40 rounded-xl border border-[#002a63]/80 flex justify-between items-center">
+                      <div key={c.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex justify-between items-center">
                         <div>
-                          <p className="font-bold text-slate-200 text-sm">{c.name}</p>
-                          <p className="font-mono text-xs text-slate-500 mt-1">{c.code}</p>
+                          <p className="font-bold text-[#344767] text-sm">{c.name}</p>
+                          <p className="font-mono text-xs text-[#8392ab] mt-1">{c.code}</p>
                         </div>
                         <div className="flex gap-2">
                           <button
@@ -606,7 +606,7 @@ const RepDashboard = () => {
                           </button>
                           <button
                             onClick={() => handleOpenAnalytics(c.id)}
-                            className="bg-[#D4A017]/10 hover:bg-[#D4A017] hover:text-slate-950 text-[#D4A017] font-bold py-1.5 px-3 rounded-lg border border-[#D4A017]/20 transition-all text-[11px]"
+                            className="bg-[#344767]/10 hover:bg-[#344767] hover:text-white text-[#344767] font-bold py-1.5 px-3 rounded-lg border border-[#344767]/20 transition-all text-[11px]"
                           >
                             📊 Analytics
                           </button>
@@ -622,10 +622,10 @@ const RepDashboard = () => {
           {/* TAB 3: CLASS STUDENTS */}
           {activeTab === 'students' && (
             <div className="space-y-6">
-              <div className="bg-[#001c44]/55 border border-[#002a63] p-5 rounded-2xl flex justify-between items-center">
+              <div className="bg-white border border-gray-200 p-5 rounded-2xl flex justify-between items-center shadow-[0_20px_27px_0_rgba(0,0,0,.05)]">
                 <div>
-                  <h3 className="font-bold text-white text-sm">Class Students</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Complete list of students enrolled in your class.</p>
+                  <h3 className="font-bold text-[#344767] text-sm">Class Students</h3>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Complete list of students enrolled in your class.</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <input
@@ -633,55 +633,55 @@ const RepDashboard = () => {
                     placeholder="Search by name or index..."
                     value={studentSearch}
                     onChange={(e) => setStudentSearch(e.target.value)}
-                    className="bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#D4A017] w-64"
+                    className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-xs text-[#344767] focus:outline-none focus:border-[#344767] w-64"
                   />
-                  <span className="text-xs text-slate-500 bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full">
+                  <span className="text-xs text-[#8392ab] bg-gray-100 border border-gray-200 px-3 py-1.5 rounded-full">
                     {students.length} student{students.length !== 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
 
-              <div className="bg-[#001c44]/55 border border-[#002a63] rounded-2xl shadow-xl overflow-hidden">
+              <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_20px_27px_0_rgba(0,0,0,.05)] overflow-hidden">
                 {studentsLoading ? (
                   <div className="flex justify-center items-center py-16">
-                    <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : students.length === 0 ? (
                   <div className="text-center py-16 space-y-3 p-6">
-                    <svg className="w-12 h-12 text-slate-600 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-12 h-12 text-[#8392ab] mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <p className="text-sm font-bold text-slate-400">No students enrolled yet</p>
-                    <p className="text-xs text-slate-500 max-w-xs mx-auto">Your administrator needs to add students to your class.</p>
+                    <p className="text-sm font-bold text-[#8392ab]">No students enrolled yet</p>
+                    <p className="text-xs text-[#8392ab] max-w-xs mx-auto">Your administrator needs to add students to your class.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-[#000a18] border-b border-[#002a63]">
+                      <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">#</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Index Number</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Name</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">#</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Index Number</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Name</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-[#8392ab] uppercase tracking-wider">Email</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#002a63]">
+                      <tbody className="divide-y divide-gray-100">
                         {students
                           .filter(student => 
                             student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                             student.indexNumber.includes(studentSearch)
                           )
                           .map((student, index) => (
-                            <tr key={student.id} className="hover:bg-[#002a63]/30 transition-colors">
-                              <td className="px-6 py-4 text-sm text-slate-400">{index + 1}</td>
+                            <tr key={student.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 text-sm text-[#8392ab]">{index + 1}</td>
                               <td className="px-6 py-4">
-                                <span className="font-mono text-sm font-bold text-[#D4A017]">{student.indexNumber}</span>
+                                <span className="font-mono text-sm font-bold text-[#344767]">{student.indexNumber}</span>
                               </td>
                               <td className="px-6 py-4">
-                                <span className="text-sm font-semibold text-white">{student.name}</span>
+                                <span className="text-sm font-semibold text-[#344767]">{student.name}</span>
                               </td>
                               <td className="px-6 py-4">
-                                <span className="text-sm text-slate-400">{student.email || 'N/A'}</span>
+                                <span className="text-sm text-[#8392ab]">{student.email || 'N/A'}</span>
                               </td>
                             </tr>
                           ))}
@@ -710,19 +710,19 @@ const RepDashboard = () => {
 
       {/* SESSION CREATION MODAL */}
       {showSessionModal && (
-        <div className="fixed inset-0 bg-[#000a18]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-[#001c44] border border-[#002a63] rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white mb-1">Open New Attendance Session</h3>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="text-lg font-bold text-[#344767] mb-1">Open New Attendance Session</h3>
             {assignedClass && (
-              <p className="text-xs text-[#D4A017] font-semibold mb-4">{assignedClass.displayName}</p>
+              <p className="text-xs text-[#8392ab] font-semibold mb-4">{assignedClass.displayName}</p>
             )}
             <form onSubmit={handleCreateSession} className="space-y-4">
               <div>
-                <label className="block text-slate-300 text-sm font-semibold mb-2">Select Course</label>
+                <label className="block text-[#344767] text-sm font-semibold mb-2">Select Course</label>
                 <select
                   value={selectedCourseId}
                   onChange={(e) => setSelectedCourseId(e.target.value)}
-                  className="w-full bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2.5 text-slate-200 focus:outline-none focus:border-[#D4A017]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-[#344767] focus:outline-none focus:border-[#344767]"
                 >
                   {courses.map((c) => (
                     <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
@@ -731,16 +731,16 @@ const RepDashboard = () => {
               </div>
 
               <div>
-                <label className="block text-slate-300 text-sm font-semibold mb-2">Session Type</label>
+                <label className="block text-[#344767] text-sm font-semibold mb-2">Session Type</label>
                 <div className="flex gap-4">
                   {['PHYSICAL', 'ONLINE'].map(type => (
-                    <label key={type} className="flex items-center gap-2 text-slate-300 cursor-pointer">
+                    <label key={type} className="flex items-center gap-2 text-[#344767] cursor-pointer">
                       <input
                         type="radio"
                         name="sessionType"
                         checked={sessionType === type}
                         onChange={() => setSessionType(type)}
-                        className="accent-[#D4A017]"
+                        className="accent-[#344767]"
                       />
                       {type === 'PHYSICAL' ? 'Physical Class' : 'Online Class'}
                     </label>
@@ -752,25 +752,25 @@ const RepDashboard = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-slate-400 text-xs font-semibold mb-1">Latitude</label>
+                      <label className="block text-[#8392ab] text-xs font-semibold mb-1">Latitude</label>
                       <input type="number" step="0.000001" placeholder="5.6037" value={latitude}
                         onChange={(e) => setLatitude(e.target.value)}
-                        className="w-full bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-[#D4A017]"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
                       />
                     </div>
                     <div>
-                      <label className="block text-slate-400 text-xs font-semibold mb-1">Longitude</label>
+                      <label className="block text-[#8392ab] text-xs font-semibold mb-1">Longitude</label>
                       <input type="number" step="0.000001" placeholder="-0.1870" value={longitude}
                         onChange={(e) => setLongitude(e.target.value)}
-                        className="w-full bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-[#D4A017]"
+                        className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
                       />
                     </div>
                   </div>
                   <button type="button" onClick={getGPSLocation}
-                    className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-[#D4A017] font-semibold rounded-lg border border-slate-700 text-xs transition-all flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-[#344767] font-semibold rounded-lg border border-gray-300 text-xs transition-all flex items-center justify-center gap-2"
                   >
                     {gpsLoading ? (
-                      <div className="w-4 h-4 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -782,19 +782,19 @@ const RepDashboard = () => {
                     )}
                   </button>
                   <div>
-                    <label className="block text-slate-300 text-sm font-semibold mb-1">Network Wi-Fi SSID (Optional)</label>
+                    <label className="block text-[#344767] text-sm font-semibold mb-1">Network Wi-Fi SSID (Optional)</label>
                     <input type="text" placeholder="e.g. LectureHall_A" value={networkSSID}
                       onChange={(e) => setNetworkSSID(e.target.value)}
-                      className="w-full bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-[#D4A017]"
+                      className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-slate-300 text-sm font-semibold mb-2">Duration</label>
+                <label className="block text-[#344767] text-sm font-semibold mb-2">Duration</label>
                 <select value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)}
-                  className="w-full bg-[#000a18] border border-[#002a63] rounded-lg px-3 py-2.5 text-slate-200 focus:outline-none focus:border-[#D4A017]"
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2.5 text-[#344767] focus:outline-none focus:border-[#344767]"
                 >
                   <option value="15">15 Minutes</option>
                   <option value="30">30 Minutes</option>
@@ -806,12 +806,12 @@ const RepDashboard = () => {
 
               <div className="flex gap-4 pt-4">
                 <button type="button" onClick={() => setShowSessionModal(false)}
-                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl border border-slate-700 transition-all text-sm"
+                  className="flex-1 py-2.5 bg-gray-100 hover:bg-gray-200 text-[#344767] font-semibold rounded-xl border border-gray-300 transition-all text-sm"
                 >
                   Cancel
                 </button>
                 <button type="submit"
-                  className="flex-1 py-2.5 bg-[#D4A017] hover:bg-[#b88a14] text-slate-950 font-bold rounded-xl transition-all text-sm"
+                  className="flex-1 py-2.5 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-bold rounded-xl transition-all text-sm"
                 >
                   Create & Open
                 </button>
@@ -823,17 +823,17 @@ const RepDashboard = () => {
 
       {/* COURSE ANALYTICS MODAL */}
       {showAnalyticsModal && (
-        <div className="fixed inset-0 bg-[#000a18]/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-[#001c44] border border-[#002a63] rounded-2xl w-full max-w-3xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-start pb-4 border-b border-[#002a63]/40">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-start pb-4 border-b border-gray-200">
               <div>
-                <h3 className="text-lg font-bold text-white">Course Attendance Analytics</h3>
+                <h3 className="text-lg font-bold text-[#344767]">Course Attendance Analytics</h3>
                 {analyticsData && (
-                  <p className="text-xs text-[#D4A017] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
+                  <p className="text-xs text-[#8392ab] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
                 )}
               </div>
               <button onClick={() => { setShowAnalyticsModal(false); setAnalyticsData(null); }}
-                className="text-slate-400 hover:text-white transition-colors"
+                className="text-[#8392ab] hover:text-[#344767] transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -843,27 +843,27 @@ const RepDashboard = () => {
 
             {analyticsLoading ? (
               <div className="flex-1 flex flex-col justify-center items-center py-20">
-                <div className="w-8 h-8 border-2 border-[#D4A017] border-t-transparent rounded-full animate-spin mb-3" />
+                <div className="w-8 h-8 border-2 border-[#344767] border-t-transparent rounded-full animate-spin mb-3" />
                 <span className="text-xs text-slate-400">Loading student attendance metrics...</span>
               </div>
             ) : analyticsData ? (
               <div className="flex-1 overflow-y-auto space-y-6 pt-4 pr-1">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-[#000a18]/30 border border-[#002a63]/60 p-4 rounded-xl text-center">
-                    <span className="block text-2xl font-bold text-white font-mono">{analyticsData.totalSessionsCount}</span>
-                    <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Concluded Lectures</span>
+                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-center">
+                    <span className="block text-2xl font-bold text-[#344767] font-mono">{analyticsData.totalSessionsCount}</span>
+                    <span className="text-[10px] text-[#8392ab] font-semibold uppercase tracking-wider">Concluded Lectures</span>
                   </div>
-                  <div className="bg-[#000a18]/30 border border-[#002a63]/60 p-4 rounded-xl text-center">
+                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl text-center">
                     <span className="block text-2xl font-bold text-rose-400 font-mono">
                       {analyticsData.analytics.filter(s => s.isAtRisk).length}
                     </span>
                     <span className="text-[10px] text-rose-400/80 font-semibold uppercase tracking-wider">At-Risk (&lt;75%)</span>
                   </div>
-                  <div className="bg-[#000a18]/30 border border-[#002a63]/60 p-4 rounded-xl flex items-center justify-center">
+                  <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl flex items-center justify-center">
                     <button
                       onClick={() => handleSendWarnings(analyticsData.course.id)}
                       disabled={broadcasting || analyticsData.totalSessionsCount === 0}
-                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-[#000a18]/10 text-rose-400 disabled:text-slate-500 border border-rose-500/20 disabled:border-transparent py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
+                      className="w-full bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-gray-50 text-rose-400 disabled:text-[#8392ab] border border-rose-500/20 disabled:border-transparent py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2"
                     >
                       {broadcasting ? (
                         <div className="w-4 h-4 border-2 border-rose-400 border-t-transparent rounded-full animate-spin" />
@@ -882,20 +882,20 @@ const RepDashboard = () => {
                   placeholder="Search by student name or index number..."
                   value={analyticsSearch}
                   onChange={(e) => setAnalyticsSearch(e.target.value)}
-                  className="w-full bg-[#000a18] border border-[#002a63] rounded-xl px-4 py-2.5 text-slate-200 text-xs focus:outline-none focus:border-[#D4A017]"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-[#344767] text-xs focus:outline-none focus:border-[#344767]"
                 />
 
-                <div className="border border-[#002a63]/40 rounded-xl overflow-hidden">
+                <div className="border border-gray-200 rounded-xl overflow-hidden">
                   <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-[#001c44] text-[10px] font-extrabold uppercase text-slate-400 border-b border-[#002a63]">
+                      <tr className="bg-gray-50 text-[10px] font-extrabold uppercase text-[#8392ab] border-b border-gray-200">
                         <th className="p-3">Student Name</th>
                         <th className="p-3">Lectures</th>
                         <th className="p-3">Attendance Rate</th>
                         <th className="p-3">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#002a63]/20">
+                    <tbody className="divide-y divide-gray-100/20">
                       {analyticsData.analytics
                         .filter(s =>
                           s.name.toLowerCase().includes(analyticsSearch.toLowerCase()) ||
@@ -907,15 +907,15 @@ const RepDashboard = () => {
                           const textColor = rate >= 75 ? 'text-emerald-400' : rate >= 60 ? 'text-amber-400' : 'text-rose-400';
                           const badgeBg = rate >= 75 ? 'bg-emerald-500/10 border-emerald-500/20' : rate >= 60 ? 'bg-amber-500/10 border-amber-500/20' : 'bg-rose-500/10 border-rose-500/20';
                           return (
-                            <tr key={student.id} className="hover:bg-[#002a63]/10 text-xs transition-colors">
+                            <tr key={student.id} className="hover:bg-gray-50 text-xs transition-colors">
                               <td className="p-3">
-                                <div className="font-bold text-white">{student.name}</div>
-                                <div className="text-[10px] text-slate-400 font-mono mt-0.5">{student.indexNumber}</div>
+                                <div className="font-bold text-[#344767]">{student.name}</div>
+                                <div className="text-[10px] text-[#8392ab] font-mono mt-0.5">{student.indexNumber}</div>
                               </td>
-                              <td className="p-3 text-slate-300 font-mono">{student.presentCount} / {student.totalConcluded}</td>
+                              <td className="p-3 text-[#344767] font-mono">{student.presentCount} / {student.totalConcluded}</td>
                               <td className="p-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-24 bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                  <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
                                     <div className={`h-full ${barColor}`} style={{ width: `${rate}%` }} />
                                   </div>
                                   <span className={`font-bold font-mono ${textColor}`}>{rate}%</span>
@@ -934,7 +934,7 @@ const RepDashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-20 text-slate-500 text-xs">No analytics data available.</div>
+              <div className="text-center py-20 text-[#8392ab] text-xs">No analytics data available.</div>
             )}
           </div>
         </div>
