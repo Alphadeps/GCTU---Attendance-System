@@ -17,20 +17,26 @@ const optionalProtect = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, JWT_SECRET);
       
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: { id: true, username: true, role: true }
-      });
-      
-      if (user) {
-        req.user = user;
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        const user = await prisma.user.findUnique({
+          where: { id: decoded.id },
+          select: { id: true, username: true, role: true, isActive: true }
+        });
+        
+        if (user && user.isActive) {
+          req.user = user;
+        }
+      } catch (tokenErr) {
+        // Token verification failed - proceed without auth
+        console.log('Optional auth token error (proceeding without auth):', tokenErr.message);
       }
     }
     next();
   } catch (err) {
-    // If token is invalid or expired, we just log and proceed without raising error (as it is optional)
+    // Unexpected error - proceed without auth
     console.log('Optional auth error (proceeding without auth):', err.message);
     next();
   }

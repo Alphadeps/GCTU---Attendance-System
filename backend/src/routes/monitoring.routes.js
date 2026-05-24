@@ -45,7 +45,36 @@ router.get('/metrics', protect, authorizeRoles('SUPERADMIN'), (req, res) => {
 router.post('/metrics/reset', protect, authorizeRoles('SUPERADMIN'), (req, res) => {
   try {
     resetMetrics();
-    res.json({ message: 'Metrics reset successfully' });
+    res.json({ 
+      message: 'Metrics reset successfully',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get detailed health status (admin only)
+ */
+router.get('/health/detailed', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
+  try {
+    const health = await getHealthStatus();
+    const metrics = getMetrics();
+    
+    res.json({
+      ...health,
+      detailedMetrics: {
+        requests: metrics.requests,
+        performance: {
+          avgResponseTime: metrics.performance.avgResponseTime,
+          slowQueriesCount: metrics.performance.slowQueries.length,
+          recentSlowQueries: metrics.performance.slowQueries.slice(-5)
+        },
+        system: metrics.system,
+        topEndpoints: metrics.endpoints
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

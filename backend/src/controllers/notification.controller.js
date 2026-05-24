@@ -33,7 +33,9 @@ const getNotifications = async (req, res) => {
       // Student portal querying notifications
       whereClause = { studentIndex };
     } else {
-      return res.status(400).json({ error: 'User identifier or Student Index Number required' });
+      // No user or studentIndex - return empty array instead of error
+      // This allows the frontend to work even when not authenticated
+      return res.json([]);
     }
 
     const notifications = await prisma.notification.findMany({

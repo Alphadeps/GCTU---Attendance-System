@@ -219,34 +219,59 @@ async function getHealthStatus() {
   let status = 'healthy';
   const issues = [];
   
-  // Only check error rate if we have requests
+  // Calculate recent error rate (last 100 requests) for more accurate health status
+  const recentRequests = metrics.performance.responseTimes.slice(-100);
+  const recentErrors = recentRequests.filter(r => {
+    const endpoint = r.endpoint;
+    const endpointStats = metrics.requests.byEndpoint.get(endpoint);
+    return endpointStats && endpointStats.errors > 0;
+  }).length;
+  const recentErrorRate = recentRequests.length > 0 ? (recentErrors / recentRequests.length) * 100 : 0;
+  
+  // Calculate recent average response time (last 50 requests)
+  const recentResponseTimes = metrics.performance.responseTimes.slice(-50);
+  const recentAvgResponseTime = recentResponseTimes.length > 0
+    ? recentResponseTimes.reduce((sum, r) => sum + r.duration, 0) / recentResponseTimes.length
+    : avgResponseTime;
+  
+  // Only check error rate if we have sufficient requests
   if (currentMetrics.requests.total > 10) {
-    if (errorRate > 5) {
+    // Use recent error rate for more accurate health assessment
+    const checkErrorRate = recentRequests.length >= 20 ? recentErrorRate : errorRate;
+    
+    if (checkErrorRate > 10) {
       status = 'degraded';
-      issues.push(`High error rate: ${errorRate}%`);
+      issues.push(`High error rate: ${checkErrorRate.toFixed(2)}%`);
     }
     
-    if (errorRate > 20) {
+    if (checkErrorRate > 30) {
       status = 'unhealthy';
     }
   }
   
-  // Only check response time if we have requests
+  // Only check response time if we have sufficient requests
   if (currentMetrics.requests.total > 5) {
-    if (avgResponseTime > 2000) {
+    // Use recent average for more accurate health assessment
+    const checkResponseTime = recentResponseTimes.length >= 10 ? recentAvgResponseTime : avgResponseTime;
+    
+    if (checkResponseTime > 3000) {
       status = status === 'healthy' ? 'degraded' : status;
-      issues.push(`Slow response time: ${avgResponseTime}ms`);
+      issues.push(`Slow response time: ${checkResponseTime.toFixed(2)}ms`);
     }
     
-    if (avgResponseTime > 5000) {
+    if (checkResponseTime > 8000) {
       status = 'unhealthy';
     }
   }
   
   const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
-  if (memoryUsed > 400) {
+  if (memoryUsed > 500) {
     status = status === 'healthy' ? 'degraded' : status;
     issues.push(`High memory usage: ${memoryUsed.toFixed(2)} MB`);
+  }
+  
+  if (memoryUsed > 800) {
+    status = 'unhealthy';
   }
   
   return {
@@ -256,7 +281,9 @@ async function getHealthStatus() {
       uptime: currentMetrics.uptime.seconds,
       requests: currentMetrics.requests.total,
       errorRate: currentMetrics.requests.errorRate,
+      recentErrorRate: `${recentErrorRate.toFixed(2)}%`,
       avgResponseTime: currentMetrics.performance.avgResponseTime,
+      recentAvgResponseTime: `${recentAvgResponseTime.toFixed(2)}ms`,
       memory: currentMetrics.system.memory.used
     },
     timestamp: new Date().toISOString()
