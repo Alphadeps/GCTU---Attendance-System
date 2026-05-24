@@ -153,10 +153,10 @@ const cache = {
    * Increment a counter in cache
    * @param {string} key - Cache key
    * @param {number} ttl - Time to live in seconds
-   * @returns {Promise<number>} - New value
+   * @returns {Promise<number>} - New value (minimum 1)
    */
   async incr(key, ttl = 3600) {
-    if (!redis) return 0;
+    if (!redis) return 1; // Return 1 instead of 0 for rate limiter compatibility
     
     try {
       const value = await redis.incr(key);
@@ -166,7 +166,7 @@ const cache = {
       return value;
     } catch (error) {
       console.error(`Cache INCR error for key "${key}":`, error.message);
-      return 0;
+      return 1; // Return 1 instead of 0 for rate limiter compatibility
     }
   },
 

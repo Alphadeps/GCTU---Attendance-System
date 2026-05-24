@@ -26,17 +26,27 @@ const RedisStore = class {
   async increment(key) {
     if (!cache) {
       // Fallback to memory store if Redis not available
-      return { totalHits: 1, resetTime: new Date(Date.now() + 60000) };
+      // Return valid rate limit data
+      return { totalHits: 1, resetTime: new Date(Date.now() + 900000) };
     }
 
-    const fullKey = this.prefix + key;
-    const hits = await cache.incr(fullKey, 900); // 15 min expiry
-    const ttl = 900000; // 15 minutes in ms
-    
-    return {
-      totalHits: hits,
-      resetTime: new Date(Date.now() + ttl)
-    };
+    try {
+      const fullKey = this.prefix + key;
+      const hits = await cache.incr(fullKey, 900); // 15 min expiry
+      const ttl = 900000; // 15 minutes in ms
+      
+      // Ensure hits is always a positive integer
+      const validHits = Math.max(1, parseInt(hits) || 1);
+      
+      return {
+        totalHits: validHits,
+        resetTime: new Date(Date.now() + ttl)
+      };
+    } catch (error) {
+      console.error('RedisStore increment error:', error);
+      // Return valid fallback data on error
+      return { totalHits: 1, resetTime: new Date(Date.now() + 900000) };
+    }
   }
 
   async decrement(key) {
