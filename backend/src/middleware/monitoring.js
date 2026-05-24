@@ -211,30 +211,36 @@ function resetMetrics() {
  * Health check function
  */
 async function getHealthStatus() {
-  const metrics = getMetrics();
-  const errorRate = parseFloat(metrics.requests.errorRate);
-  const avgResponseTime = parseFloat(metrics.performance.avgResponseTime);
+  const currentMetrics = getMetrics();
+  const errorRate = parseFloat(currentMetrics.requests.errorRate) || 0;
+  const avgResponseTime = parseFloat(currentMetrics.performance.avgResponseTime) || 0;
   
   // Determine health status
   let status = 'healthy';
   const issues = [];
   
-  if (errorRate > 5) {
-    status = 'degraded';
-    issues.push(`High error rate: ${errorRate}%`);
+  // Only check error rate if we have requests
+  if (currentMetrics.requests.total > 10) {
+    if (errorRate > 5) {
+      status = 'degraded';
+      issues.push(`High error rate: ${errorRate}%`);
+    }
+    
+    if (errorRate > 20) {
+      status = 'unhealthy';
+    }
   }
   
-  if (errorRate > 20) {
-    status = 'unhealthy';
-  }
-  
-  if (avgResponseTime > 2000) {
-    status = status === 'healthy' ? 'degraded' : status;
-    issues.push(`Slow response time: ${avgResponseTime}ms`);
-  }
-  
-  if (avgResponseTime > 5000) {
-    status = 'unhealthy';
+  // Only check response time if we have requests
+  if (currentMetrics.requests.total > 5) {
+    if (avgResponseTime > 2000) {
+      status = status === 'healthy' ? 'degraded' : status;
+      issues.push(`Slow response time: ${avgResponseTime}ms`);
+    }
+    
+    if (avgResponseTime > 5000) {
+      status = 'unhealthy';
+    }
   }
   
   const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
@@ -247,11 +253,11 @@ async function getHealthStatus() {
     status,
     issues,
     metrics: {
-      uptime: metrics.uptime.seconds,
-      requests: metrics.requests.total,
-      errorRate: metrics.requests.errorRate,
-      avgResponseTime: metrics.performance.avgResponseTime,
-      memory: metrics.system.memory.used
+      uptime: currentMetrics.uptime.seconds,
+      requests: currentMetrics.requests.total,
+      errorRate: currentMetrics.requests.errorRate,
+      avgResponseTime: currentMetrics.performance.avgResponseTime,
+      memory: currentMetrics.system.memory.used
     },
     timestamp: new Date().toISOString()
   };
@@ -260,8 +266,8 @@ async function getHealthStatus() {
 /**
  * Periodic metrics logging (every 5 minutes)
  */
-setInterval(() => {
-  const health = getHealthStatus();
+setInterval(async () => {
+  const health = await getHealthStatus();
   
   if (health.status !== 'healthy') {
     console.warn('⚠️  System Health Check:', health);
