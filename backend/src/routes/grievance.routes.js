@@ -46,6 +46,9 @@ router.post('/submit', upload.single('evidence'), grievanceController.submitGrie
 // Student fetch their own history
 router.get('/student/:studentIndex', grievanceController.getStudentGrievances);
 
+// Public/Student list grievances (with query filters) - no auth required for students to see their relevant grievances
+router.get('/', grievanceController.listGrievances);
+
 // Admin-only operations
 router.get('/list', protect, authorizeRoles('SUPERADMIN', 'ADMIN', 'LECTURER'), grievanceController.listGrievances);
 router.post('/:id/resolve', protect, authorizeRoles('SUPERADMIN', 'ADMIN', 'LECTURER'), grievanceController.resolveGrievance);

@@ -233,7 +233,7 @@ app.use('/api/sessions', sessionRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/courses', courseRoutes);
-app.use('/api/notifications', protect, notificationRoutes);
+app.use('/api/notifications', notificationRoutes); // Removed protect - route has optionalProtect internally
 app.use('/api/grievances', grievanceRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/lecturer', lecturerRoutes);

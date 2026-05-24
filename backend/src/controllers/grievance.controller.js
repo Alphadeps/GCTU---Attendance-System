@@ -57,14 +57,20 @@ exports.submitGrievance = async (req, res) => {
   }
 };
 
-// Admin Fetch/List
+// Admin Fetch/List or Student filtered list
 exports.listGrievances = async (req, res) => {
   try {
-    const { status, type } = req.query;
+    const { status, type, studentIndex } = req.query;
 
     const filter = {};
     if (status) filter.status = status.toUpperCase();
     if (type) filter.type = type.toUpperCase();
+    
+    // If studentIndex is provided (student accessing their own), filter by it
+    if (studentIndex) {
+      filter.studentIndex = studentIndex;
+      filter.anonymous = false; // Only show non-anonymous ones for students
+    }
 
     const grievances = await prisma.grievance.findMany({
       where: filter,
