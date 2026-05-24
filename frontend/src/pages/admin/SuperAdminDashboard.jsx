@@ -508,7 +508,7 @@ export default function SuperAdminDashboard() {
       setShowResetPwdModal(false);
       setNewPassword('');
       showNotification('Representative password reset successfully');
-    } catch (err) {
+    } catch (_err) {
       showNotification('Failed to reset representative password', 'error');
     }
   };
@@ -636,7 +636,7 @@ export default function SuperAdminDashboard() {
           await api.delete(`/admin/reps/${id}`);
           setReps(prev => prev.filter(r => r.id !== id));
           showNotification('Representative deleted successfully');
-        } catch (err) {
+        } catch (_err) {
           showNotification('Failed to delete representative', 'error');
         }
       }
@@ -675,7 +675,7 @@ export default function SuperAdminDashboard() {
           if (classRes && classRes.data) {
             setClasses(classRes.data);
           }
-        } catch (err) {
+        } catch (_err) {
           showNotification('Failed to remove representative', 'error');
         }
       }
@@ -691,7 +691,7 @@ export default function SuperAdminDashboard() {
     try {
       const res = await api.get(`/admin/classes/${cls.id}/students`);
       setClassStudents(res.data);
-    } catch (err) {
+    } catch (_err) {
       showNotification('Failed to load students for class', 'error');
     } finally {
       setLoading(false);
@@ -796,7 +796,7 @@ export default function SuperAdminDashboard() {
           
           // Update state directly by removing the student
           setClassStudents(prev => prev.filter(s => s.id !== studentId));
-        } catch (err) {
+        } catch (_err) {
           showNotification('Failed to remove student', 'error');
         }
       }
@@ -829,7 +829,7 @@ export default function SuperAdminDashboard() {
           // Update state directly by removing deleted students
           setClassStudents(prev => prev.filter(s => !selectedStudentIds.includes(s.id)));
           setSelectedStudentIds([]);
-        } catch (err) {
+        } catch (_err) {
           showNotification('Failed to remove students', 'error');
         }
       }
@@ -867,7 +867,7 @@ export default function SuperAdminDashboard() {
     try {
       const res = await api.get(`/admin/classes/${cls.id}/courses`);
       setClassCourses(res.data);
-    } catch (err) {
+    } catch (_err) {
       showNotification('Failed to load courses for class', 'error');
     } finally {
       setLoading(false);
@@ -894,7 +894,7 @@ export default function SuperAdminDashboard() {
           await api.delete(`/admin/classes/${selectedClassForCourses.id}/courses/${courseId}`);
           showNotification('Course unlinked from class');
           handleOpenCoursesModal(selectedClassForCourses);
-        } catch (err) {
+        } catch (_err) {
           showNotification('Failed to unlink course', 'error');
         }
       }
@@ -1661,7 +1661,7 @@ export default function SuperAdminDashboard() {
                                         await api.delete(`/admin/classes/${cls.id}`);
                                         showNotification('Class deleted successfully');
                                         setClasses(prev => prev.filter(c => c.id !== cls.id));
-                                      } catch (err) {
+                                      } catch (_err) {
                                         showNotification('Failed to delete class', 'error');
                                       }
                                     }
@@ -2093,7 +2093,7 @@ export default function SuperAdminDashboard() {
                     try {
                       await api.patch('/admin/settings', { deptName: settings.deptName });
                       showNotification('Department name updated');
-                    } catch (err) { showNotification('Failed to update name', 'error'); }
+                    } catch (_err) { showNotification('Failed to update name', 'error'); }
                   }} className="sip-btn-dark !w-auto px-5 py-2.5 text-xs">
                     Save Name
                   </button>

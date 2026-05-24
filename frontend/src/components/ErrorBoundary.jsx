@@ -11,7 +11,6 @@ class ErrorBoundary extends React.Component {
     return { hasError: true, error };
   }
 
-  // eslint-disable-next-line no-unused-vars
   componentDidCatch(error, errorInfo) {
     // You can also log the error to an error reporting service here
     console.error('[Resilience] Captured React render crash:', error, errorInfo);

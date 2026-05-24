@@ -19,10 +19,6 @@ const SessionManager = () => {
   const auth = useAuth();
   const { deptName, deptLogo } = auth;
 
-  // Use defaults if not set
-  const displayDeptName = deptName || 'Class Attendance System';
-  const displayDeptLogo = deptLogo || '/logo.svg';
-
   const [session, setSession] = useState(null);
   const [attendances, setAttendances] = useState([]);
   const [qrImage, setQrImage] = useState('');

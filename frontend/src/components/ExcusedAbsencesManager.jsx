@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 import { useToast } from './ToastProvider';
 
@@ -37,7 +37,7 @@ const ExcusedAbsencesManager = () => {
   const [processing, setProcessing] = useState(false);
   const toast = useToast();
 
-  const fetchExcusedRequests = async () => {
+  const fetchExcusedRequests = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -56,11 +56,11 @@ const ExcusedAbsencesManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, toast]);
 
   useEffect(() => {
     fetchExcusedRequests();
-  }, [filter]);
+  }, [fetchExcusedRequests]);
 
   const handleApprove = async (request) => {
     if (!adminResponse.trim()) {

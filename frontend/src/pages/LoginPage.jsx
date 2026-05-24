@@ -41,28 +41,6 @@ const AlertIcon = () => (
   </svg>
 );
 
-/* ─── Feature card data ───────────────────────────────────────────────────── */
-const FEATURES = [
-  {
-    icon: <LockIcon />,
-    title: 'Secure Login',
-    desc: 'Role-based access with encrypted credentials',
-    delay: 'delay-200',
-  },
-  {
-    icon: <ChartIcon />,
-    title: 'Real-time Attendance',
-    desc: 'Live session tracking across all courses',
-    delay: 'delay-300',
-  },
-  {
-    icon: <LightningIcon />,
-    title: 'Smart Analytics',
-    desc: 'Instant reports and attendance insights',
-    delay: 'delay-400',
-  },
-];
-
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 const LoginPage = () => {

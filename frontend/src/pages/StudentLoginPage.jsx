@@ -53,28 +53,6 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
-/* ─── Feature card data ───────────────────────────────────────────────────── */
-const FEATURES = [
-  {
-    icon: <QrIcon />,
-    title: 'QR Check-in',
-    desc: 'Scan your QR code to mark attendance instantly',
-    delay: 'delay-200',
-  },
-  {
-    icon: <HistoryIcon />,
-    title: 'Attendance History',
-    desc: 'View your full attendance record per course',
-    delay: 'delay-300',
-  },
-  {
-    icon: <SupportIcon />,
-    title: 'Grievance Support',
-    desc: 'Raise concerns about attendance discrepancies',
-    delay: 'delay-400',
-  },
-];
-
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 const StudentLoginPage = () => {

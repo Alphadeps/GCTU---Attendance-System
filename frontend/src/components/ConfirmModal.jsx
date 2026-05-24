@@ -1,4 +1,3 @@
-import React from 'react';
 
 const ConfirmModal = ({ message, confirmLabel = 'Confirm', onConfirm, onCancel }) => {
   return (

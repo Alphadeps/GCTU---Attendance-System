@@ -35,7 +35,7 @@ const AdminGrievancePanel = () => {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter, typeFilter, toast]);
 
   useEffect(() => {
     fetchGrievances();

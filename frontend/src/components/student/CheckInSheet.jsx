@@ -13,8 +13,6 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
   const [submitting, setSubmitting] = useState(false);
   const [gpsError, setGpsError] = useState('');
   const [scannedCodeToken, setScannedCodeToken] = useState('');
-  const [gpsVerified, setGpsVerified] = useState(false);
-  const [gpsCoords, setGpsCoords] = useState({ lat: null, lng: null });
   const [successDetails, setSuccessDetails] = useState({ status: '', time: '', courseName: '' });
   const [submitErrorMsg, setSubmitErrorMsg] = useState('');
   const [submittingStatus, setSubmittingStatus] = useState('');
