@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 
+const ChartBarIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+  </svg>
+);
+
 export default function OfficialArchives() {
   const [groupedReports, setGroupedReports] = useState({});
   const [loading, setLoading] = useState(true);
@@ -123,7 +129,10 @@ export default function OfficialArchives() {
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-2xl font-black text-[#0c2340] tracking-tight">📊 Official Archives</h2>
+          <h2 className="text-2xl font-black text-[#0c2340] tracking-tight flex items-center gap-2">
+            <ChartBarIcon className="w-7 h-7 text-[#0c2340]" />
+            <span>Official Archives</span>
+          </h2>
           <p className="text-sm text-[#8392ab] mt-1">Digitally signed course attendance reports organized by programme and level.</p>
         </div>
       </div>

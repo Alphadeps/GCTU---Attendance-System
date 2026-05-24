@@ -1,11 +1,54 @@
 import { useState } from 'react';
 
+const ClipboardListIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6-4h6" />
+  </svg>
+);
+
+const BulbIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+  </svg>
+);
+
+const AlertTriangleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+);
+
+const PinIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v3a2 2 0 00.314 1.077l1.558 2.6A1 1 0 0120 15h-5.28l-.72 6.48a1 1 0 01-1.986.11l-.8-6.59H6a1 1 0 01-.894-1.447l1.58-2.6A2 2 0 007 8V5z" />
+  </svg>
+);
+
+const CheckCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const SparklesIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
+
+const RocketIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 00-1 1v2a1 1 0 001 1h1.586a1 1 0 00.707-.293l5.414-5.414a1 1 0 00-.707-1.707H9.414a1 1 0 00-.707.293L5.586 15z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.414 4.586a2 2 0 112.828 2.828l-8.485 8.485a2 2 0 01-1.414.586H9.5a.5.5 0 01-.5-.5v-2.828a2 2 0 01.586-1.414l8.485-8.485z" />
+  </svg>
+);
+
 const OnboardingTour = ({ onComplete, onSkip }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   const steps = [
     {
-      title: "Welcome to GCTU Attendance System! 🎓",
+      title: "Welcome to GCTU Attendance System!",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -13,7 +56,9 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             Let's walk through the setup process to get your institution up and running.
           </p>
           <div className="bg-[#0c2340]/5 border border-[#0c2340]/10 rounded-xl p-4">
-            <p className="text-[#0c2340] text-sm font-bold mb-2">📋 What you'll learn:</p>
+            <p className="text-[#0c2340] text-sm font-bold mb-2 flex items-center gap-1.5">
+              <ClipboardListIcon className="w-4 h-4 text-[#0c2340] flex-shrink-0" /> What you'll learn:
+            </p>
             <ul className="text-gray-700 text-sm space-y-1.5 ml-4">
               <li>• How to create academic programmes</li>
               <li>• Setting up classes and groups</li>
@@ -30,7 +75,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
     },
     {
-      title: "Step 1: Create Academic Programmes 📚",
+      title: "Step 1: Create Academic Programmes",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -46,9 +91,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>4. Click <span className="text-[#0c2340] font-bold">"Save"</span></li>
             </ol>
           </div>
-          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3">
+          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3 flex items-start gap-2">
+            <BulbIcon className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
             <p className="text-amber-800 text-xs font-medium">
-              💡 <strong>Tip:</strong> Use clear, full names for programmes. You can edit them later if needed.
+              <strong>Tip:</strong> Use clear, full names for programmes. You can edit them later if needed.
             </p>
           </div>
         </div>
@@ -56,7 +102,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
     },
     {
-      title: "Step 2: Create Classes & Groups 🏫",
+      title: "Step 2: Create Classes & Groups",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -72,9 +118,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>5. Click <span className="text-[#0c2340] font-bold">"Create Classes"</span></li>
             </ol>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+            <PinIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
             <p className="text-blue-800 text-xs font-medium">
-              📌 <strong>Example:</strong> "BIT LEVEL 300 REGULAR GROUP B (MORNING)" will be auto-generated
+              <strong>Example:</strong> "BIT LEVEL 300 REGULAR GROUP B (MORNING)" will be auto-generated
             </p>
           </div>
         </div>
@@ -82,7 +129,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
     },
     {
-      title: "Step 3: Add Class Representatives 👥",
+      title: "Step 3: Add Class Representatives",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -106,9 +153,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>4. Reps are auto-created with default password: <span className="text-amber-800 font-mono font-bold">rep123</span></li>
             </ol>
           </div>
-          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3">
+          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3 flex items-start gap-2">
+            <AlertTriangleIcon className="w-4 h-4 text-amber-700 mt-0.5 flex-shrink-0" />
             <p className="text-amber-800 text-xs font-medium">
-              ⚠️ <strong>Important:</strong> Index numbers are required for reps to check in to their own sessions!
+              <strong>Important:</strong> Index numbers are required for reps to check in to their own sessions!
             </p>
           </div>
         </div>
@@ -116,7 +164,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
     },
     {
-      title: "Step 4: Assign Reps to Classes 🔗",
+      title: "Step 4: Assign Reps to Classes",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -132,9 +180,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>5. Click <span className="text-[#0c2340] font-bold">"Assign"</span></li>
             </ol>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+            <SparklesIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0 animate-pulse" />
             <p className="text-blue-800 text-xs font-medium">
-              ★ <strong>Auto-magic:</strong> When you assign a rep, they're automatically added as a student in that class!
+              <strong>Auto-magic:</strong> When you assign a rep, they're automatically added as a student in that class!
             </p>
           </div>
         </div>
@@ -142,7 +191,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
     },
     {
-      title: "Step 5: Add Students to Classes 📝",
+      title: "Step 5: Add Students to Classes",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -162,9 +211,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>3. Click <span className="text-[#0c2340] font-bold">"Save"</span> or <span className="text-[#0c2340] font-bold">"Import"</span></li>
             </ol>
           </div>
-          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3">
+          <div className="bg-amber-50 border border-amber-250 rounded-xl p-3 flex items-start gap-2">
+            <BulbIcon className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
             <p className="text-amber-800 text-xs font-medium">
-              💡 <strong>Tip:</strong> You can bulk delete students by selecting multiple and clicking "Delete Selected"
+              <strong>Tip:</strong> You can bulk delete students by selecting multiple and clicking "Delete Selected"
             </p>
           </div>
         </div>
@@ -172,13 +222,13 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
     },
     {
-      title: "Step 6: Add Global Courses 📖",
+      title: "Step 6: Add Global Courses",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
             Create a database of all courses offered by your institution. These can then be linked to specific classes.
           </p>
-          <div className="bg-[#f8f9fa] border border-gray-200 rounded-xl p-4 space-y-3">
+          <div className="bg-[#f8f9fa] border border-gray-250 rounded-xl p-4 space-y-3">
             <p className="text-emerald-800 text-sm font-bold">✓ How to add courses:</p>
             <ol className="text-gray-700 text-sm space-y-2 ml-4">
               <li>1. Navigate to <span className="text-[#0c2340] font-bold">"Global Courses"</span> tab</li>
@@ -187,9 +237,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>4. Click <span className="text-[#0c2340] font-bold">"Save"</span></li>
             </ol>
           </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-start gap-2">
+            <PinIcon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
             <p className="text-blue-800 text-xs font-medium">
-              📌 <strong>Note:</strong> Course codes must be unique across the system
+              <strong>Note:</strong> Course codes must be unique across the system
             </p>
           </div>
         </div>
@@ -197,7 +248,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
     },
     {
-      title: "Step 7: Link Courses to Classes 🔗",
+      title: "Step 7: Link Courses to Classes",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -212,9 +263,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>4. Repeat for all courses taught to that class</li>
             </ol>
           </div>
-          <div className="bg-emerald-50 border border-emerald-250 rounded-xl p-3">
+          <div className="bg-emerald-50 border border-emerald-250 rounded-xl p-3 flex items-start gap-2">
+            <CheckCircleIcon className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
             <p className="text-emerald-800 text-xs font-semibold">
-              ✅ <strong>Ready to go:</strong> Once a class has a rep, students, and courses, it's ready for attendance sessions!
+              <strong>Ready to go:</strong> Once a class has a rep, students, and courses, it's ready for attendance sessions!
             </p>
           </div>
         </div>
@@ -222,7 +274,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
     },
     {
-      title: "Step 8: Configure System Settings ⚙️",
+      title: "Step 8: Configure System Settings",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
@@ -258,14 +310,16 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
       icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z"
     },
     {
-      title: "You're All Set! 🎉",
+      title: "You're All Set!",
       content: (
         <div className="space-y-4">
           <p className="text-[#344767] leading-relaxed font-medium">
             Congratulations! You've completed the system setup. Here's what happens next:
           </p>
           <div className="bg-[#f8f9fa] border border-gray-200 rounded-xl p-4 space-y-3">
-            <p className="text-emerald-800 text-sm font-bold">📋 The Attendance Workflow:</p>
+            <p className="text-emerald-800 text-sm font-bold flex items-center gap-1.5">
+              <ClipboardListIcon className="w-4 h-4 text-emerald-800 flex-shrink-0" /> The Attendance Workflow:
+            </p>
             <ol className="text-gray-700 text-sm space-y-2 ml-4">
               <li>1. <strong className="text-[#0c2340]">Rep</strong> logs in and creates an attendance session for a course</li>
               <li>2. <strong className="text-[#0c2340]">Students</strong> scan QR code or check in via portal</li>
@@ -275,7 +329,9 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             </ol>
           </div>
           <div className="bg-[#0c2340]/5 border border-[#0c2340]/10 rounded-xl p-4 space-y-2">
-            <p className="text-[#0c2340] text-sm font-bold">🚀 Quick Access:</p>
+            <p className="text-[#0c2340] text-sm font-bold flex items-center gap-1.5">
+              <RocketIcon className="w-4 h-4 text-[#0c2340] flex-shrink-0" /> Quick Access:
+            </p>
             <ul className="text-gray-700 text-sm space-y-1 ml-4">
               <li>• <strong>Overview:</strong> See system statistics at a glance</li>
               <li>• <strong>Grievance Desk:</strong> Handle student complaints and issues</li>
@@ -284,9 +340,10 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>• <strong>Notifications:</strong> Stay updated on system activities</li>
             </ul>
           </div>
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-center">
+          <div className="bg-emerald-50 border border-emerald-250 rounded-xl p-3 text-center flex items-center justify-center gap-2">
+            <SparklesIcon className="w-4 h-4 text-emerald-800 animate-pulse flex-shrink-0" />
             <p className="text-emerald-800 text-sm font-bold">
-              ✨ Need help? Click the "?" icon in the top-right corner anytime!
+              Need help? Click the "?" icon in the top-right corner anytime!
             </p>
           </div>
         </div>

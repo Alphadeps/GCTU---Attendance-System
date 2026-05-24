@@ -2,6 +2,30 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useToast } from './ToastProvider';
 
+const ClockIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0" />
+  </svg>
+);
+
+const CheckCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const XCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const ClipboardIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+  </svg>
+);
+
 const ExcusedAbsencesManager = () => {
   const [excusedRequests, setExcusedRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -113,11 +137,11 @@ const ExcusedAbsencesManager = () => {
 
   const getStatusIcon = (status) => {
     const icons = {
-      PENDING: '⏳',
-      RESOLVED: '✅',
-      REJECTED: '❌'
+      PENDING: <ClockIcon className="w-6 h-6 text-yellow-600" />,
+      RESOLVED: <CheckCircleIcon className="w-6 h-6 text-emerald-600" />,
+      REJECTED: <XCircleIcon className="w-6 h-6 text-red-600" />
     };
-    return icons[status] || '📋';
+    return icons[status] || <ClipboardIcon className="w-6 h-6 text-gray-500" />;
   };
 
   const filteredRequests = excusedRequests.filter(request => {
@@ -235,7 +259,7 @@ const ExcusedAbsencesManager = () => {
                 {/* Left: Request Info */}
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <span className="text-2xl">{getStatusIcon(request.status)}</span>
+                    <div className="flex-shrink-0">{getStatusIcon(request.status)}</div>
                     <div>
                       <h4 className="font-bold text-[#344767] text-sm">{request.subject}</h4>
                       <div className="flex items-center gap-2 mt-1">

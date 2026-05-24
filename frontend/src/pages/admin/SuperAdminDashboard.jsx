@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+
+const PencilIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+);
+
+const FolderIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+  </svg>
+);
 import AdminGrievancePanel from '../../components/AdminGrievancePanel';
 import ReportSettings from '../../components/admin/ReportSettings';
 import OfficialArchives from '../../components/admin/OfficialArchives';
@@ -2903,7 +2915,10 @@ export default function SuperAdminDashboard() {
                       studentAddTab === 'manual' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#8392ab] hover:text-[#0c2340]'
                     }`}
                   >
-                    ✍️ Manual Entry
+                    <span className="flex items-center gap-1.5">
+                      <PencilIcon className="w-3.5 h-3.5" />
+                      <span>Manual Entry</span>
+                    </span>
                   </button>
                   <button
                     onClick={() => setStudentAddTab('csv')}
@@ -2911,7 +2926,10 @@ export default function SuperAdminDashboard() {
                       studentAddTab === 'csv' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#8392ab] hover:text-[#0c2340]'
                     }`}
                   >
-                    📂 Bulk Import (CSV/Excel/PDF)
+                    <span className="flex items-center gap-1.5">
+                      <FolderIcon className="w-3.5 h-3.5" />
+                      <span>Bulk Import (CSV/Excel/PDF)</span>
+                    </span>
                   </button>
                 </div>
 

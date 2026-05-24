@@ -1,6 +1,49 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const AlertTriangleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+  </svg>
+);
+
+const ChartBarIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z" />
+  </svg>
+);
+
+const XCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const SnailIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0" />
+  </svg>
+);
+
+const FlameIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const TrendingUpIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  </svg>
+);
+
+const SaveIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+  </svg>
+);
+
 const PerformanceMetrics = () => {
   const [metricsData, setMetricsData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -157,7 +200,7 @@ const PerformanceMetrics = () => {
       {/* Slowest Endpoints */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <span className="text-2xl">🐌</span>
+          <SnailIcon className="w-6 h-6 text-amber-600 flex-shrink-0" />
           Slowest Endpoints (Top 10)
         </h3>
         <div className="overflow-x-auto">
@@ -195,7 +238,7 @@ const PerformanceMetrics = () => {
       {/* Most Used Endpoints */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <span className="text-2xl">🔥</span>
+          <FlameIcon className="w-6 h-6 text-red-500 flex-shrink-0" />
           Most Used Endpoints (Top 10)
         </h3>
         <div className="overflow-x-auto">
@@ -236,7 +279,7 @@ const PerformanceMetrics = () => {
       {metricsData.performance.slowQueries && metricsData.performance.slowQueries.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span className="text-2xl">⚠️</span>
+            <AlertTriangleIcon className="w-6 h-6 text-yellow-600 flex-shrink-0" />
             Recent Slow Queries (Last 10)
           </h3>
           <div className="space-y-2">
@@ -274,7 +317,7 @@ const PerformanceMetrics = () => {
       {metricsData.performance.recentResponseTimes && metricsData.performance.recentResponseTimes.length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span className="text-2xl">📊</span>
+            <ChartBarIcon className="w-6 h-6 text-[#0c2340] flex-shrink-0" />
             Recent Response Times (Last 20 Requests)
           </h3>
           <div className="space-y-2">
@@ -312,7 +355,7 @@ const PerformanceMetrics = () => {
       {metricsData.requests.statusCodes && Object.keys(metricsData.requests.statusCodes).length > 0 && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <span className="text-2xl">📈</span>
+            <TrendingUpIcon className="w-6 h-6 text-[#0c2340] flex-shrink-0" />
             Status Code Distribution
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -342,7 +385,7 @@ const PerformanceMetrics = () => {
       {/* System Memory */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <span className="text-2xl">💾</span>
+          <SaveIcon className="w-6 h-6 text-[#0c2340] flex-shrink-0" />
           Memory Usage
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -365,7 +408,7 @@ const PerformanceMetrics = () => {
       {metricsData.system.lastError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h3 className="text-xl font-semibold mb-4 text-red-700 flex items-center gap-2">
-            <span className="text-2xl">❌</span>
+            <XCircleIcon className="w-6 h-6 text-red-600 flex-shrink-0" />
             Last Error
           </h3>
           <div className="space-y-2">

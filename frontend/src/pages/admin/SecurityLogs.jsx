@@ -1,6 +1,66 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
+const AlertCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const CheckCircleIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const LockIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  </svg>
+);
+
+const TrashIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+  </svg>
+);
+
+const PlusIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m6-6H6" />
+  </svg>
+);
+
+const PencilIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+  </svg>
+);
+
+const UploadIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+  </svg>
+);
+
+const CheckIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+const ClipboardIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+  </svg>
+);
+
+const DocumentIcon = ({ className }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+  </svg>
+);
+
 const SecurityLogs = () => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,34 +134,34 @@ const SecurityLogs = () => {
   const getLogIcon = (log) => {
     if (log.type === 'security') {
       if (log.event?.includes('FAILED') || log.event?.includes('BLOCKED')) {
-        return '🔴';
+        return <AlertCircleIcon className="w-5 h-5 text-red-600" />;
       }
       if (log.event?.includes('SUCCESS')) {
-        return '🟢';
+        return <CheckCircleIcon className="w-5 h-5 text-emerald-600" />;
       }
-      return '🔒';
+      return <LockIcon className="w-5 h-5 text-gray-500" />;
     }
     
     if (log.type === 'audit') {
       if (log.action?.includes('DELETE')) {
-        return '🗑️';
+        return <TrashIcon className="w-5 h-5 text-red-500" />;
       }
       if (log.action?.includes('CREATE') || log.action?.includes('ADD')) {
-        return '➕';
+        return <PlusIcon className="w-5 h-5 text-[#0c2340]" />;
       }
       if (log.action?.includes('UPDATE') || log.action?.includes('EDIT')) {
-        return '✏️';
+        return <PencilIcon className="w-5 h-5 text-blue-500" />;
       }
       if (log.action?.includes('UPLOAD')) {
-        return '📤';
+        return <UploadIcon className="w-5 h-5 text-indigo-500" />;
       }
       if (log.action?.includes('APPROVE')) {
-        return '✅';
+        return <CheckIcon className="w-5 h-5 text-emerald-600" />;
       }
-      return '📋';
+      return <ClipboardIcon className="w-5 h-5 text-gray-600" />;
     }
     
-    return '📝';
+    return <DocumentIcon className="w-5 h-5 text-[#0c2340]" />;
   };
 
   const getLogColor = (log) => {
@@ -304,7 +364,7 @@ const SecurityLogs = () => {
               >
                 <div className="flex items-start gap-4">
                   {/* Icon */}
-                  <div className="text-2xl flex-shrink-0 mt-1">
+                  <div className="flex-shrink-0 mt-1">
                     {getLogIcon(log)}
                   </div>
 
