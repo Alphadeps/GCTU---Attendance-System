@@ -12,16 +12,39 @@ const protect = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      // Provide more specific error messages for token issues
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ 
+          error: 'Token expired',
+          code: 'TOKEN_EXPIRED',
+          expiredAt: err.expiredAt
+        });
+      } else if (err.name === 'JsonWebTokenError') {
+        return res.status(401).json({ 
+          error: 'Invalid token',
+          code: 'INVALID_TOKEN'
+        });
+      }
+      return res.status(401).json({ error: 'Not authorized, invalid token' });
+    }
 
     // Fetch user from DB
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, username: true, role: true }
+      select: { id: true, username: true, role: true, isActive: true }
     });
 
     if (!user) {
       return res.status(401).json({ error: 'User not found or token invalid' });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: 'Account deactivated' });
     }
 
     req.user = user;

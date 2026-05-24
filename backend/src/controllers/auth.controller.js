@@ -186,7 +186,7 @@ const login = async (req, res) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin in production
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
@@ -237,16 +237,24 @@ const login = async (req, res) => {
  */
 const refresh = async (req, res) => {
   try {
+    console.log('Refresh token request received');
+    console.log('Cookies:', req.cookies);
+    console.log('Headers:', req.headers);
+    
     const refreshToken = req.cookies?.refreshToken;
     if (!refreshToken) {
+      console.log('No refresh token found in cookies');
       return res.status(401).json({ error: 'Not authorized, refresh token missing' });
     }
 
+    console.log('Refresh token found, verifying...');
     // Verify Refresh Token
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, REFRESH_JWT_SECRET);
+      console.log('Token verified successfully for user:', decoded.id);
     } catch (err) {
+      console.log('Token verification failed:', err.message);
       return res.status(401).json({ error: 'Invalid or expired refresh token' });
     }
 
@@ -257,9 +265,11 @@ const refresh = async (req, res) => {
     });
 
     if (!user || !user.isActive) {
+      console.log('User not found or inactive:', decoded.id);
       return res.status(401).json({ error: 'User not found or account deactivated' });
     }
 
+    console.log('Generating new access token for user:', user.username);
     // Generate new Access Token (15 mins)
     const token = jwt.sign(
       { id: user.id, username: user.username, role: user.role },
@@ -267,6 +277,7 @@ const refresh = async (req, res) => {
       { expiresIn: '15m' }
     );
 
+    console.log('Token refresh successful');
     res.json({ token });
   } catch (err) {
     console.error('Refresh token error:', err);
@@ -282,7 +293,7 @@ const logout = async (req, res) => {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
     res.json({ message: 'Logged out successfully' });
   } catch (err) {

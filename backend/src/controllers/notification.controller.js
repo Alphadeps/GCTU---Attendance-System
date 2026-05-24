@@ -38,12 +38,19 @@ const getNotifications = async (req, res) => {
 
     const notifications = await prisma.notification.findMany({
       where: whereClause,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      take: 100 // Limit to 100 most recent notifications for performance
     });
 
     res.json(notifications);
   } catch (err) {
     console.error('Get notifications error:', err);
+    
+    // Handle specific database errors
+    if (err.code === 'P2025') {
+      return res.status(404).json({ error: 'Notifications not found' });
+    }
+    
     res.status(500).json({ error: 'Internal server error' });
   }
 };

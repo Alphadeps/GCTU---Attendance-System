@@ -29,6 +29,21 @@ api.interceptors.request.use(
 );
 
 // Response interceptor to handle transparent token refresh on token expiry
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => {
     return response;
@@ -45,36 +60,81 @@ api.interceptors.response.use(
       // Do not try to refresh if the failed request was the login or refresh route itself
       if (
         originalRequest.url.includes('/auth/login') ||
-        originalRequest.url.includes('/auth/refresh')
+        originalRequest.url.includes('/auth/refresh') ||
+        originalRequest.url.includes('/student-auth/login')
       ) {
         return Promise.reject(error);
       }
 
+      // Check if the error is specifically a token expiration
+      const isTokenExpired = error.response?.data?.code === 'TOKEN_EXPIRED' || 
+                            error.response?.data?.error?.includes('expired');
+
+      if (!isTokenExpired) {
+        // If it's not a token expiration, don't try to refresh
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // If already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
+        console.log('Token expired, attempting refresh...');
         // Attempt to request a new access token using the HTTP-only refresh token cookie
         const res = await axios.post(
           `${API_BASE_URL}/auth/refresh`,
           {},
-          { withCredentials: true }
+          { 
+            withCredentials: true,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
         );
 
         if (res.status === 200 && res.data.token) {
           const newToken = res.data.token;
           localStorage.setItem('token', newToken);
+          console.log('Token refreshed successfully');
+
+          // Process queued requests
+          processQueue(null, newToken);
 
           // Retry the original request with the new access token
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
           return api(originalRequest);
         }
       } catch (refreshErr) {
-        console.error('Session expired. Redirecting to login.', refreshErr);
+        console.error('Token refresh failed:', refreshErr.response?.data || refreshErr.message);
+        processQueue(refreshErr, null);
+        
         // Clear authentication items and redirect to login page
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/';
+        
+        // Only redirect if we're not already on the login page
+        if (!window.location.pathname.includes('/login') && window.location.pathname !== '/') {
+          console.log('Session expired. Redirecting to login.');
+          window.location.href = '/';
+        }
+        
         return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
 
