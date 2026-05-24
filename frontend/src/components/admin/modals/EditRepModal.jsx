@@ -46,7 +46,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-      <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-up">
         <h3 className="text-lg font-bold text-[#344767] mb-4">Edit Class Rep</h3>
         
         {error && (
@@ -65,7 +65,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
               required
               value={formData.username}
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
-              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#0c2340] transition-colors"
               placeholder="e.g. johndoe"
             />
           </div>
@@ -78,7 +78,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
               type="text"
               value={formData.indexNumber}
               onChange={(e) => setFormData(prev => ({ ...prev, indexNumber: e.target.value }))}
-              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#0c2340] transition-colors"
               placeholder="e.g. 10912345"
             />
             <p className="text-xs text-[#8392ab] mt-1.5">
@@ -91,14 +91,14 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767] disabled:opacity-50"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#8392ab] disabled:opacity-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767] disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2.5 bg-[#0c2340] hover:bg-[#1a3c6d] rounded-xl text-xs font-bold text-white disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {loading && (
                 <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />

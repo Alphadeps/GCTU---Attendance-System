@@ -229,8 +229,8 @@ const StudentPortal = () => {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
         {/* Background gradient blobs */}
-        <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-[#17c1e8]/10 blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-[#cb0c9f]/8 blur-[80px] pointer-events-none" />
+        <div className="absolute top-0 left-0 w-72 h-72 rounded-full bg-[#0c2340]/10 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full bg-[#E5A93C]/8 blur-[80px] pointer-events-none" />
 
         <div className="w-full max-w-[380px] relative z-10 space-y-6 animate-fade-in-up">
           {/* Logo + heading */}
@@ -282,7 +282,7 @@ const StudentPortal = () => {
                   type="button"
                   onClick={() => setRememberMe(!rememberMe)}
                   className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 focus:outline-none ${
-                    rememberMe ? 'bg-[#17c1e8]' : 'bg-gray-200'
+                    rememberMe ? 'bg-[#E5A93C]' : 'bg-gray-200'
                   }`}
                 >
                   <div
@@ -335,7 +335,7 @@ const StudentPortal = () => {
 
       {/* Welcome banner (when identified) */}
       {isIdentified && (activeTab === 'home') && (
-        <div className="bg-gradient-to-r from-[#14172B] to-[#3A416F] px-5 py-4 animate-fade-in">
+        <div className="bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] px-5 py-4 animate-fade-in">
           <p className="text-[11px] text-blue-200 font-medium">{getGreeting()},</p>
           <p className="text-[16px] font-black text-white mt-0.5 truncate">{fullName.split(' ')[0]}</p>
           <p className="text-[10px] text-blue-300 font-mono mt-0.5">{indexNumber}</p>
@@ -355,7 +355,7 @@ const StudentPortal = () => {
               <button
                 onClick={fetchActiveSessions}
                 disabled={loadingActive}
-                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#17c1e8] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingActive ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -393,7 +393,7 @@ const StudentPortal = () => {
                 style={{ animationDelay: `${idx * 80}ms` }}
               >
                 {/* Type indicator bar */}
-                <div className={`h-1 ${session.sessionType === 'PHYSICAL' ? 'bg-gradient-to-r from-[#17c1e8] to-[#0ea5c9]' : 'bg-gradient-to-r from-[#cb0c9f] to-[#e91e8c]'}`} />
+                <div className={`h-1 ${session.sessionType === 'PHYSICAL' ? 'bg-gradient-to-r from-[#E5A93C] to-[#C59B27]' : 'bg-gradient-to-r from-[#0c2340] to-[#1a3c6d]'}`} />
                 <div className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className={`badge ${session.sessionType === 'PHYSICAL' ? 'badge-info' : 'badge-primary'}`}>
@@ -449,7 +449,7 @@ const StudentPortal = () => {
                 <div className="relative w-11 h-11 flex items-center justify-center">
                   <svg className="w-11 h-11 -rotate-90">
                     <circle cx="22" cy="22" r="18" stroke="#e2e8f0" strokeWidth="3" fill="transparent" />
-                    <circle cx="22" cy="22" r="18" stroke="#17c1e8" strokeWidth="3" fill="transparent"
+                    <circle cx="22" cy="22" r="18" stroke="#E5A93C" strokeWidth="3" fill="transparent"
                       strokeDasharray={113.1} strokeDashoffset={113.1 - (113.1 * attendanceRate) / 100} />
                   </svg>
                   <span className="absolute text-[9px] font-bold text-[#344767]">{attendanceRate}%</span>
@@ -468,8 +468,8 @@ const StudentPortal = () => {
                   onClick={() => setFilter(chip)}
                   className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all
                     ${filter === chip
-                      ? 'bg-[#17c1e8] text-white border-[#17c1e8]'
-                      : 'bg-white text-[#8392ab] border-gray-200 hover:border-[#17c1e8]'
+                      ? 'bg-[#E5A93C] text-white border-[#E5A93C]'
+                      : 'bg-white text-[#8392ab] border-gray-200 hover:border-[#E5A93C]'
                     }`}
                 >
                   {chip}
@@ -542,7 +542,7 @@ const StudentPortal = () => {
               <button
                 onClick={fetchStudentGrievances}
                 disabled={loadingGrievances}
-                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#17c1e8] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingGrievances ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -561,7 +561,7 @@ const StudentPortal = () => {
                 }
                 setShowGrievanceModal(true);
               }}
-              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-[#344767]/10"
+              className="w-full bg-gradient-to-br from-[#0c2340] to-[#1a3c6d] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-[#0c2340]/10"
             >
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -618,7 +618,7 @@ const StudentPortal = () => {
                     {g.evidenceUrl && (
                       <div className="mt-2 flex justify-end">
                         <a href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${g.evidenceUrl}`} target="_blank" rel="noopener noreferrer"
-                          className="text-[10px] text-[#17c1e8] font-semibold hover:underline">
+                          className="text-[10px] text-[#E5A93C] font-semibold hover:underline">
                           View Evidence
                         </a>
                       </div>
@@ -644,7 +644,7 @@ const StudentPortal = () => {
 
             {/* Avatar card */}
             <div className="bg-white rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,.08)] flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] text-white text-2xl font-black flex items-center justify-center shadow-lg shadow-[#17c1e8]/30 mb-3">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#0c2340] to-[#1a3c6d] text-white text-2xl font-black flex items-center justify-center shadow-lg shadow-[#0c2340]/30 mb-3">
                 {getInitials(fullName)}
               </div>
               <p className="text-[16px] font-extrabold text-[#344767]">{fullName}</p>
@@ -706,48 +706,48 @@ const StudentPortal = () => {
           <button
             onClick={() => setActiveTab('home')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'home' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'home' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Home</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Home</span>
           </button>
 
           {/* History */}
           <button
             onClick={() => setActiveTab('history')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'history' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'history' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>History</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>History</span>
           </button>
 
           {/* Grievances */}
           <button
             onClick={() => { setActiveTab('grievances'); fetchStudentGrievances(); }}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'grievances' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'grievances' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Grievances</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Grievances</span>
           </button>
 
           {/* Profile */}
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'profile' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'profile' ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}>Profile</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Profile</span>
           </button>
         </div>
       </nav>
@@ -766,7 +766,7 @@ const StudentPortal = () => {
             }
             setShowGrievanceModal(true);
           }}
-          className="fixed bottom-[72px] right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] text-white shadow-lg shadow-[#17c1e8]/30 flex items-center justify-center hover-lift transition-all animate-scale-in"
+          className="fixed bottom-[72px] right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#E5A93C] to-[#C59B27] text-white shadow-lg shadow-[#E5A93C]/30 flex items-center justify-center hover-lift transition-all animate-scale-in"
           title="New Grievance"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

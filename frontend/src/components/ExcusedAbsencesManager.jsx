@@ -141,7 +141,7 @@ const ExcusedAbsencesManager = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E5A93C]"></div>
       </div>
     );
   }
@@ -159,7 +159,7 @@ const ExcusedAbsencesManager = () => {
           </div>
           <button
             onClick={fetchExcusedRequests}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[#344767] text-xs font-bold rounded-lg transition"
+            className="px-4 py-2 bg-[#0c2340] hover:bg-[#1a3c6d] text-white text-xs font-bold rounded-lg transition-colors"
           >
             Refresh
           </button>
@@ -197,8 +197,8 @@ const ExcusedAbsencesManager = () => {
                 onClick={() => setFilter(status)}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
                   filter === status
-                    ? 'bg-blue-600 text-[#344767]'
-                    : 'bg-[#0a2540] text-[#8392ab] hover:bg-[#0d2f4f]'
+                    ? 'bg-[#0c2340] text-white'
+                    : 'bg-gray-100 text-[#8392ab] hover:bg-gray-200'
                 }`}
               >
                 {status}
@@ -212,7 +212,7 @@ const ExcusedAbsencesManager = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by student name, index, subject, or course..."
-            className="flex-1 px-4 py-2 bg-[#0a2540] border border-gray-200 rounded-lg text-[#344767] text-xs placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="flex-1 px-4 py-2 bg-[#f8f9fa] border border-[#e9ecef] rounded-lg text-[#344767] text-xs placeholder-slate-500 focus:outline-none focus:border-[#0c2340] transition-colors"
           />
         </div>
       </div>
@@ -271,7 +271,7 @@ const ExcusedAbsencesManager = () => {
                   </p>
 
                   {request.adminResponse && (
-                    <div className="bg-[#0a2540] border border-gray-200 rounded-lg p-3 mb-3">
+                    <div className="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-3 mb-3">
                       <div className="text-xs text-[#8392ab] mb-1">Response:</div>
                       <p className="text-xs text-[#344767]">{request.adminResponse}</p>
                       {request.resolvedBy && (
@@ -305,7 +305,7 @@ const ExcusedAbsencesManager = () => {
 
                   <button
                     onClick={() => openDetailsModal(request)}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-[#344767] text-xs font-bold rounded-lg transition"
+                    className="px-4 py-2 bg-[#E5A93C] hover:bg-[#b5821c] text-white text-xs font-bold rounded-lg transition-colors"
                   >
                     {request.status === 'PENDING' ? 'Review' : 'View Details'}
                   </button>
@@ -319,13 +319,13 @@ const ExcusedAbsencesManager = () => {
       {/* Details Modal */}
       {showDetailsModal && selectedRequest && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0a1929] border border-gray-200 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white border border-gray-100 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-up">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-[#0a1929] border-b border-gray-200 p-6 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex justify-between items-center">
               <h3 className="text-lg font-bold text-[#344767]">Excused Absence Request</h3>
               <button
                 onClick={closeDetailsModal}
-                className="text-[#8392ab] hover:text-[#344767] transition"
+                className="text-[#8392ab] hover:text-[#0c2340] transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -393,7 +393,7 @@ const ExcusedAbsencesManager = () => {
                   disabled={selectedRequest.status !== 'PENDING'}
                   placeholder="Provide your decision and comments..."
                   rows={4}
-                  className="w-full px-4 py-3 bg-[#0a2540] border border-gray-200 rounded-lg text-[#344767] text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-[#f8f9fa] border border-[#e9ecef] rounded-lg text-[#344767] text-sm placeholder-slate-500 focus:outline-none focus:border-[#0c2340] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
 
@@ -408,25 +408,25 @@ const ExcusedAbsencesManager = () => {
 
             {/* Modal Footer */}
             {selectedRequest.status === 'PENDING' && (
-              <div className="sticky bottom-0 bg-[#0a1929] border-t border-gray-200 p-6 flex gap-3">
+              <div className="sticky bottom-0 bg-white border-t border-gray-100 p-6 flex gap-3">
                 <button
                   onClick={closeDetailsModal}
                   disabled={processing}
-                  className="flex-1 px-4 py-3 bg-[#0a2540] hover:bg-[#0d2f4f] text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-[#8392ab] text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => handleReject(selectedRequest)}
                   disabled={processing || !adminResponse.trim()}
-                  className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? 'Processing...' : 'Reject'}
                 </button>
                 <button
                   onClick={() => handleApprove(selectedRequest)}
                   disabled={processing || !adminResponse.trim()}
-                  className="flex-1 px-4 py-3 bg-green-600 hover:bg-green-700 text-[#344767] text-sm font-bold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processing ? 'Processing...' : 'Approve'}
                 </button>

@@ -149,7 +149,7 @@ const StudentLoginPage = () => {
       {/* ══════════════════════ LEFT PANEL ══════════════════════ */}
       <div
         className="login-left animate-slide-left"
-        style={{ background: 'linear-gradient(135deg, #11cdef 0%, #1171ef 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0c2340 0%, #1a3c6d 100%)' }}
       >
         {/* Decorative background blobs */}
         <div
@@ -172,7 +172,7 @@ const StudentLoginPage = () => {
           className="login-blob"
           style={{
             width: 130, height: 130,
-            background: 'rgba(17,193,239,0.15)',
+            background: 'rgba(229,169,60,0.15)',
             bottom: 220, right: 30,
           }}
         />
@@ -217,23 +217,13 @@ const StudentLoginPage = () => {
             </p>
           </div>
 
-          {/* Feature cards */}
-          <div style={{
-            display: 'flex', flexDirection: 'column',
-            gap: '12px', width: '100%', alignItems: 'center',
-          }}>
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={`login-feature-card animate-float ${f.delay}`}
-              >
-                <div className="login-feature-icon">{f.icon}</div>
-                <div className="login-feature-text">
-                  <h4>{f.title}</h4>
-                  <p>{f.desc}</p>
-                </div>
-              </div>
-            ))}
+          {/* Student Login Bot Image */}
+          <div className="animate-float" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <img
+              src="/admin login bot.png"
+              alt="Student Login Bot"
+              style={{ width: '80%', maxWidth: '280px', height: 'auto', objectFit: 'contain' }}
+            />
           </div>
 
           {/* Bottom caption */}
@@ -493,7 +483,7 @@ const StudentLoginPage = () => {
                   fontSize: '13px', cursor: 'pointer',
                   transition: 'color 150ms ease',
                 }}
-                onMouseEnter={(e) => { e.target.style.color = '#1171ef'; }}
+                onMouseEnter={(e) => { e.target.style.color = 'var(--sip-primary)'; }}
                 onMouseLeave={(e) => { e.target.style.color = 'var(--sip-text-heading)'; }}
               >
                 Login here

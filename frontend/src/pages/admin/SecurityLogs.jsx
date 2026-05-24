@@ -164,7 +164,7 @@ const SecurityLogs = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E5A93C]"></div>
       </div>
     );
   }
@@ -205,7 +205,7 @@ const SecurityLogs = () => {
           )}
           <button
             onClick={fetchLogs}
-            className="px-4 py-2 bg-blue-600 text-[#344767] rounded-lg hover:bg-blue-700 text-sm font-semibold"
+            className="px-4 py-2 bg-[#0c2340] text-white rounded-lg hover:bg-[#1a3c6d] text-sm font-semibold transition-colors"
           >
             Refresh
           </button>
@@ -221,7 +221,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('all')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'all'
-                  ? 'bg-blue-600 text-[#344767]'
+                  ? 'bg-[#0c2340] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -231,7 +231,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('audit')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'audit'
-                  ? 'bg-blue-600 text-[#344767]'
+                  ? 'bg-[#0c2340] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -241,7 +241,7 @@ const SecurityLogs = () => {
               onClick={() => setFilter('security')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                 filter === 'security'
-                  ? 'bg-blue-600 text-[#344767]'
+                  ? 'bg-[#0c2340] text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -260,7 +260,7 @@ const SecurityLogs = () => {
             />
             <button
               type="submit"
-              className="px-4 py-2 bg-gray-700 text-[#344767] rounded-lg hover:bg-gray-800 text-sm font-semibold"
+              className="px-4 py-2 bg-[#0c2340] text-white rounded-lg hover:bg-[#1a3c6d] text-sm font-semibold transition-colors"
             >
               Search
             </button>

@@ -108,7 +108,7 @@ const LoginPage = () => {
       {/* ══════════════════════ LEFT PANEL ══════════════════════ */}
       <div
         className="login-left animate-slide-left"
-        style={{ background: 'linear-gradient(135deg, #141727 0%, #3A416F 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #0c2340 0%, #1a3c6d 100%)' }}
       >
         {/* Decorative background blobs */}
         <div
@@ -131,7 +131,7 @@ const LoginPage = () => {
           className="login-blob"
           style={{
             width: 120, height: 120,
-            background: 'rgba(203,12,159,0.10)',
+            background: 'rgba(229,169,60,0.10)',
             bottom: 200, right: 40,
           }}
         />
@@ -173,20 +173,13 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Feature cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', alignItems: 'center' }}>
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={`login-feature-card animate-float ${f.delay}`}
-              >
-                <div className="login-feature-icon">{f.icon}</div>
-                <div className="login-feature-text">
-                  <h4>{f.title}</h4>
-                  <p>{f.desc}</p>
-                </div>
-              </div>
-            ))}
+          {/* Admin Login Bot Image */}
+          <div className="animate-float" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+            <img
+              src="/admin login bot.png"
+              alt="Admin Login Bot"
+              style={{ width: '80%', maxWidth: '280px', height: 'auto', objectFit: 'contain' }}
+            />
           </div>
 
           {/* Bottom caption */}

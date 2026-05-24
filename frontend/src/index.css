@@ -6,12 +6,12 @@
 
 :root {
   /* ── Brand colours ─────────────────────────────────────────────────────── */
-  --sip-primary:    #cb0c9f;
-  --sip-dark:       #344767;
+  --sip-primary:    #E5A93C; /* GCTU Gold */
+  --sip-dark:       #0c2340; /* GCTU Dark Blue */
   --sip-secondary:  #8392ab;
   --sip-success:    #82d616;
-  --sip-info:       #17c1e8;
-  --sip-warning:    #fbcf33;
+  --sip-info:       #1a3c6d; /* GCTU Medium/Dark Blue */
+  --sip-warning:    #f3c63f; /* GCTU Lighter Gold */
   --sip-danger:     #ea0606;
   --sip-light:      #e9ecef;
   --sip-white:      #ffffff;
@@ -19,18 +19,18 @@
 
   /* ── Text ──────────────────────────────────────────────────────────────── */
   --sip-text-body:    rgb(103, 116, 142);
-  --sip-text-heading: rgb(52,  71,  103);
+  --sip-text-heading: #0c2340; /* GCTU Dark Blue */
   --sip-text-footer:  rgb(131, 146, 171);
 
   /* ── Gradients ─────────────────────────────────────────────────────────── */
-  --sip-grad-dark:     linear-gradient(310deg, #14172B, #3A416F);
-  --sip-grad-primary:  linear-gradient(310deg, #7928CA, #FF0080);
-  --sip-grad-info:     linear-gradient(310deg, #2152FF, #21D4FD);
+  --sip-grad-dark:     linear-gradient(310deg, #060c1d, #0c2340);
+  --sip-grad-primary:  linear-gradient(310deg, #b5821c, #E5A93C);
+  --sip-grad-info:     linear-gradient(310deg, #0c2340, #1a3c6d);
   --sip-grad-success:  linear-gradient(310deg, #17AD37, #98EC2D);
-  --sip-grad-warning:  linear-gradient(310deg, #F53939, #FBCF33);
+  --sip-grad-warning:  linear-gradient(310deg, #c59b27, #f3c63f);
   --sip-grad-danger:   linear-gradient(310deg, #EA0606, #FF667C);
-  --sip-grad-teal:     linear-gradient(135deg, #11cdef 0%, #1171ef 100%);
-  --sip-grad-pink:     linear-gradient(135deg, #f5365c 0%, #cb0c9f 100%);
+  --sip-grad-teal:     linear-gradient(135deg, #060c1d 0%, #1a3c6d 100%);
+  --sip-grad-pink:     linear-gradient(135deg, #C59B27 0%, #E5A93C 100%);
 
   /* ── Shadows ───────────────────────────────────────────────────────────── */
   --sip-shadow-xs:   0 2px 4px 0 rgba(0,0,0,.06);
@@ -112,9 +112,9 @@ body {
 }
 
 @keyframes pulseRing {
-  0%   { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(203,12,159,.5); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 12px rgba(203,12,159,0); }
-  100% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(203,12,159,0);  }
+  0%   { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(229,169,60,.5); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 12px rgba(229,169,60,0); }
+  100% { transform: scale(0.85); box-shadow: 0 0 0 0 rgba(229,169,60,0);  }
 }
 
 @keyframes growBar {
@@ -230,13 +230,13 @@ body {
   background: var(--sip-grad-teal);
   border-radius: var(--sip-radius-card);
   color: #fff;
-  box-shadow: 0 8px 20px -4px rgba(17, 113, 239, 0.45);
+  box-shadow: 0 8px 20px -4px rgba(12, 35, 64, 0.45);
 }
 .stat-card-pink {
   background: var(--sip-grad-pink);
   border-radius: var(--sip-radius-card);
   color: #fff;
-  box-shadow: 0 8px 20px -4px rgba(203, 12, 159, 0.45);
+  box-shadow: 0 8px 20px -4px rgba(229, 169, 60, 0.45);
 }
 .stat-card-green {
   background: var(--sip-grad-success);
@@ -248,13 +248,13 @@ body {
   background: var(--sip-grad-warning);
   border-radius: var(--sip-radius-card);
   color: #fff;
-  box-shadow: 0 8px 20px -4px rgba(251, 207, 51, 0.45);
+  box-shadow: 0 8px 20px -4px rgba(229, 169, 60, 0.45);
 }
 .stat-card-purple {
   background: var(--sip-grad-primary);
   border-radius: var(--sip-radius-card);
   color: #fff;
-  box-shadow: 0 8px 20px -4px rgba(121, 40, 202, 0.45);
+  box-shadow: 0 8px 20px -4px rgba(229, 169, 60, 0.45);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -315,7 +315,7 @@ body {
   padding: 13px 24px;
   border-radius: var(--sip-radius-input);
   border: none;
-  box-shadow: 0 4px 7px -1px rgba(121,40,202,.4);
+  box-shadow: 0 4px 7px -1px rgba(229,169,60,.4);
   cursor: pointer;
   transition: opacity var(--sip-transition-fast), transform var(--sip-transition-fast);
   width: 100%;
@@ -385,10 +385,10 @@ body {
 }
 .badge-success { background: rgba(130,214,22,.15);  color: #4a7c10; }
 .badge-danger  { background: rgba(234,6,6,.1);      color: #c00; }
-.badge-info    { background: rgba(23,193,232,.12);  color: #0985a3; }
-.badge-warning { background: rgba(251,207,51,.15);  color: #9a6f00; }
-.badge-primary { background: rgba(203,12,159,.1);   color: #a00a82; }
-.badge-dark    { background: rgba(52,71,103,.1);    color: var(--sip-dark); }
+.badge-info    { background: rgba(26,60,109,.12);  color: #1a3c6d; }
+.badge-warning { background: rgba(229,169,60,.15);  color: #b5821c; }
+.badge-primary { background: rgba(229,169,60,.12);   color: #b5821c; }
+.badge-dark    { background: rgba(12,35,64,.1);    color: var(--sip-dark); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    TABLE
@@ -640,8 +640,8 @@ body {
   line-height: 1.5;
 }
 .sip-alert-error   { background: rgba(234,6,6,.07);   border: 1px solid rgba(234,6,6,.2);   color: #c00; }
-.sip-alert-warning { background: rgba(251,207,51,.1);  border: 1px solid rgba(251,207,51,.3); color: #b45309; }
-.sip-alert-info    { background: rgba(23,193,232,.08); border: 1px solid rgba(23,193,232,.25); color: #0c9abf; }
+.sip-alert-warning { background: rgba(229,169,60,.1);  border: 1px solid rgba(229,169,60,.3); color: #b5821c; }
+.sip-alert-info    { background: rgba(26,60,109,.08); border: 1px solid rgba(26,60,109,.25); color: #1a3c6d; }
 
 /* Mobile compact header (shown on small screens instead of left panel) */
 .login-mobile-header {

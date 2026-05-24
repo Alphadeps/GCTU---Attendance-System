@@ -55,7 +55,7 @@ const AttendanceTable = ({ attendances }) => {
                 <div className="flex items-center gap-2.5">
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0"
-                    style={{ background: att.status === 'ABSENT' ? '#ea0606' : att.status === 'LATE' ? '#fbcf33' : 'linear-gradient(135deg,#11cdef,#1171ef)' }}
+                    style={{ background: att.status === 'ABSENT' ? '#ea0606' : att.status === 'LATE' ? '#E5A93C' : 'linear-gradient(135deg,#0c2340,#1a3c6d)' }}
                   >
                     {(att.student?.name || 'S').charAt(0).toUpperCase()}
                   </div>

@@ -1634,6 +1634,34 @@ const getAdminStats = async (req, res) => {
       prisma.attendanceSession.count({ where: { status: 'OPEN' } }),
     ]);
 
+    const getGroupStats = async (whereClause) => {
+      try {
+        const total = await prisma.attendance.count({
+          where: whereClause
+        });
+        if (total === 0) return 0;
+        const attended = await prisma.attendance.count({
+          where: {
+            ...whereClause,
+            status: { in: ['PRESENT', 'LATE'] }
+          }
+        });
+        return Math.round((attended / total) * 100);
+      } catch (err) {
+        console.error('getGroupStats error:', err);
+        return 0;
+      }
+    };
+
+    const attendanceRates = {
+      lvl100: await getGroupStats({ session: { class: { level: '100' } } }),
+      lvl200: await getGroupStats({ session: { class: { level: '200' } } }),
+      lvl300: await getGroupStats({ session: { class: { level: '300' } } }),
+      lvl400: await getGroupStats({ session: { class: { level: '400' } } }),
+      topUp: await getGroupStats({ session: { class: { type: 'TOP-UP' } } }),
+      evening: await getGroupStats({ session: { class: { session: 'EVENING' } } }),
+    };
+
     const stats = {
       programmesCount,
       classesCount,
@@ -1641,6 +1669,7 @@ const getAdminStats = async (req, res) => {
       repsCount,
       coursesCount,
       activeSessionsCount,
+      attendanceRates,
     };
 
     // Cache for 2 minutes (stats change frequently)

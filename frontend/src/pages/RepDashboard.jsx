@@ -324,9 +324,9 @@ const RepDashboard = () => {
             <p className="text-[9px] font-bold text-[#8392ab] uppercase tracking-wider mb-1">My Class</p>
             <p className="text-[12px] font-bold text-[#344767] truncate">{assignedClass.displayName}</p>
             <div className="flex gap-3 mt-1.5">
-              <span className="text-[10px] text-[#17c1e8] font-semibold">{classStudentCount} students</span>
+              <span className="text-[10px] text-[#E5A93C] font-semibold">{classStudentCount} students</span>
               <span className="text-[10px] text-[#8392ab]">•</span>
-              <span className="text-[10px] text-[#17c1e8] font-semibold">{courses.length} courses</span>
+              <span className="text-[10px] text-[#E5A93C] font-semibold">{courses.length} courses</span>
             </div>
           </div>
         )}
@@ -339,7 +339,7 @@ const RepDashboard = () => {
               onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all
                 ${activeTab === item.id
-                  ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] text-white shadow-md'
                   : 'text-[#67748e] hover:bg-[#f8f9fa] hover:text-[#344767]'
                 }`}
             >
@@ -352,7 +352,7 @@ const RepDashboard = () => {
         {/* User footer */}
         <div className="px-4 py-4 border-t border-gray-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#17c1e8] to-[#0ea5c9] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#E5A93C] to-[#C59B27] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
               {(username || 'R')[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -457,7 +457,7 @@ const RepDashboard = () => {
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-100">
                   <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Active Courses</p>
                   <p className="text-3xl font-extrabold text-[#344767] mt-1">{courses.length}</p>
-                  <div className="mt-2 w-8 h-1 rounded-full bg-[#17c1e8]" />
+                   <div className="mt-2 w-8 h-1 rounded-full bg-[#E5A93C]" />
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-200">
@@ -475,8 +475,8 @@ const RepDashboard = () => {
 
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-300">
                   <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Total Sessions</p>
-                  <p className="text-3xl font-extrabold text-[#cb0c9f] mt-1">{sessions.length}</p>
-                  <div className="mt-2 w-8 h-1 rounded-full bg-[#cb0c9f]" />
+                  <p className="text-3xl font-extrabold text-[#E5A93C] mt-1">{sessions.length}</p>
+                  <div className="mt-2 w-8 h-1 rounded-full bg-[#E5A93C]" />
                 </div>
               </div>
 
@@ -508,7 +508,7 @@ const RepDashboard = () => {
                   <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider">Recent Sessions</p>
                   <button
                     onClick={fetchData}
-                    className="text-[11px] text-[#17c1e8] hover:text-[#0ea5c9] font-semibold flex items-center gap-1 transition-colors"
+                    className="text-[11px] text-[#E5A93C] hover:text-[#b5821c] font-semibold flex items-center gap-1 transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -573,7 +573,7 @@ const RepDashboard = () => {
                               )}
                               <button
                                 onClick={() => navigate(`/rep/session/${s.id}`)}
-                                className="text-[11px] text-[#17c1e8] font-semibold hover:text-[#0ea5c9] transition-colors"
+                                className="text-[11px] text-[#E5A93C] hover:text-[#b5821c] transition-colors"
                               >
                                 View
                               </button>
@@ -603,7 +603,7 @@ const RepDashboard = () => {
               ) : courses.length === 0 ? (
                 <div className="bg-white rounded-2xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,.08)]">
                   <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                   <p className="text-[13px] font-semibold text-[#8392ab]">No courses assigned yet</p>
                   <p className="text-[11px] text-[#8392ab] mt-1 max-w-xs mx-auto">Your administrator needs to link courses to your class.</p>
@@ -731,7 +731,7 @@ const RepDashboard = () => {
             key={item.id}
             onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors
-              ${activeTab === item.id ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             {item.icon}
             {item.label}
@@ -780,7 +780,7 @@ const RepDashboard = () => {
                         name="sessionType"
                         checked={sessionType === type}
                         onChange={() => setSessionType(type)}
-                        className="accent-[#17c1e8]"
+                        className="accent-[#E5A93C]"
                       />
                       {type === 'PHYSICAL' ? 'Physical' : 'Online'}
                     </label>
@@ -810,10 +810,10 @@ const RepDashboard = () => {
                     className="w-full py-2 bg-[#f8f9fa] hover:bg-gray-100 text-[#344767] font-semibold rounded-xl border border-gray-200 text-[12px] transition-all flex items-center justify-center gap-2"
                   >
                     {gpsLoading ? (
-                      <div className="w-4 h-4 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        <svg className="w-4 h-4 text-[#17c1e8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-[#E5A93C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -882,7 +882,7 @@ const RepDashboard = () => {
 
             {analyticsLoading ? (
               <div className="flex-1 flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-8 h-8 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
                 <span className="text-[12px] text-[#8392ab]">Loading attendance metrics…</span>
               </div>
             ) : analyticsData ? (

@@ -256,7 +256,7 @@ const LecturerPortal = () => {
               onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all
                 ${activeTab === item.id
-                  ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] text-white shadow-md'
                   : 'text-[#67748e] hover:bg-[#f8f9fa] hover:text-[#344767]'
                 }`}
             >
@@ -269,7 +269,7 @@ const LecturerPortal = () => {
         {/* User footer */}
         <div className="px-4 py-4 border-t border-gray-100">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#cb0c9f] to-[#e91e8c] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#E5A93C] to-[#b5821c] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
               {(displayUsername)[0].toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
@@ -319,7 +319,7 @@ const LecturerPortal = () => {
                   <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  <span className="font-semibold text-[#17c1e8] truncate max-w-[160px]">
+                  <span className="font-semibold text-[#E5A93C] truncate max-w-[160px]">
                     {selectedSession?.courseName || selectedReport?.course?.name}
                   </span>
                 </>
@@ -368,8 +368,8 @@ const LecturerPortal = () => {
                         onClick={() => setSelectedClass(null)}
                         className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all
                           ${!selectedClass
-                            ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white border-transparent shadow-md'
-                            : 'bg-[#f8f9fa] border-gray-200 text-[#67748e] hover:border-[#17c1e8]'
+                            ? 'bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] text-white border-transparent shadow-md'
+                            : 'bg-[#f8f9fa] border-gray-200 text-[#67748e] hover:border-[#E5A93C]'
                           }`}
                       >
                         All
@@ -380,8 +380,8 @@ const LecturerPortal = () => {
                           onClick={() => setSelectedClass(ac)}
                           className={`px-3 py-1.5 rounded-xl text-[11px] font-semibold border transition-all text-left leading-tight
                             ${selectedClass?.assignmentId === ac.assignmentId
-                              ? 'bg-gradient-to-r from-[#14172B] to-[#3A416F] text-white border-transparent shadow-md'
-                              : 'bg-[#f8f9fa] border-gray-200 text-[#67748e] hover:border-[#17c1e8]'
+                              ? 'bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] text-white border-transparent shadow-md'
+                              : 'bg-[#f8f9fa] border-gray-200 text-[#67748e] hover:border-[#E5A93C]'
                             }`}
                         >
                           <span className="font-bold block">{ac.courseCode}</span>
@@ -436,8 +436,8 @@ const LecturerPortal = () => {
                           onClick={() => handleSelectSession(s)}
                           className={`p-3.5 rounded-xl cursor-pointer border transition-all hover-lift
                             ${selectedSession?.id === s.id
-                              ? 'bg-[#f0fafb] border-[#17c1e8] shadow-sm'
-                              : 'bg-[#f8f9fa] border-gray-100 hover:border-[#17c1e8]'
+                              ? 'bg-[#fffdf5] border-[#E5A93C] shadow-sm'
+                              : 'bg-[#f8f9fa] border-gray-100 hover:border-[#E5A93C]'
                             }`}
                           style={{ animationDelay: `${idx * 60}ms` }}
                         >
@@ -446,7 +446,7 @@ const LecturerPortal = () => {
                             <span className="badge badge-dark font-mono text-[10px]">{s.courseCode}</span>
                           </div>
                           {s.classDisplayName && (
-                            <p className="text-[11px] text-[#17c1e8] font-semibold mt-1">{s.classDisplayName}</p>
+                            <p className="text-[11px] text-[#b5821c] font-semibold mt-1">{s.classDisplayName}</p>
                           )}
                           <p className="text-[11px] text-[#8392ab] mt-2 flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -465,13 +465,13 @@ const LecturerPortal = () => {
                           onClick={() => handleSelectReport(r)}
                           className={`p-3.5 rounded-xl cursor-pointer border transition-all hover-lift
                             ${selectedReport?.id === r.id
-                              ? 'bg-[#f0fafb] border-[#17c1e8] shadow-sm'
-                              : 'bg-[#f8f9fa] border-gray-100 hover:border-[#17c1e8]'
+                              ? 'bg-[#fffdf5] border-[#E5A93C] shadow-sm'
+                              : 'bg-[#f8f9fa] border-gray-100 hover:border-[#E5A93C]'
                             }`}
                           style={{ animationDelay: `${idx * 60}ms` }}
                         >
                           <p className="text-[13px] font-bold text-[#344767]">{r.course.name}</p>
-                          <p className="text-[11px] text-[#17c1e8] font-semibold mt-1">{r.class.displayName}</p>
+                          <p className="text-[11px] text-[#b5821c] font-semibold mt-1">{r.class.displayName}</p>
                           <p className="text-[10px] text-[#8392ab] mt-1.5">
                             Generated by: {r.generatedBy?.username}
                           </p>
@@ -517,7 +517,7 @@ const LecturerPortal = () => {
                         <>
                           {loadingDetails ? (
                             <div className="flex flex-col items-center py-14 gap-3">
-                              <div className="w-8 h-8 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
+                              <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
                               <span className="text-[12px] text-[#8392ab]">Loading attendance records…</span>
                             </div>
                           ) : (
@@ -675,7 +675,7 @@ const LecturerPortal = () => {
             key={item.id}
             onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors
-              ${activeTab === item.id ? 'text-[#17c1e8]' : 'text-[#8392ab]'}`}
+              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
           >
             {item.icon}
             {item.label}

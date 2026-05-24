@@ -210,7 +210,7 @@ const HelpGuidePage = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-2xl p-8 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#0c2340] to-[#1a3c6d] rounded-2xl p-8 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path d="M0,0 L100,0 L100,100 Z" fill="white" />
@@ -219,22 +219,22 @@ const HelpGuidePage = () => {
         <div className="relative">
           <div className="flex items-center space-x-4 mb-4">
             <div className="p-4 bg-white/10 rounded-xl border border-white/20">
-              <svg className="w-10 h-10 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-10 h-10 text-[#E5A93C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-[#344767]">Help & Setup Guide</h1>
-              <p className="text-indigo-200 mt-1">Complete guide to setting up and managing your attendance system</p>
+              <h1 className="text-3xl font-bold text-white">Help & Setup Guide</h1>
+              <p className="text-[#E5A93C] font-semibold mt-1">Complete guide to setting up and managing your attendance system</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Start */}
-      <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6">
-        <h2 className="text-xl font-bold text-[#344767] mb-4 flex items-center space-x-2">
-          <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h2 className="text-xl font-bold text-[#0c2340] mb-4 flex items-center space-x-2">
+          <svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
           <span>Quick Start Checklist</span>
@@ -250,13 +250,13 @@ const HelpGuidePage = () => {
             { step: '7', text: 'Link Courses to Classes', done: false },
             { step: '8', text: 'Configure System Settings', done: false }
           ].map((item, index) => (
-            <div key={index} className="flex items-center space-x-3 p-3 bg-[#0f172a] rounded-xl border border-slate-800">
+            <div key={index} className="flex items-center space-x-3 p-3 bg-[#f8f9fa] rounded-xl border border-gray-250">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                item.done ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-200 text-[#8392ab]'
+                item.done ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700'
               }`}>
                 {item.done ? '✓' : item.step}
               </div>
-              <span className={item.done ? 'text-[#8392ab] line-through' : 'text-[#344767]'}>{item.text}</span>
+              <span className={item.done ? 'text-gray-400 line-through' : 'text-gray-700 font-medium'}>{item.text}</span>
             </div>
           ))}
         </div>
@@ -268,16 +268,16 @@ const HelpGuidePage = () => {
           <button
             key={guide.id}
             onClick={() => setSelectedGuide(guide)}
-            className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 text-left hover:border-indigo-500/30 transition-all hover:scale-[1.02] group"
+            className="bg-white border border-gray-200 rounded-2xl p-6 text-left hover:border-[#E5A93C]/50 hover:shadow-lg transition-all hover:scale-[1.02] group"
           >
             <div className={`w-14 h-14 rounded-xl border flex items-center justify-center mb-4 ${colorClasses[guide.color]}`}>
               <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={guide.icon} />
               </svg>
             </div>
-            <h3 className="text-lg font-bold text-[#344767] mb-2 group-hover:text-indigo-400 transition-colors">{guide.title}</h3>
+            <h3 className="text-lg font-bold text-[#0c2340] mb-2 group-hover:text-[#E5A93C] transition-colors">{guide.title}</h3>
             <p className="text-[#8392ab] text-sm">{guide.description}</p>
-            <div className="mt-4 flex items-center text-indigo-400 text-sm font-semibold">
+            <div className="mt-4 flex items-center text-[#E5A93C] text-sm font-semibold">
               <span>View Guide</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -289,10 +289,10 @@ const HelpGuidePage = () => {
 
       {/* Selected Guide Modal */}
       {selectedGuide && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setSelectedGuide(null)}>
-          <div className="bg-[#1e293b] border border-gray-300 rounded-2xl max-w-3xl w-full shadow-2xl animate-scale-up overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setSelectedGuide(null)}>
+          <div className="bg-white border border-gray-200 rounded-2xl max-w-3xl w-full shadow-2xl animate-scale-up overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className={`p-6 border-b border-slate-800 ${colorClasses[selectedGuide.color]} bg-opacity-5`}>
+            <div className={`p-6 border-b border-gray-100 ${colorClasses[selectedGuide.color]} bg-opacity-5`}>
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`p-3 rounded-xl border ${colorClasses[selectedGuide.color]}`}>
@@ -301,13 +301,13 @@ const HelpGuidePage = () => {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-[#344767]">{selectedGuide.title}</h2>
+                    <h2 className="text-2xl font-bold text-[#0c2340]">{selectedGuide.title}</h2>
                     <p className="text-[#8392ab] text-sm mt-1">{selectedGuide.description}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedGuide(null)}
-                  className="text-[#8392ab] hover:text-[#344767] transition-colors p-2"
+                  className="text-[#8392ab] hover:text-[#0c2340] transition-colors p-2"
                 >
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -320,19 +320,19 @@ const HelpGuidePage = () => {
             <div className="p-6 max-h-[60vh] overflow-y-auto space-y-6">
               {/* Steps */}
               <div>
-                <h3 className="text-lg font-bold text-[#344767] mb-4 flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <h3 className="text-lg font-bold text-[#0c2340] mb-4 flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                   <span>Step-by-Step Instructions</span>
                 </h3>
                 <div className="space-y-3">
                   {selectedGuide.steps.map((step, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-[#0f172a] rounded-xl border border-slate-800">
-                      <div className="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-[#f8f9fa] rounded-xl border border-gray-200">
+                      <div className="w-6 h-6 rounded-full bg-[#0c2340]/10 text-[#0c2340] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                         {index + 1}
                       </div>
-                      <p className="text-[#344767] text-sm leading-relaxed">{step}</p>
+                      <p className="text-gray-700 text-sm leading-relaxed">{step}</p>
                     </div>
                   ))}
                 </div>
@@ -340,17 +340,17 @@ const HelpGuidePage = () => {
 
               {/* Tips */}
               <div>
-                <h3 className="text-lg font-bold text-[#344767] mb-4 flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <h3 className="text-lg font-bold text-[#0c2340] mb-4 flex items-center space-x-2">
+                  <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                   <span>Tips & Best Practices</span>
                 </h3>
                 <div className="space-y-2">
                   {selectedGuide.tips.map((tip, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 bg-amber-500/5 rounded-xl border border-amber-500/20">
-                      <span className="text-amber-400 text-lg shrink-0">💡</span>
-                      <p className="text-[#344767] text-sm leading-relaxed">{tip}</p>
+                    <div key={index} className="flex items-start space-x-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+                      <span className="text-amber-600 text-lg shrink-0">💡</span>
+                      <p className="text-amber-900 text-sm leading-relaxed">{tip}</p>
                     </div>
                   ))}
                 </div>
@@ -358,10 +358,10 @@ const HelpGuidePage = () => {
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-[#0f172a] border-t border-slate-800 p-4 flex justify-end">
+            <div className="bg-[#f8f9fa] border-t border-gray-100 p-4 flex justify-end">
               <button
                 onClick={() => setSelectedGuide(null)}
-                className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-[#344767] font-bold rounded-xl transition-colors"
+                className="px-6 py-2.5 bg-[#0c2340] hover:bg-[#113057] text-white font-bold rounded-xl transition-colors"
               >
                 Got it!
               </button>

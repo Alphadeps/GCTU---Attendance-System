@@ -29,7 +29,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-      <div className="bg-[#1e293b] border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scale-up">
         <h3 className="text-lg font-bold text-[#344767] mb-4">Edit Course</h3>
         {error && (
           <div className="mb-4 p-3 bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 text-xs">
@@ -45,7 +45,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
               placeholder="e.g. Introduction to Programming"
               value={courseName}
               onChange={(e) => setCourseName(e.target.value)}
-              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#0c2340] transition-colors"
             />
           </div>
           <div>
@@ -56,7 +56,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
               placeholder="e.g. CS101"
               value={courseCode}
               onChange={(e) => setCourseCode(e.target.value.toUpperCase())}
-              className="w-full bg-[#0f172a] border border-slate-800 rounded-xl px-4 py-3 text-[#344767] focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#0c2340] transition-colors"
             />
           </div>
           <div className="flex justify-end space-x-3">
@@ -64,14 +64,14 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-gray-200 hover:bg-gray-100 rounded-xl text-xs font-semibold text-[#344767] disabled:opacity-50"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#8392ab] disabled:opacity-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-xs font-bold text-[#344767] disabled:opacity-50"
+              className="px-4 py-2.5 bg-[#0c2340] hover:bg-[#1a3c6d] rounded-xl text-xs font-bold text-white disabled:opacity-50 transition-colors"
             >
               {loading ? 'Saving...' : 'Save Changes'}
             </button>

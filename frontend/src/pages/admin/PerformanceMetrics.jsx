@@ -57,7 +57,7 @@ const PerformanceMetrics = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E5A93C]"></div>
       </div>
     );
   }
@@ -103,7 +103,7 @@ const PerformanceMetrics = () => {
           )}
           <button
             onClick={fetchMetrics}
-            className="px-4 py-2 bg-blue-600 text-[#344767] rounded-lg hover:bg-blue-700 text-sm font-semibold"
+            className="px-4 py-2 bg-[#0c2340] text-white rounded-lg hover:bg-[#1a3c6d] text-sm font-semibold transition-colors"
           >
             Refresh Now
           </button>

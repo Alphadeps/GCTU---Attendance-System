@@ -513,7 +513,7 @@ const SessionManager = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center items-center gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-[#17c1e8] border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-[#E5A93C] border-t-transparent animate-spin" />
         <p className="text-sm text-[#8392ab] font-semibold">Loading session…</p>
       </div>
     );
@@ -551,7 +551,7 @@ const SessionManager = () => {
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={() => navigate('/rep/dashboard')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#8392ab] hover:text-[#17c1e8] transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#8392ab] hover:text-[#E5A93C] transition-colors shrink-0"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -617,7 +617,7 @@ const SessionManager = () => {
             { label: 'Present', value: presentCount, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
             { label: 'Late',    value: lateCount,    color: 'text-amber-600',   bg: 'bg-amber-50',   border: 'border-amber-100' },
             { label: 'Absent',  value: absentCount,  color: 'text-rose-600',    bg: 'bg-rose-50',    border: 'border-rose-100' },
-            { label: 'Rate',    value: `${attendanceRate}%`, color: 'text-[#17c1e8]', bg: 'bg-sky-50', border: 'border-sky-100' },
+            { label: 'Rate',    value: `${attendanceRate}%`, color: 'text-[#0c2340]', bg: 'bg-slate-50', border: 'border-slate-200' },
           ].map((s, i) => (
             <div
               key={i}
@@ -649,19 +649,19 @@ const SessionManager = () => {
                     <img src={qrImage} alt="Live QR Code" className="w-52 h-52 object-contain" />
                   ) : (
                     <div className="w-52 h-52 flex items-center justify-center">
-                      <div className="w-8 h-8 border-2 border-[#17c1e8] border-t-transparent rounded-full animate-spin" />
+                      <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
 
                 {/* Countdown ring */}
                 <div className="flex items-center justify-center gap-2 bg-[#f0f2f5] rounded-xl py-2 px-4 w-fit mx-auto mb-3">
-                  <svg className="w-4 h-4 text-[#17c1e8] -rotate-90 animate-spin-slow" viewBox="0 0 36 36" fill="none">
+                  <svg className="w-4 h-4 text-[#E5A93C] -rotate-90 animate-spin-slow" viewBox="0 0 36 36" fill="none">
                     <circle cx="18" cy="18" r="15" stroke="#e9ecef" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15" stroke="#17c1e8" strokeWidth="3" strokeDasharray="94" strokeDashoffset={94 - (94 * countdown / 25)} strokeLinecap="round" />
+                    <circle cx="18" cy="18" r="15" stroke="#E5A93C" strokeWidth="3" strokeDasharray="94" strokeDashoffset={94 - (94 * countdown / 25)} strokeLinecap="round" />
                   </svg>
                   <span className="text-xs font-bold text-[#344767]">
-                    Rotates in <span className="font-mono text-[#17c1e8]">{countdown}s</span>
+                    Rotates in <span className="font-mono text-[#E5A93C]">{countdown}s</span>
                   </span>
                 </div>
 
@@ -693,12 +693,12 @@ const SessionManager = () => {
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1.5">
                   <span className="text-[10px] text-[#8392ab] font-bold uppercase tracking-wider">Attendance Rate</span>
-                  <span className="text-xs font-black text-[#17c1e8]">{attendanceRate}%</span>
+                  <span className="text-xs font-black text-[#E5A93C]">{attendanceRate}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-[#f0f2f5] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-700"
-                    style={{ width: `${attendanceRate}%`, background: 'linear-gradient(90deg,#11cdef,#1171ef)' }}
+                    style={{ width: `${attendanceRate}%`, background: 'linear-gradient(90deg,#0c2340,#1a3c6d)' }}
                   />
                 </div>
               </div>
