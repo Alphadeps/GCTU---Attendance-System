@@ -99,10 +99,10 @@ router.get('/database', protect, authorizeRoles('SUPERADMIN'), async (req, res) 
       classCount,
       sessionCount
     ] = await Promise.all([
-      prisma.user.count(),
-      prisma.student.count(),
-      prisma.class.count(),
-      prisma.attendanceSession.count()
+      prisma.user.count().catch(() => -1),
+      prisma.student.count().catch(() => -1),
+      prisma.class.count().catch(() => -1),
+      prisma.attendanceSession.count().catch(() => -1)
     ]);
     
     res.json({
@@ -131,10 +131,12 @@ router.get('/database', protect, authorizeRoles('SUPERADMIN'), async (req, res) 
 router.get('/cache', protect, authorizeRoles('SUPERADMIN'), async (req, res) => {
   try {
     const stats = await cache.stats();
+    // Always return 200 - cache being disabled/unavailable is not a server error
     res.json(stats);
   } catch (error) {
-    res.status(500).json({
+    res.json({
       enabled: false,
+      connected: false,
       error: error.message
     });
   }
