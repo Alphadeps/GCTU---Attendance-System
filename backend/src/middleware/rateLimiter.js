@@ -95,7 +95,7 @@ function blockIP(ip, durationMs = 15 * 60 * 1000) {
 }
 
 /**
- * Track suspicious activity
+ * Track suspicious activity (more lenient)
  */
 function trackSuspiciousActivity(ip) {
   const current = suspiciousIPs.get(ip) || { count: 0, firstSeen: Date.now() };
@@ -103,23 +103,29 @@ function trackSuspiciousActivity(ip) {
   current.lastSeen = Date.now();
   suspiciousIPs.set(ip, current);
   
-  // Block IP if too many rate limit violations (5 violations in 10 minutes)
-  if (current.count >= 5 && (current.lastSeen - current.firstSeen) < 10 * 60 * 1000) {
-    blockIP(ip, 30 * 60 * 1000); // Block for 30 minutes
+  // Block IP only after many violations (10 violations in 15 minutes)
+  // This is more lenient to avoid blocking legitimate users
+  if (current.count >= 10 && (current.lastSeen - current.firstSeen) < 15 * 60 * 1000) {
+    blockIP(ip, 15 * 60 * 1000); // Block for 15 minutes (reduced from 30)
     suspiciousIPs.delete(ip);
   }
 }
 
 /**
- * Middleware to check if IP is blocked
+ * Middleware to check if IP is blocked (more informative)
  */
 const checkIPBlock = (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
   
   if (isIPBlocked(ip)) {
-    return res.status(403).json({
-      error: 'Access denied. Your IP has been temporarily blocked due to suspicious activity.',
-      retryAfter: Math.ceil((blockedIPs.get(ip).expiresAt - Date.now()) / 1000)
+    const blockInfo = blockedIPs.get(ip);
+    const remainingSeconds = Math.ceil((blockInfo.expiresAt - Date.now()) / 1000);
+    const remainingMinutes = Math.ceil(remainingSeconds / 60);
+    
+    return res.status(429).json({ // Changed from 403 to 429 (Too Many Requests)
+      error: `Too many failed attempts. Please wait ${remainingMinutes} minute(s) before trying again.`,
+      retryAfter: remainingSeconds,
+      code: 'IP_TEMPORARILY_BLOCKED'
     });
   }
   
@@ -131,15 +137,14 @@ const checkIPBlock = (req, res, next) => {
 // ==========================================
 
 /**
- * Exponential backoff for failed login attempts
- * - 1st violation: 1 minute block
- * - 2nd violation: 5 minutes block
- * - 3rd violation: 15 minutes block
- * - 4th+ violation: 30 minutes block + IP flagged as suspicious
+ * More flexible login rate limiter
+ * - Allows more attempts for legitimate users
+ * - Only tracks failed attempts
+ * - Less aggressive blocking
  */
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minute window
-  max: 5, // 5 attempts per window
+  max: 20, // 20 attempts per window (increased from 5)
   skipSuccessfulRequests: true, // Don't count successful logins
   standardHeaders: true,
   legacyHeaders: false,
@@ -147,15 +152,15 @@ const loginLimiter = rateLimit({
   
   handler: (req, res) => {
     const ip = req.ip || req.connection.remoteAddress;
-    trackSuspiciousActivity(ip);
-    
-    // Exponential backoff calculation
-    const violations = suspiciousIPs.get(ip)?.count || 1;
-    const backoffMinutes = Math.min(Math.pow(2, violations - 1), 30); // 1, 2, 4, 8, 16, 30 max
+    // Only track as suspicious after many violations
+    const current = suspiciousIPs.get(ip) || { count: 0 };
+    if (current.count >= 3) {
+      trackSuspiciousActivity(ip);
+    }
     
     res.status(429).json({
-      error: `Too many login attempts. Please try again in ${backoffMinutes} minute(s).`,
-      retryAfter: backoffMinutes * 60,
+      error: 'Too many login attempts. Please try again in a few minutes.',
+      retryAfter: 300, // 5 minutes
       attemptsRemaining: 0
     });
   },
@@ -167,23 +172,20 @@ const loginLimiter = rateLimit({
 
 /**
  * Student authentication (first-time login)
- * Stricter than regular login due to potential for abuse
+ * More flexible for legitimate student access
  */
 const studentAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // 10 attempts per window
+  max: 25, // 25 attempts per window (increased from 10)
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:student-auth:' }),
   
   handler: (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    trackSuspiciousActivity(ip);
-    
     res.status(429).json({
-      error: 'Too many authentication attempts. Please try again in 15 minutes.',
-      retryAfter: 900
+      error: 'Too many authentication attempts. Please try again in a few minutes.',
+      retryAfter: 300 // 5 minutes
     });
   }
 });
@@ -212,11 +214,11 @@ const checkInLimiter = rateLimit({
 
 /**
  * Unauthenticated API limiter (public endpoints)
- * Stricter limits for non-authenticated users
+ * More generous limits for legitimate browsing
  */
 const unauthenticatedLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per 15 minutes for unauthenticated users
+  max: 300, // 300 requests per 15 minutes (increased from 100)
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:unauth:' }),
@@ -227,12 +229,10 @@ const unauthenticatedLimiter = rateLimit({
   },
   
   handler: (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    trackSuspiciousActivity(ip);
-    
+    // Don't track as suspicious immediately for unauthenticated requests
     res.status(429).json({
-      error: 'Rate limit exceeded. Please authenticate or wait before making more requests.',
-      retryAfter: 900
+      error: 'Rate limit exceeded. Please wait a moment before making more requests.',
+      retryAfter: 300 // 5 minutes
     });
   }
 });
