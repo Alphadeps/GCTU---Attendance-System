@@ -129,11 +129,30 @@ const bodyguard = async (req, res, next) => {
     let decodedQr = null;
 
     if (isQrCheckIn) {
-      try {
-        decodedQr = jwt.verify(qrCode, JWT_SECRET);
-        targetSessionId = decodedQr.sessionId;
-      } catch (err) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid or expired QR code token. Please scan the current live QR code.', null);
+      // Check if it's a 6-digit manual code
+      if (/^\d{6}$/.test(qrCode)) {
+        // Find session with this manual code in active sessions
+        const { getActiveSessionsFromCache } = require('../lib/securityCache');
+        // Wait, I need to add getActiveSessionsFromCache to securityCache.js or use a loop
+        // Let's assume I can iterate or I'll add the helper.
+        // Actually, let's just use prisma if not in cache or if we want to be sure.
+        const manualSession = await prisma.attendanceSession.findFirst({
+          where: { manualCode: qrCode, status: 'OPEN' }
+        });
+        
+        if (manualSession) {
+          targetSessionId = manualSession.id;
+        } else {
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid manual code. Please check with your representative.', null);
+        }
+      } else {
+        // Handle as JWT QR Code
+        try {
+          decodedQr = jwt.verify(qrCode, JWT_SECRET);
+          targetSessionId = decodedQr.sessionId;
+        } catch (err) {
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid or expired QR code token. Please scan the current live QR code.', null);
+        }
       }
     }
 
@@ -151,14 +170,17 @@ const bodyguard = async (req, res, next) => {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'This attendance session has been closed.', session);
     }
 
-    // Validate QR code matches active session QR
+    // Validate QR code matches active session QR or manual code
     if (isQrCheckIn) {
-      if (session.qrCode !== qrCode) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Outdated QR code. Please scan the live QR code.', session);
+      const isManualMatch = /^\d{6}$/.test(qrCode) && session.manualCode === qrCode;
+      const isQrMatch = session.qrCode === qrCode;
+
+      if (!isManualMatch && !isQrMatch) {
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Outdated or invalid code. Please use the current live code.', session);
       }
 
-      // Check expiry timestamp
-      if (new Date() > new Date(session.qrCodeExpiry)) {
+      // Check expiry timestamp for QR code only (manual codes are usually valid as long as session is open)
+      if (isQrMatch && new Date() > new Date(session.qrCodeExpiry)) {
         return handleCheckInFailure(indexNumber, ipAddress, res, 'QR code has expired. Please scan the live QR code.', session);
       }
     } else {

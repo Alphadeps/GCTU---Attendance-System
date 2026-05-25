@@ -27,6 +27,7 @@ function cacheSession(session) {
     longitude: session.longitude,
     qrCode: session.qrCode,
     qrCodeExpiry: session.qrCodeExpiry,
+    manualCode: session.manualCode,
     networkSSID: session.networkSSID,
     courseCode: session.course?.code,
     courseName: session.course?.name
