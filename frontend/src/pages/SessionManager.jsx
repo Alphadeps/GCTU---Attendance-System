@@ -45,7 +45,7 @@ const SessionManager = () => {
       setSession(response.data);
       setAttendances(response.data.attendances || []);
       
-      if (response.data.qrCodeImage && !qrImage) {
+      if (response.data.qrCodeImage) {
         setQrImage(response.data.qrCodeImage);
       }
     } catch (err) {
@@ -649,6 +649,22 @@ const SessionManager = () => {
                     </div>
                   )}
                 </div>
+
+                {/* Manual Fallback Code */}
+                {session.manualCode && (
+                  <div className="mb-4 px-4">
+                    <div className="bg-slate-900 rounded-xl p-3 border border-slate-800 shadow-inner">
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Manual Entry Code</p>
+                      <div className="flex items-center justify-center gap-2">
+                        {session.manualCode.split('').map((digit, i) => (
+                          <span key={i} className="w-8 h-10 flex items-center justify-center bg-slate-800 text-white rounded-lg text-lg font-black font-mono border border-slate-700">
+                            {digit}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Countdown ring */}
                 <div className="flex items-center justify-center gap-2 bg-[#f0f2f5] rounded-xl py-2 px-4 w-fit mx-auto mb-3">

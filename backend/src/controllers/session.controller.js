@@ -91,12 +91,16 @@ const createSession = async (req, res) => {
       { expiresIn: `${qrExpirySeconds}s` }
     );
 
-    // Update session with QR code
+    // Generate a short 6-digit manual code for fallback
+    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Update session with QR code and manual code
     const updatedSession = await prisma.attendanceSession.update({
       where: { id: session.id },
       data: {
         qrCode: qrCodeToken,
-        qrCodeExpiry: qrExpiry
+        qrCodeExpiry: qrExpiry,
+        manualCode
       },
       include: { course: true }
     });
@@ -361,18 +365,23 @@ const refreshQRCode = async (req, res) => {
       { expiresIn: `${qrExpirySeconds}s` }
     );
 
+    // Generate a short 6-digit manual code for fallback
+    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
+
     const updated = await prisma.attendanceSession.update({
       where: { id },
       data: {
         qrCode: qrCodeToken,
-        qrCodeExpiry: qrExpiry
+        qrCodeExpiry: qrExpiry,
+        manualCode
       }
     });
 
     // Update refreshed QR parameters in security cache
     updateCachedSession(id, {
       qrCode: qrCodeToken,
-      qrCodeExpiry: qrExpiry
+      qrCodeExpiry: qrExpiry,
+      manualCode
     });
 
     // Generate base64 QR code image

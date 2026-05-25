@@ -16,6 +16,8 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
   const [successDetails, setSuccessDetails] = useState({ status: '', time: '', courseName: '' });
   const [submitErrorMsg, setSubmitErrorMsg] = useState('');
   const [submittingStatus, setSubmittingStatus] = useState('');
+  const [gpsVerified, setGpsVerified] = useState(false);
+  const [gpsCoords, setGpsCoords] = useState({ lat: null, lng: null });
 
   // Generate unique device fingerprint
   const getDeviceFingerprint = () => {
