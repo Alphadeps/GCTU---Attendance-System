@@ -109,6 +109,15 @@ api.interceptors.response.use(
         if (res.status === 200 && res.data.token) {
           const newToken = res.data.token;
           localStorage.setItem('token', newToken);
+          
+          // Update role and username if provided
+          if (res.data.role) {
+            localStorage.setItem('role', res.data.role);
+          }
+          if (res.data.username) {
+            localStorage.setItem('username', res.data.username);
+          }
+          
           console.log('Token refreshed successfully');
 
           // Process queued requests

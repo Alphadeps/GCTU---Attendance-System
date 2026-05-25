@@ -278,7 +278,12 @@ const refresh = async (req, res) => {
     );
 
     console.log('Token refresh successful');
-    res.json({ token });
+    // Return token along with user data so frontend can update localStorage
+    res.json({ 
+      token,
+      role: user.role,
+      username: user.username
+    });
   } catch (err) {
     console.error('Refresh token error:', err);
     res.status(500).json({ error: 'Internal server error' });
