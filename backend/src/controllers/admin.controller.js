@@ -532,26 +532,29 @@ const addStudentsToClass = async (req, res) => {
           create: { indexNumber, name, email: studentEmail }
         });
 
-        // Link student via ClassStudent
-        const linkExists = await prisma.classStudent.findUnique({
-          where: {
-            classId_studentId: {
-              classId: id,
-              studentId: student.id
-            }
-          }
-        });
-
-        if (!linkExists) {
-          await prisma.classStudent.create({
-            data: {
+        // Link student via ClassStudent - use upsert to handle race conditions
+        try {
+          await prisma.classStudent.upsert({
+            where: {
+              classId_studentId: {
+                classId: id,
+                studentId: student.id
+              }
+            },
+            update: {}, // No update needed, just ensure it exists
+            create: {
               classId: id,
               studentId: student.id
             }
           });
           addedCount++;
-        } else {
-          skippedCount++;
+        } catch (upsertError) {
+          // If upsert fails due to race condition, count as skipped
+          if (upsertError.code === 'P2002') {
+            skippedCount++;
+          } else {
+            throw upsertError; // Re-throw other errors
+          }
         }
       } catch (e) {
         skippedCount++;
@@ -813,19 +816,26 @@ const bulkImportClassStudents = async (req, res) => {
           create: { indexNumber: std.indexNumber, name: std.name, email: std.email }
         });
 
-        const linkExists = await prisma.classStudent.findUnique({
-          where: {
-            classId_studentId: { classId: id, studentId: student.id }
-          }
-        });
-
-        if (!linkExists) {
-          await prisma.classStudent.create({
-            data: { classId: id, studentId: student.id }
+        // Use upsert to handle race conditions
+        try {
+          await prisma.classStudent.upsert({
+            where: {
+              classId_studentId: { classId: id, studentId: student.id }
+            },
+            update: {}, // No update needed
+            create: {
+              classId: id,
+              studentId: student.id
+            }
           });
           addedCount++;
-        } else {
-          skippedCount++;
+        } catch (upsertError) {
+          // Handle race condition
+          if (upsertError.code === 'P2002') {
+            skippedCount++;
+          } else {
+            throw upsertError;
+          }
         }
       } catch (e) {
         skippedCount++;

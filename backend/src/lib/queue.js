@@ -197,13 +197,25 @@ async function processBulkStudentUpload(data) {
       });
 
       if (!linkExists) {
-        await prisma.classStudent.create({
-          data: {
-            classId,
-            studentId: student.id
+        try {
+          await prisma.classStudent.create({
+            data: {
+              classId,
+              studentId: student.id
+            }
+          });
+          addedCount++;
+        } catch (createError) {
+          // Handle race condition - another process may have created the link
+          if (createError.code === 'P2002') {
+            // Unique constraint violation - link already exists, skip silently
+            skippedCount++;
+          } else {
+            // Other error - log and count
+            skippedCount++;
+            errors.push(createError.message);
           }
-        });
-        addedCount++;
+        }
       } else {
         skippedCount++;
       }
