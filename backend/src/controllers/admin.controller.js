@@ -1634,42 +1634,63 @@ const getAdminStats = async (req, res) => {
       return res.json(cached);
     }
 
-    // Cache miss - fetch from database
+    // Cache miss - fetch from database with error handling
     const [programmesCount, classesCount, studentsCount, repsCount, coursesCount, activeSessionsCount] = await Promise.all([
-      prisma.programme.count(),
-      prisma.class.count(),
-      prisma.student.count(),
-      prisma.user.count({ where: { role: 'REP' } }),
-      prisma.course.count(),
-      prisma.attendanceSession.count({ where: { status: 'OPEN' } }),
+      prisma.programme.count().catch(err => { console.error('Error counting programmes:', err); return 0; }),
+      prisma.class.count().catch(err => { console.error('Error counting classes:', err); return 0; }),
+      prisma.student.count().catch(err => { console.error('Error counting students:', err); return 0; }),
+      prisma.user.count({ where: { role: 'REP' } }).catch(err => { console.error('Error counting reps:', err); return 0; }),
+      prisma.course.count().catch(err => { console.error('Error counting courses:', err); return 0; }),
+      prisma.attendanceSession.count({ where: { status: 'OPEN' } }).catch(err => { console.error('Error counting sessions:', err); return 0; }),
     ]);
 
+    // Simplified attendance rate calculation - use raw counts instead of nested queries
     const getGroupStats = async (whereClause) => {
       try {
-        const total = await prisma.attendance.count({
-          where: whereClause
+        // Get all attendance records matching the criteria
+        const attendances = await prisma.attendance.findMany({
+          where: whereClause,
+          select: { status: true }
         });
-        if (total === 0) return 0;
-        const attended = await prisma.attendance.count({
-          where: {
-            ...whereClause,
-            status: { in: ['PRESENT', 'LATE'] }
-          }
-        });
-        return Math.round((attended / total) * 100);
+
+        if (attendances.length === 0) return 0;
+
+        const attended = attendances.filter(a => a.status === 'PRESENT' || a.status === 'LATE').length;
+        return Math.round((attended / attendances.length) * 100);
       } catch (err) {
         console.error('getGroupStats error:', err);
         return 0;
       }
     };
 
+    // Optimize: Get all classes first, then filter attendance by classIds
+    const [lvl100Classes, lvl200Classes, lvl300Classes, lvl400Classes, topUpClasses, eveningClasses] = await Promise.all([
+      prisma.class.findMany({ where: { level: '100' }, select: { id: true } }).catch(() => []),
+      prisma.class.findMany({ where: { level: '200' }, select: { id: true } }).catch(() => []),
+      prisma.class.findMany({ where: { level: '300' }, select: { id: true } }).catch(() => []),
+      prisma.class.findMany({ where: { level: '400' }, select: { id: true } }).catch(() => []),
+      prisma.class.findMany({ where: { type: 'TOP-UP' }, select: { id: true } }).catch(() => []),
+      prisma.class.findMany({ where: { session: 'EVENING' }, select: { id: true } }).catch(() => []),
+    ]);
+
+    // Get sessions for each group
+    const [lvl100Sessions, lvl200Sessions, lvl300Sessions, lvl400Sessions, topUpSessions, eveningSessions] = await Promise.all([
+      prisma.attendanceSession.findMany({ where: { classId: { in: lvl100Classes.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+      prisma.attendanceSession.findMany({ where: { classId: { in: lvl200Classes.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+      prisma.attendanceSession.findMany({ where: { classId: { in: lvl300Classes.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+      prisma.attendanceSession.findMany({ where: { classId: { in: lvl400Classes.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+      prisma.attendanceSession.findMany({ where: { classId: { in: topUpClasses.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+      prisma.attendanceSession.findMany({ where: { classId: { in: eveningClasses.map(c => c.id) } }, select: { id: true } }).catch(() => []),
+    ]);
+
+    // Calculate attendance rates
     const attendanceRates = {
-      lvl100: await getGroupStats({ session: { class: { level: '100' } } }),
-      lvl200: await getGroupStats({ session: { class: { level: '200' } } }),
-      lvl300: await getGroupStats({ session: { class: { level: '300' } } }),
-      lvl400: await getGroupStats({ session: { class: { level: '400' } } }),
-      topUp: await getGroupStats({ session: { class: { type: 'TOP-UP' } } }),
-      evening: await getGroupStats({ session: { class: { session: 'EVENING' } } }),
+      lvl100: await getGroupStats({ sessionId: { in: lvl100Sessions.map(s => s.id) } }),
+      lvl200: await getGroupStats({ sessionId: { in: lvl200Sessions.map(s => s.id) } }),
+      lvl300: await getGroupStats({ sessionId: { in: lvl300Sessions.map(s => s.id) } }),
+      lvl400: await getGroupStats({ sessionId: { in: lvl400Sessions.map(s => s.id) } }),
+      topUp: await getGroupStats({ sessionId: { in: topUpSessions.map(s => s.id) } }),
+      evening: await getGroupStats({ sessionId: { in: eveningSessions.map(s => s.id) } }),
     };
 
     const stats = {
@@ -1682,13 +1703,30 @@ const getAdminStats = async (req, res) => {
       attendanceRates,
     };
 
-    // Cache for 2 minutes (stats change frequently)
-    await cache.set(cacheKey, stats, 120);
+    // Cache for 5 minutes (increased from 2 minutes)
+    await cache.set(cacheKey, stats, 300).catch(err => console.error('Cache set error:', err));
 
     res.json(stats);
   } catch (err) {
     console.error('Get admin stats error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    // Return partial stats instead of complete failure
+    res.status(200).json({
+      programmesCount: 0,
+      classesCount: 0,
+      studentsCount: 0,
+      repsCount: 0,
+      coursesCount: 0,
+      activeSessionsCount: 0,
+      attendanceRates: {
+        lvl100: 0,
+        lvl200: 0,
+        lvl300: 0,
+        lvl400: 0,
+        topUp: 0,
+        evening: 0,
+      },
+      error: 'Some stats could not be loaded. Please refresh.'
+    });
   }
 };
 
