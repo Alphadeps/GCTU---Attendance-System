@@ -276,14 +276,15 @@ model OfficialReport {
   course        Course    @relation(fields: [courseId], references: [id])
   generatedById String
   generatedBy   User      @relation("RepGeneratedReports", fields: [generatedById], references: [id])
-  fileUrl       String    // Path to the generated .docx
-  status        String    @default("PENDING_SIGNATURE") // PENDING_SIGNATURE, SIGNED
+  fileUrl       String    // Path to the generated .docx or .html
+  status        String    @default("PENDING_SIGNATURE") // PENDING_SIGNATURE, APPROVED, SUBMITTED_TO_DEPT
   repSignature  String?   // Rep's signature (base64 or text)
   repSignedAt   DateTime?
   signedById    String?
   signedBy      User?     @relation("LecturerSignedReports", fields: [signedById], references: [id])
   lecturerSignature String? // Lecturer's signature (base64 or text)
-  signedAt      DateTime?
+  signedAt      DateTime? // When lecturer signed/approved
+  submittedToDeptAt DateTime? // When submitted to department
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

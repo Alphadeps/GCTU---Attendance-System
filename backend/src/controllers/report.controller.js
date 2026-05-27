@@ -281,9 +281,8 @@ const generateReport = async (req, res) => {
   try {
     const { courseId, repSignature } = req.body;
     
-    if (!repSignature) {
-      return res.status(400).json({ error: 'Rep signature is required' });
-    }
+    // Make signature optional for now (can be added later from frontend)
+    const signature = repSignature || 'Digital Signature - ' + req.user.username;
     
     // Check if report already exists for this course/class
     const existing = await prisma.officialReport.findFirst({
@@ -405,7 +404,7 @@ const generateReport = async (req, res) => {
       generatedDate: new Date().toLocaleDateString(),
       generatedTime: new Date().toLocaleTimeString(),
       repName: req.user.username,
-      repSignature: repSignature,
+      repSignature: signature,
       lecturerName: lecturerAssignment ? lecturerAssignment.lecturer.username : 'Not Assigned',
       students: studentsData
     };
@@ -458,7 +457,7 @@ const generateReport = async (req, res) => {
         generatedById: req.user.id,
         fileUrl,
         status: 'PENDING_SIGNATURE',
-        repSignature,
+        repSignature: signature,
         repSignedAt: new Date()
       }
     });
@@ -520,7 +519,7 @@ const getPendingReports = async (req, res) => {
   }
 };
 
-// Lecturer: Sign a report
+// Lecturer: Sign and Approve a report (automatically submits to department)
 const signReport = async (req, res) => {
   try {
     const { id } = req.params;
@@ -543,20 +542,28 @@ const signReport = async (req, res) => {
       return res.status(404).json({ error: 'Report not found' });
     }
 
-    if (existingReport.status === 'SIGNED') {
-      return res.status(400).json({ error: 'Report is already signed' });
+    if (existingReport.status !== 'PENDING_SIGNATURE') {
+      return res.status(400).json({ error: 'Report has already been processed' });
     }
 
-    // Update report with lecturer signature
+    const now = new Date();
+
+    // Update report with lecturer signature and approve it
     const report = await prisma.officialReport.update({
       where: { id },
       data: {
-        status: 'SIGNED',
+        status: 'APPROVED', // Approved by lecturer
         signedById: req.user.id,
         lecturerSignature,
-        signedAt: new Date()
+        signedAt: now,
+        submittedToDeptAt: now // Automatically submitted to department
       },
-      include: { class: true, course: true, generatedBy: { select: { username: true } } }
+      include: { 
+        class: { include: { programme: true } }, 
+        course: true, 
+        generatedBy: { select: { username: true } },
+        signedBy: { select: { username: true } }
+      }
     });
 
     // If report is HTML, regenerate it with lecturer signature
@@ -635,8 +642,8 @@ const signReport = async (req, res) => {
           repSignature: existingReport.repSignature,
           lecturerName: req.user.username,
           lecturerSignature: lecturerSignature,
-          lecturerSignedDate: new Date().toLocaleDateString(),
-          lecturerSignedTime: new Date().toLocaleTimeString(),
+          lecturerSignedDate: now.toLocaleDateString(),
+          lecturerSignedTime: now.toLocaleTimeString(),
           students: studentsData
         };
 
@@ -648,7 +655,7 @@ const signReport = async (req, res) => {
       }
     }
 
-    // Notify SuperAdmins that a new report was signed
+    // Notify SuperAdmins (Department) that report is ready
     const superAdmins = await prisma.user.findMany({
       where: { role: 'SUPERADMIN', isActive: true },
       select: { id: true }
@@ -657,32 +664,36 @@ const signReport = async (req, res) => {
     for (const admin of superAdmins) {
       await createNotificationHelper({
         userId: admin.id,
-        title: 'New Official Report Signed',
-        message: `The attendance report for ${report.course.name} (${report.course.code}) - ${report.class.displayName} has been signed by ${req.user.username} and is ready for department review.`,
+        title: '📋 New Report Submitted to Department',
+        message: `APPROVED REPORT: ${report.course.name} (${report.course.code}) - ${report.class.displayName}. Signed by ${req.user.username}. Ready for department review.`,
         type: 'SUCCESS'
       });
     }
 
-    // Also notify the rep
+    // Notify the rep that their report was approved
     await createNotificationHelper({
       userId: report.generatedById,
-      title: 'Your Report Has Been Signed',
-      message: `Your attendance report for ${report.course.name} (${report.course.code}) has been signed by ${req.user.username}.`,
+      title: '✅ Report Approved & Submitted',
+      message: `Your attendance report for ${report.course.name} (${report.course.code}) has been approved by ${req.user.username} and submitted to the department.`,
       type: 'SUCCESS'
     });
 
-    res.json({ message: 'Report signed successfully', report });
+    res.json({ 
+      message: 'Report approved and automatically submitted to department', 
+      report,
+      submittedToDepartment: true
+    });
   } catch (err) {
     console.error('Sign report error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-// SuperAdmin: Get all archived reports grouped by level & group
+// SuperAdmin: Get all approved reports (submitted to department) grouped by level & group
 const getArchivedReports = async (req, res) => {
   try {
     const reports = await prisma.officialReport.findMany({
-      where: { status: 'SIGNED' },
+      where: { status: 'APPROVED' }, // Changed from 'SIGNED' to 'APPROVED'
       include: {
         class: {
           include: {
@@ -693,7 +704,7 @@ const getArchivedReports = async (req, res) => {
         signedBy: { select: { username: true } },
         generatedBy: { select: { username: true } }
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { submittedToDeptAt: 'desc' } // Order by submission date
     });
 
     // Grouping by programme -> level -> group
@@ -709,7 +720,11 @@ const getArchivedReports = async (req, res) => {
       grouped[programmeName][level][groupKey].push(r);
     }
 
-    res.json(grouped);
+    res.json({
+      grouped,
+      totalReports: reports.length,
+      message: reports.length === 0 ? 'No reports submitted to department yet' : null
+    });
   } catch (err) {
     console.error('Get archived reports error:', err);
     res.status(500).json({ error: 'Internal server error' });
