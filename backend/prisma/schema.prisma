@@ -105,6 +105,7 @@ model AttendanceSession {
   longitude          Float?
   qrCode             String?
   qrCodeExpiry       DateTime?
+  manualCode         String?
   networkSSID        String?
   attendances        Attendance[]
   lecturerSignature  String?
