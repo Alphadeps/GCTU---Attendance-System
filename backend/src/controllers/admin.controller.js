@@ -514,26 +514,29 @@ const addStudentsToClass = async (req, res) => {
     let skippedCount = 0;
     const errors = [];
 
-    for (const item of students) {
-      try {
-        const { indexNumber, name, email } = item;
-        if (!indexNumber || !name) {
-          skippedCount++;
-          errors.push(`Missing indexNumber or name for: ${JSON.stringify(item)}`);
-          continue;
-        }
+    // Process students in batches of 50 for much better performance
+    const batchSize = 50;
+    for (let i = 0; i < students.length; i += batchSize) {
+      const batch = students.slice(i, i + batchSize);
+      
+      // Process batch in parallel
+      const results = await Promise.allSettled(
+        batch.map(async (item) => {
+          const { indexNumber, name, email } = item;
+          if (!indexNumber || !name) {
+            throw new Error(`Missing indexNumber or name for: ${JSON.stringify(item)}`);
+          }
 
-        const studentEmail = email || `${indexNumber}@student.gctu.edu.gh`;
+          const studentEmail = email || `${indexNumber}@student.gctu.edu.gh`;
 
-        // Upsert student
-        const student = await prisma.student.upsert({
-          where: { indexNumber },
-          update: { name, email: studentEmail },
-          create: { indexNumber, name, email: studentEmail }
-        });
+          // Upsert student
+          const student = await prisma.student.upsert({
+            where: { indexNumber },
+            update: { name, email: studentEmail },
+            create: { indexNumber, name, email: studentEmail }
+          });
 
-        // Link student via ClassStudent - use upsert to handle race conditions
-        try {
+          // Link student via ClassStudent - use upsert to handle race conditions
           await prisma.classStudent.upsert({
             where: {
               classId_studentId: {
@@ -547,39 +550,44 @@ const addStudentsToClass = async (req, res) => {
               studentId: student.id
             }
           });
+
+          return { success: true };
+        })
+      );
+
+      // Count results
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
           addedCount++;
-        } catch (upsertError) {
-          // If upsert fails due to race condition, count as skipped
-          if (upsertError.code === 'P2002') {
-            skippedCount++;
-          } else {
-            throw upsertError; // Re-throw other errors
-          }
+        } else {
+          skippedCount++;
+          errors.push(result.reason?.message || 'Unknown error');
         }
-      } catch (e) {
-        skippedCount++;
-        errors.push(e.message);
-      }
+      });
     }
 
     res.json({ addedCount, skippedCount, errors });
 
-    // Log student upload
-    logAudit('STUDENTS_UPLOADED', {
-      user: req.user?.username || 'system',
-      userId: req.user?.id,
-      ip: req.ip,
-      classId: id,
-      className: classRecord.displayName,
-      studentsAdded: addedCount,
-      studentsSkipped: skippedCount,
-      totalAttempted: students.length
+    // Log student upload (in background)
+    setImmediate(() => {
+      logAudit('STUDENTS_UPLOADED', {
+        user: req.user?.username || 'system',
+        userId: req.user?.id,
+        ip: req.ip,
+        classId: id,
+        className: classRecord.displayName,
+        studentsAdded: addedCount,
+        studentsSkipped: skippedCount,
+        totalAttempted: students.length
+      });
     });
 
-    // Invalidate cache for this class
-    await cache.del(cacheKeys.classStudents(id));
-    await cache.del(cacheKeys.class(id));
-    await cache.del(cacheKeys.classes());
+    // Invalidate cache for this class (in background)
+    setImmediate(async () => {
+      await cache.del(cacheKeys.classStudents(id));
+      await cache.del(cacheKeys.class(id));
+      await cache.del(cacheKeys.classes());
+    });
   } catch (err) {
     console.error('Add students to class error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -882,6 +890,11 @@ const addCourseToClass = async (req, res) => {
       data: { classId: id, courseId }
     });
 
+    // Invalidate caches so the UI shows the new course immediately
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.classStudents(id));
+
     res.status(201).json(newLink);
   } catch (err) {
     console.error('Add course to class error:', err);
@@ -896,6 +909,11 @@ const removeCourseFromClass = async (req, res) => {
     await prisma.classCourse.deleteMany({
       where: { classId: id, courseId }
     });
+
+    // Invalidate caches so the UI updates immediately
+    await cache.del(cacheKeys.class(id));
+    await cache.del(cacheKeys.classes());
+    await cache.del(cacheKeys.classStudents(id));
 
     res.json({ message: 'Course unlinked from class successfully' });
   } catch (err) {
