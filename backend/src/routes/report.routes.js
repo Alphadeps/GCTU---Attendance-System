@@ -33,6 +33,8 @@ const upload = multer({
 // Admin: Template Management
 router.post('/template', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), uploadLimiter, upload.single('template'), reportController.uploadTemplate);
 router.get('/template', protect, reportController.getActiveTemplate);
+router.get('/templates', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), reportController.getAllTemplates);
+router.delete('/template/:id', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), reportController.deleteTemplate);
 
 // Rep: Generate Report
 router.post('/generate', protect, authorizeRoles('REP'), reportLimiter, reportController.generateReport);
