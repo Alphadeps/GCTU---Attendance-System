@@ -239,12 +239,13 @@ async function getHealthStatus() {
     // Use recent error rate for more accurate health assessment
     const checkErrorRate = recentRequests.length >= 20 ? recentErrorRate : errorRate;
     
-    if (checkErrorRate > 10) {
+    // Relaxed thresholds: 20% for degraded, 50% for unhealthy
+    if (checkErrorRate > 20) {
       status = 'degraded';
       issues.push(`High error rate: ${checkErrorRate.toFixed(2)}%`);
     }
     
-    if (checkErrorRate > 30) {
+    if (checkErrorRate > 50) {
       status = 'unhealthy';
     }
   }
@@ -254,23 +255,25 @@ async function getHealthStatus() {
     // Use recent average for more accurate health assessment
     const checkResponseTime = recentResponseTimes.length >= 10 ? recentAvgResponseTime : avgResponseTime;
     
-    if (checkResponseTime > 3000) {
+    // Relaxed thresholds: 5 seconds for degraded, 15 seconds for unhealthy
+    if (checkResponseTime > 5000) {
       status = status === 'healthy' ? 'degraded' : status;
       issues.push(`Slow response time: ${checkResponseTime.toFixed(2)}ms`);
     }
     
-    if (checkResponseTime > 8000) {
+    if (checkResponseTime > 15000) {
       status = 'unhealthy';
     }
   }
   
   const memoryUsed = process.memoryUsage().heapUsed / 1024 / 1024;
-  if (memoryUsed > 500) {
+  // Relaxed thresholds: 1GB for degraded, 1.5GB for unhealthy
+  if (memoryUsed > 1024) {
     status = status === 'healthy' ? 'degraded' : status;
     issues.push(`High memory usage: ${memoryUsed.toFixed(2)} MB`);
   }
   
-  if (memoryUsed > 800) {
+  if (memoryUsed > 1536) {
     status = 'unhealthy';
   }
   

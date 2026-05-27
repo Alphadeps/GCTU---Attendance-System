@@ -16,7 +16,8 @@ const router = express.Router();
 router.get('/health', async (req, res) => {
   try {
     const health = await getHealthStatus();
-    const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+    // Return 200 for healthy and degraded, 503 only for truly unhealthy
+    const statusCode = health.status === 'unhealthy' ? 503 : 200;
     res.status(statusCode).json(health);
   } catch (error) {
     res.status(503).json({
