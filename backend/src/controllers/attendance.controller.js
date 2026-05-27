@@ -179,22 +179,25 @@ const repSelfCheckIn = async (req, res) => {
       return res.status(400).json({ error: 'Session ID is required' });
     }
 
-    // Get rep's assigned class
-    const repClass = await prisma.class.findFirst({
-      where: { repId: req.user.id }
-    });
+    // Parallel queries for better performance
+    const [repClass, session, repUser] = await Promise.all([
+      prisma.class.findFirst({
+        where: { repId: req.user.id },
+        select: { id: true }
+      }),
+      prisma.attendanceSession.findUnique({
+        where: { id: sessionId },
+        include: { course: { select: { name: true, code: true } } }
+      }),
+      prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { indexNumber: true }
+      })
+    ]);
 
     if (!repClass) {
       return res.status(403).json({ error: 'You are not assigned to any class' });
     }
-
-    // Get session and verify it belongs to rep's class
-    const session = await prisma.attendanceSession.findUnique({
-      where: { id: sessionId },
-      include: {
-        course: true
-      }
-    });
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
@@ -208,17 +211,13 @@ const repSelfCheckIn = async (req, res) => {
       return res.status(400).json({ error: 'This session is not open for attendance' });
     }
 
-    // Get rep's student record (should exist if they have index number)
-    const repUser = await prisma.user.findUnique({
-      where: { id: req.user.id }
-    });
-
     if (!repUser.indexNumber) {
       return res.status(400).json({ error: 'Your account does not have an index number. Please contact admin.' });
     }
 
     const repStudent = await prisma.student.findUnique({
-      where: { indexNumber: repUser.indexNumber }
+      where: { indexNumber: repUser.indexNumber },
+      select: { id: true, indexNumber: true }
     });
 
     if (!repStudent) {
@@ -240,7 +239,9 @@ const repSelfCheckIn = async (req, res) => {
     // Determine attendance status based on time
     const now = new Date();
     const sessionStart = new Date(session.startTime);
-    const settings = await prisma.systemSettings.findFirst();
+    
+    // Use cached system settings (default to 15 if not available)
+    const settings = await prisma.systemSettings.findFirst().catch(() => null);
     const lateWindowMinutes = settings?.lateWindowMinutes || 15;
     const lateThreshold = new Date(sessionStart.getTime() + lateWindowMinutes * 60000);
 
@@ -263,12 +264,18 @@ const repSelfCheckIn = async (req, res) => {
       }
     });
 
-    // Create notification
-    await createNotificationHelper({
-      studentIndex: repStudent.indexNumber,
-      title: 'Attendance Checked In',
-      message: `You checked in successfully for ${session.course.name} (${session.course.code}) as ${attendanceStatus}.`,
-      type: 'SUCCESS'
+    // Create notification in background (non-blocking)
+    setImmediate(async () => {
+      try {
+        await createNotificationHelper({
+          studentIndex: repStudent.indexNumber,
+          title: 'Attendance Checked In',
+          message: `You checked in successfully for ${session.course.name} (${session.course.code}) as ${attendanceStatus}.`,
+          type: 'SUCCESS'
+        });
+      } catch (err) {
+        console.error('Failed to create notification:', err);
+      }
     });
 
     res.status(201).json({

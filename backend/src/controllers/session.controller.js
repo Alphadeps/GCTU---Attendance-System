@@ -122,15 +122,29 @@ const createSession = async (req, res) => {
           type: 'SUCCESS'
         });
 
-        // Get all students to broadcast the session open
-        const students = await prisma.student.findMany();
-        for (const student of students) {
-          await createNotificationHelper({
-            studentIndex: student.indexNumber,
+        // Only notify students in the class (if classId exists)
+        if (classId) {
+          // Get students in this specific class only
+          const classStudents = await prisma.classStudent.findMany({
+            where: { classId },
+            include: { student: { select: { indexNumber: true } } },
+            take: 500 // Limit to prevent overwhelming the system
+          });
+
+          // Batch create notifications for better performance
+          const notifications = classStudents.map(cs => ({
+            studentIndex: cs.student.indexNumber,
             title: 'New Class Session Open',
             message: `${course.name} (${course.code}) has started. Click to mark attendance.`,
-            type: 'INFO'
-          });
+            type: 'INFO',
+            isRead: false
+          }));
+
+          // Create notifications in batches of 100
+          for (let i = 0; i < notifications.length; i += 100) {
+            const batch = notifications.slice(i, i + 100);
+            await prisma.notification.createMany({ data: batch });
+          }
         }
       } catch (notifyErr) {
         console.error('Failed to trigger session open notifications:', notifyErr);
@@ -199,23 +213,26 @@ const closeSession = async (req, res) => {
     if (session.classId) {
       const classStudents = await prisma.classStudent.findMany({
         where: { classId: session.classId },
-        include: { student: true }
+        select: { student: { select: { id: true, indexNumber: true, name: true } } }
       });
       eligibleStudents = classStudents.map(cs => cs.student);
     } else {
-      eligibleStudents = await prisma.student.findMany();
+      eligibleStudents = await prisma.student.findMany({
+        select: { id: true, indexNumber: true, name: true }
+      });
     }
 
-    // 3. Find students who checked in
+    // 3. Find students who checked in (use Set for O(1) lookup)
     const checkIns = await prisma.attendance.findMany({
-      where: { sessionId: id }
+      where: { sessionId: id },
+      select: { studentId: true }
     });
     const checkedInStudentIds = new Set(checkIns.map(c => c.studentId));
 
     // 4. Determine absent students
     const absentStudents = eligibleStudents.filter(student => !checkedInStudentIds.has(student.id));
 
-    // 5. Create ABSENT attendance records
+    // 5. Create ABSENT attendance records in batch
     if (absentStudents.length > 0) {
       await prisma.attendance.createMany({
         data: absentStudents.map(student => ({
@@ -225,7 +242,8 @@ const closeSession = async (req, res) => {
           ipAddress: '0.0.0.0',
           deviceInfo: 'Auto-marked Absent',
           locationData: null
-        }))
+        })),
+        skipDuplicates: true // Prevent errors if record already exists
       });
     }
 
@@ -243,17 +261,47 @@ const closeSession = async (req, res) => {
           type: 'WARNING'
         });
 
-        // Notify all LECTURER users
-        const lecturers = await prisma.user.findMany({
-          where: { role: 'LECTURER' }
-        });
-        for (const lecturer of lecturers) {
-          await createNotificationHelper({
-            userId: lecturer.id,
-            title: 'Attendance Pending Approval',
-            message: `The session for ${courseName} (${courseCode}) is ready for review and signature.`,
-            type: 'INFO'
+        // Notify lecturers assigned to this course/class (not all lecturers)
+        if (session.classId && session.courseId) {
+          const assignedLecturers = await prisma.lecturerAssignment.findMany({
+            where: {
+              classId: session.classId,
+              courseId: session.courseId
+            },
+            select: { lecturerId: true }
           });
+
+          // Batch create notifications for lecturers
+          if (assignedLecturers.length > 0) {
+            await prisma.notification.createMany({
+              data: assignedLecturers.map(la => ({
+                userId: la.lecturerId,
+                title: 'Attendance Pending Approval',
+                message: `The session for ${courseName} (${courseCode}) is ready for review and signature.`,
+                type: 'INFO',
+                isRead: false
+              }))
+            });
+          }
+        } else {
+          // Fallback: notify all lecturers if no specific assignment
+          const lecturers = await prisma.user.findMany({
+            where: { role: 'LECTURER' },
+            select: { id: true },
+            take: 50 // Limit to prevent overwhelming
+          });
+
+          if (lecturers.length > 0) {
+            await prisma.notification.createMany({
+              data: lecturers.map(lecturer => ({
+                userId: lecturer.id,
+                title: 'Attendance Pending Approval',
+                message: `The session for ${courseName} (${courseCode}) is ready for review and signature.`,
+                type: 'INFO',
+                isRead: false
+              }))
+            });
+          }
         }
       } catch (notifyErr) {
         console.error('Failed to trigger session close notifications:', notifyErr);
