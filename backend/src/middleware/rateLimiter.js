@@ -171,40 +171,58 @@ const loginLimiter = rateLimit({
 });
 
 /**
- * Student authentication (first-time login)
- * More flexible for legitimate student access
+ * Student authentication (first-time login / password set)
+ * Keyed by student index number so campus NAT does not pool all students
+ * into one rate-limit bucket.
  */
 const studentAuthLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 25, // 25 attempts per window (increased from 10)
+  max: 25, // 25 failed attempts per student per window
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:student-auth:' }),
-  
+
+  keyGenerator: (req) => {
+    const indexNumber = req.body?.indexNumber;
+    if (indexNumber) return `student:${String(indexNumber).toLowerCase()}`;
+    return req.ip || 'unknown';
+  },
+
   handler: (req, res) => {
     res.status(429).json({
       error: 'Too many authentication attempts. Please try again in a few minutes.',
-      retryAfter: 300 // 5 minutes
+      retryAfter: 300
     });
   }
 });
 
 /**
  * Check-in rate limiter (prevent QR code scanning spam)
- * Very strict to prevent automated attendance marking
+ * Keyed by student index number so campus NAT does not collapse all students
+ * onto a single IP bucket and block legitimate check-ins.
  */
 const checkInLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute window
-  max: 3, // Only 3 check-ins per minute (reasonable for legitimate use)
+  max: 10, // 10 attempts per minute per student (allows retries without blocking peers)
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:checkin:' }),
-  
+
+  keyGenerator: (req) => {
+    // Rate-limit by student index number, not IP.
+    // Thousands of students sharing campus NAT/WiFi all appear as one IP;
+    // keying by identity gives each student their own independent bucket.
+    const indexNumber = req.body?.indexNumber;
+    if (indexNumber) return `student:${String(indexNumber).toLowerCase()}`;
+    return req.ip || 'unknown';
+  },
+
   handler: (req, res) => {
-    const ip = req.ip || req.connection.remoteAddress;
-    trackSuspiciousActivity(ip);
-    
+    const indexNumber = req.body?.indexNumber;
+    if (indexNumber) {
+      trackSuspiciousActivity(`student:${String(indexNumber).toLowerCase()}`);
+    }
     res.status(429).json({
       error: 'Too many check-in attempts. Please wait before trying again.',
       retryAfter: 60
@@ -214,25 +232,21 @@ const checkInLimiter = rateLimit({
 
 /**
  * Unauthenticated API limiter (public endpoints)
- * More generous limits for legitimate browsing
+ * High ceiling to accommodate large shared-IP campus networks.
  */
 const unauthenticatedLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // 300 requests per 15 minutes (increased from 100)
+  max: 5000, // 5,000 requests per IP per window (campus NAT safe)
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:unauth:' }),
-  
-  skip: (req) => {
-    // Skip if user is authenticated (has valid JWT)
-    return !!req.user;
-  },
-  
+
+  skip: (req) => !!req.user,
+
   handler: (req, res) => {
-    // Don't track as suspicious immediately for unauthenticated requests
     res.status(429).json({
       error: 'Rate limit exceeded. Please wait a moment before making more requests.',
-      retryAfter: 300 // 5 minutes
+      retryAfter: 300
     });
   }
 });
@@ -346,15 +360,24 @@ const reportLimiter = rateLimit({
 });
 
 /**
- * General API limiter (fallback for all other endpoints)
+ * General API limiter (fallback for all endpoints)
+ * Keyed by user ID for authenticated requests so per-user limits apply
+ * rather than a shared IP bucket that collapses under campus NAT.
+ * The high IP-based ceiling (20,000 / 15 min) covers mass concurrent
+ * unauthenticated traffic (e.g., 10,000 students logging in at once).
  */
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // 500 requests per 15 minutes
+  max: 20000, // 20,000 per window — handles 10k+ students on shared IPs
   standardHeaders: true,
   legacyHeaders: false,
   store: new RedisStore({ prefix: 'rl:api:' }),
-  
+
+  keyGenerator: (req) => {
+    if (req.user?.id) return `user:${req.user.id}`;
+    return req.ip || 'unknown';
+  },
+
   message: {
     error: 'Too many requests. Please slow down.'
   }
