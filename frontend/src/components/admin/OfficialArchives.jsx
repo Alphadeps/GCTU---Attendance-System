@@ -48,23 +48,26 @@ export default function OfficialArchives() {
 
   // Count total reports in a programme
   const countProgrammeReports = (levels) => {
+    if (!levels) return 0;
     return Object.values(levels).reduce((sum, groups) => {
-      return sum + Object.values(groups).reduce((gSum, reports) => gSum + reports.length, 0);
+      if (!groups) return sum;
+      return sum + Object.values(groups).reduce((gSum, reports) => gSum + (reports || []).length, 0);
     }, 0);
   };
 
   // Count total reports in a level
   const countLevelReports = (groups) => {
-    return Object.values(groups).reduce((sum, reports) => sum + reports.length, 0);
+    if (!groups) return 0;
+    return Object.values(groups).reduce((sum, reports) => sum + (reports || []).length, 0);
   };
 
   // Filter reports based on search and filters
   const getFilteredReports = () => {
-    let filtered = { ...groupedReports };
+    let filtered = { ...(groupedReports || {}) };
 
     // Filter by programme
     if (filterProgramme) {
-      filtered = { [filterProgramme]: filtered[filterProgramme] };
+      filtered = { [filterProgramme]: filtered[filterProgramme] || {} };
     }
 
     // Filter by level
@@ -72,8 +75,8 @@ export default function OfficialArchives() {
       filtered = Object.fromEntries(
         Object.entries(filtered).map(([prog, levels]) => [
           prog,
-          { [filterLevel]: levels[filterLevel] }
-        ]).filter(([, levels]) => Object.keys(levels).length > 0)
+          { [filterLevel]: (levels || {})[filterLevel] }
+        ]).filter(([, levels]) => Object.keys(levels || {}).length > 0)
       );
     }
 
@@ -84,20 +87,20 @@ export default function OfficialArchives() {
         Object.entries(filtered).map(([prog, levels]) => [
           prog,
           Object.fromEntries(
-            Object.entries(levels).map(([level, groups]) => [
+            Object.entries(levels || {}).map(([level, groups]) => [
               level,
               Object.fromEntries(
-                Object.entries(groups).map(([group, reports]) => [
+                Object.entries(groups || {}).map(([group, reports]) => [
                   group,
-                  reports.filter(r =>
-                    r.course.name.toLowerCase().includes(query) ||
-                    r.course.code.toLowerCase().includes(query)
+                  (reports || []).filter(r =>
+                    r.course?.name?.toLowerCase().includes(query) ||
+                    r.course?.code?.toLowerCase().includes(query)
                   )
-                ]).filter(([, reports]) => reports.length > 0)
+                ]).filter(([, reports]) => (reports || []).length > 0)
               )
-            ]).filter(([, groups]) => Object.keys(groups).length > 0)
+            ]).filter(([, groups]) => Object.keys(groups || {}).length > 0)
           )
-        ]).filter(([, levels]) => Object.keys(levels).length > 0)
+        ]).filter(([, levels]) => Object.keys(levels || {}).length > 0)
       );
     }
 
