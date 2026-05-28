@@ -19,14 +19,16 @@ export default function OfficialArchives() {
   const fetchArchives = async () => {
     try {
       const res = await api.get('/reports/archived');
-      setGroupedReports(res.data);
+      const data = res.data || {};
+      setGroupedReports(data);
       // Expand first programme by default
-      const firstKey = Object.keys(res.data)[0];
+      const firstKey = Object.keys(data)[0];
       if (firstKey) {
         setExpandedProgrammes({ [firstKey]: true });
       }
     } catch (err) {
       console.error('Failed to fetch archives', err);
+      setGroupedReports({});
     } finally {
       setLoading(false);
     }
@@ -103,8 +105,8 @@ export default function OfficialArchives() {
   };
 
   const filteredReports = getFilteredReports();
-  const programmes = Object.keys(groupedReports);
-  const allLevels = [...new Set(Object.values(groupedReports).flatMap(levels => Object.keys(levels)))].sort();
+  const programmes = Object.keys(groupedReports || {});
+  const allLevels = [...new Set(Object.values(groupedReports || {}).flatMap(levels => Object.keys(levels || {})))].sort();
 
   if (loading) {
     return <div className="text-[#8392ab] text-center py-10">Loading archives...</div>;
