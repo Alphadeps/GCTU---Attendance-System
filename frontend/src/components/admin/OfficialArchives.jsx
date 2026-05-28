@@ -234,7 +234,7 @@ export default function OfficialArchives() {
               {/* Levels */}
               {expandedProgrammes[programmeKey] && (
                 <div className="p-5 space-y-4 bg-gray-50/50">
-                  {Object.entries(levels).map(([level, groups]) => {
+                  {Object.entries(levels || {}).map(([level, groups]) => {
                     const totalLevelReports = countLevelReports(groups);
                     const levelKey = `${programmeKey}-${level}`;
 
@@ -267,29 +267,29 @@ export default function OfficialArchives() {
                         {/* Groups */}
                         {expandedLevels[levelKey] && (
                           <div className="p-4 space-y-4">
-                            {Object.entries(groups).map(([groupKey, reports]) => (
+                            {Object.entries(groups || {}).map(([groupKey, reports]) => (
                               <div key={groupKey} className="pl-4 border-l-2 border-[#E5A93C]/40">
                                 <h5 className="text-sm font-bold text-[#0c2340] mb-3 flex items-center gap-2">
                                   <svg className="w-4 h-4 text-[#E5A93C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                   </svg>
                                   Group {groupKey}
-                                  <span className="text-xs text-[#8392ab] font-normal">({reports.length} report{reports.length !== 1 ? 's' : ''})</span>
+                                  <span className="text-xs text-[#8392ab] font-normal">({(reports || []).length} report{(reports || []).length !== 1 ? 's' : ''})</span>
                                 </h5>
                                 <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                                  {reports.map(report => (
+                                  {(reports || []).map(report => (
                                     <div key={report.id} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col justify-between hover:border-[#E5A93C]/50 hover:shadow transition duration-200">
                                       <div>
                                         <div className="flex justify-between items-start mb-2">
                                           <span className="text-xs font-bold px-2 py-1 bg-[#0c2340]/10 text-[#0c2340] rounded-lg">
-                                            {report.course.code}
+                                            {report.course?.code || 'N/A'}
                                           </span>
                                           <span className="text-[10px] text-[#8392ab] font-bold">
-                                            {new Date(report.signedAt).toLocaleDateString()}
+                                            {report.signedAt ? new Date(report.signedAt).toLocaleDateString() : 'N/A'}
                                           </span>
                                         </div>
-                                        <h6 className="text-[#344767] font-semibold text-sm line-clamp-2 mb-1">{report.course.name}</h6>
-                                        <p className="text-xs text-[#8392ab]">Signed by: {report.signedBy?.username}</p>
+                                        <h6 className="text-[#344767] font-semibold text-sm line-clamp-2 mb-1">{report.course?.name || 'Unknown Course'}</h6>
+                                        <p className="text-xs text-[#8392ab]">Signed by: {report.signedBy?.username || 'Unknown'}</p>
                                       </div>
 
                                       <a
