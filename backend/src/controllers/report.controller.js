@@ -726,11 +726,8 @@ const getArchivedReports = async (req, res) => {
       grouped[programmeName][level][groupKey].push(r);
     }
 
-    res.json({
-      grouped,
-      totalReports: reports.length,
-      message: reports.length === 0 ? 'No reports submitted to department yet' : null
-    });
+    // Return just the grouped object (frontend expects this format)
+    res.json(grouped);
   } catch (err) {
     console.error('Get archived reports error:', err);
     res.status(500).json({ error: 'Internal server error' });
