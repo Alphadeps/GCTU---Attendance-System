@@ -170,7 +170,7 @@ const LecturerPortal = () => {
     setApproving(true);
     try {
       await api.patch(`/reports/${selectedReport.id}/sign`, {
-        signature // The backend doesn't strictly save the signature image for reports right now, just the fact it was signed by the user. But we send it.
+        lecturerSignature: signature
       });
       toast.success('Official Report signed and archived successfully!', 'Archived!');
       setSelectedReport(null);
