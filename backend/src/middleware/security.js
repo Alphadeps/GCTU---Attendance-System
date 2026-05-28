@@ -335,20 +335,18 @@ const preventSqlInjection = (req, res, next) => {
 
 /**
  * Rate limit bypass prevention
- * Prevents users from bypassing rate limits using different headers
+ * Express's built-in `trust proxy` setting (configured in index.js) already
+ * validates the proxy chain — client-supplied X-Forwarded-For values cannot
+ * be spoofed when trust proxy is set to 1 (trusts only the immediate proxy).
+ * Stripping the header here would cause the rate limiter to see Render's
+ * load-balancer IP for every student, collapsing all buckets to one and
+ * blocking legitimate users under high concurrency.
  */
 const preventRateLimitBypass = (req, res, next) => {
-  // Remove headers that could be used to bypass rate limiting
-  delete req.headers['x-forwarded-for'];
-  delete req.headers['x-real-ip'];
-  delete req.headers['x-client-ip'];
-  
-  // Only trust proxy headers in production with proper configuration
-  if (process.env.NODE_ENV === 'production' && process.env.TRUST_PROXY === 'true') {
-    // Restore trusted proxy headers
-    // This should be configured based on your deployment environment
-  }
-  
+  // No-op: spoofing protection is handled by Express `trust proxy` config.
+  // Do NOT delete x-forwarded-for — doing so breaks per-IP rate limiting
+  // behind reverse proxies (Render, Vercel, nginx) and causes every user
+  // to share a single rate-limit bucket.
   next();
 };
 
