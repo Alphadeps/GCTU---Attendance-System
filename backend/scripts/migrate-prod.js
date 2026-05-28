@@ -19,6 +19,8 @@ const { Client } = require('pg');
 const BASELINE_MIGRATIONS = [
   '20260519140836_init',
   '20260522212135_init',
+  '20260525204500_add_manual_code',
+  '20260527000000_add_report_signatures',
 ];
 
 async function run() {
