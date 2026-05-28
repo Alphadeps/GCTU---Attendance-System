@@ -43,8 +43,9 @@ export default function OfficialArchives() {
     
     try {
       const token = localStorage.getItem('token');
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/file?token=${token}`
+        `${baseUrl}/reports/${report.id}/file?token=${token}`
       );
       
       if (response.ok) {
@@ -419,7 +420,8 @@ export default function OfficialArchives() {
                 <button
                   onClick={() => {
                     const token = localStorage.getItem('token');
-                    const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${previewReport.id}/file`;
+                    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                    const url = `${baseUrl}/reports/${previewReport.id}/file`;
                     window.open(url + `?token=${token}`, '_blank');
                   }}
                   className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition flex items-center gap-2"
@@ -432,7 +434,8 @@ export default function OfficialArchives() {
                 <button
                   onClick={() => {
                     const token = localStorage.getItem('token');
-                    const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${previewReport.id}/pdf`;
+                    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                    const url = `${baseUrl}/reports/${previewReport.id}/pdf`;
                     window.open(url + `?token=${token}`, '_blank');
                   }}
                   className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition flex items-center gap-2"
