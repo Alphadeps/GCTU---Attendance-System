@@ -760,7 +760,9 @@ const serveReportFile = async (req, res) => {
       where: { id },
       include: {
         course: true,
-        class: { include: { programme: true } }
+        class: { include: { programme: true } },
+        generatedBy: { select: { username: true } },
+        signedBy: { select: { username: true } }
       }
     });
 
@@ -769,24 +771,106 @@ const serveReportFile = async (req, res) => {
     }
 
     const filePath = path.join(__dirname, '..', '..', 'public', report.fileUrl);
+    const fileExists = fs.existsSync(filePath);
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'Report file not found on server' });
+    // If file doesn't exist (ephemeral storage issue), regenerate it
+    if (!fileExists && report.fileUrl.endsWith('.html')) {
+      console.log(`Report file not found, regenerating: ${report.fileUrl}`);
+      
+      // Regenerate report data
+      const sessions = await prisma.attendanceSession.findMany({
+        where: { 
+          courseId: report.courseId,
+          classId: report.classId,
+          status: { in: ['CLOSED', 'APPROVED'] } 
+        },
+        select: { 
+          id: true, 
+          startTime: true, 
+          endTime: true,
+          sessionType: true 
+        },
+        orderBy: { startTime: 'asc' }
+      });
+
+      const classStudents = await prisma.classStudent.findMany({
+        where: { classId: report.classId },
+        include: {
+          student: {
+            select: { id: true, name: true, indexNumber: true }
+          }
+        }
+      });
+
+      const studentSessionIds = sessions.map(s => s.id);
+      const totalSessionsCount = sessions.length;
+
+      const studentsData = await Promise.all(classStudents.map(async (cs) => {
+        const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
+          where: {
+            studentId: cs.student.id,
+            sessionId: { in: studentSessionIds },
+            status: { in: ['PRESENT', 'LATE'] }
+          }
+        }) : 0;
+
+        const rate = totalSessionsCount > 0
+          ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
+          : 100;
+
+        return {
+          name: cs.student.name,
+          indexNumber: cs.student.indexNumber,
+          attended: presentOrLateCount,
+          total: totalSessionsCount,
+          rate: rate,
+          status: rate >= 75 ? 'SAFE' : rate >= 60 ? 'WARNING' : 'AT RISK'
+        };
+      }));
+
+      const reportData = {
+        courseName: report.course.name,
+        courseCode: report.course.code,
+        className: report.class.displayName,
+        programmeName: report.class.programme.name,
+        level: report.class.level,
+        group: report.class.group,
+        session: report.class.session,
+        totalSessions: totalSessionsCount,
+        firstSessionDate: sessions.length > 0 ? new Date(sessions[0].startTime).toLocaleDateString() : 'N/A',
+        firstSessionTime: sessions.length > 0 ? new Date(sessions[0].startTime).toLocaleTimeString() : 'N/A',
+        lastSessionDate: sessions.length > 0 ? new Date(sessions[sessions.length - 1].endTime).toLocaleDateString() : 'N/A',
+        lastSessionTime: sessions.length > 0 ? new Date(sessions[sessions.length - 1].endTime).toLocaleTimeString() : 'N/A',
+        generatedDate: new Date(report.repSignedAt).toLocaleDateString(),
+        generatedTime: new Date(report.repSignedAt).toLocaleTimeString(),
+        repName: report.generatedBy.username,
+        repSignature: report.repSignature,
+        lecturerName: report.signedBy?.username || 'Not Signed',
+        lecturerSignature: report.lecturerSignature || '',
+        lecturerSignedDate: report.signedAt ? new Date(report.signedAt).toLocaleDateString() : '',
+        lecturerSignedTime: report.signedAt ? new Date(report.signedAt).toLocaleTimeString() : '',
+        students: studentsData
+      };
+
+      const htmlContent = generateDefaultReportHTML(reportData);
+      
+      // Serve directly without saving (ephemeral storage)
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.html"`);
+      return res.send(htmlContent);
     }
 
-    // Determine file type and set appropriate headers
+    // File exists, serve it normally
     const isHTML = report.fileUrl.endsWith('.html');
     const isDOCX = report.fileUrl.endsWith('.docx');
 
     if (isHTML) {
-      // Serve HTML with proper content type
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Disposition', `inline; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.html"`);
       
       const htmlContent = fs.readFileSync(filePath, 'utf-8');
       res.send(htmlContent);
     } else if (isDOCX) {
-      // Serve DOCX as download
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.setHeader('Content-Disposition', `attachment; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.docx"`);
       
