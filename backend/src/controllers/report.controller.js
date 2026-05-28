@@ -492,6 +492,12 @@ const getPendingReports = async (req, res) => {
       const assignments = await prisma.lecturerAssignment.findMany({
         where: { lecturerId: req.user.id }
       });
+
+      // If lecturer has no assignments, return empty array
+      if (assignments.length === 0) {
+        return res.json([]);
+      }
+
       const classIds = assignments.map(a => a.classId);
       const courseIds = assignments.map(a => a.courseId);
 
@@ -515,7 +521,7 @@ const getPendingReports = async (req, res) => {
     res.json(reports);
   } catch (err) {
     console.error('Get pending reports error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 };
 
