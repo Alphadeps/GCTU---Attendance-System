@@ -111,8 +111,14 @@ const createSession = async (req, res) => {
     // Generate base64 QR code image
     const qrCodeImage = await QRCode.toDataURL(qrCodeToken);
 
-    // Trigger Notifications in background
-    (async () => {
+    // Send response immediately
+    res.status(201).json({
+      ...updatedSession,
+      qrCodeImage
+    });
+
+    // Trigger Notifications in background (after response sent)
+    setImmediate(async () => {
       try {
         // Representative notification
         await createNotificationHelper({
@@ -124,11 +130,11 @@ const createSession = async (req, res) => {
 
         // Only notify students in the class (if classId exists)
         if (classId) {
-          // Get students in this specific class only
+          // Get students in this specific class only (limit to 100 to prevent timeout)
           const classStudents = await prisma.classStudent.findMany({
             where: { classId },
             include: { student: { select: { indexNumber: true } } },
-            take: 500 // Limit to prevent overwhelming the system
+            take: 100 // Reduced limit to prevent timeout
           });
 
           // Batch create notifications for better performance
@@ -140,20 +146,17 @@ const createSession = async (req, res) => {
             isRead: false
           }));
 
-          // Create notifications in batches of 100
-          for (let i = 0; i < notifications.length; i += 100) {
-            const batch = notifications.slice(i, i + 100);
-            await prisma.notification.createMany({ data: batch });
+          // Create notifications in batches of 50
+          for (let i = 0; i < notifications.length; i += 50) {
+            const batch = notifications.slice(i, i + 50);
+            await prisma.notification.createMany({ data: batch }).catch(err => {
+              console.error('Batch notification error:', err);
+            });
           }
         }
       } catch (notifyErr) {
         console.error('Failed to trigger session open notifications:', notifyErr);
       }
-    })();
-
-    res.status(201).json({
-      ...updatedSession,
-      qrCodeImage
     });
   } catch (err) {
     console.error('Create session error:', err);
