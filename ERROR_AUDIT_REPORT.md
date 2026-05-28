@@ -1,8 +1,114 @@
 # Complete Error Audit Report
-**Date:** May 24, 2026  
+**Date:** May 24, 2026 (Updated: May 28, 2026)  
 **System:** GCTU Class Attendance System  
 **Frontend:** https://gctu-attendance-system-chi.vercel.app  
 **Backend:** https://class-attendance-backend-o80x.onrender.com
+
+---
+
+## 🚨 CRITICAL PRODUCTION ISSUE - REQUIRES IMMEDIATE ACTION
+
+### 🔴 Database Schema Mismatch - Missing Column `submittedToDeptAt`
+
+**Status:** ACTIVE - Production Partially Down  
+**Severity:** CRITICAL  
+**First Detected:** May 28, 2026 00:19:59  
+**Impact:** All report-related endpoints failing with 500 errors
+
+#### Error Details
+```
+PrismaClientKnownRequestError: Invalid `prisma.officialReport.findMany()` invocation:
+The column `OfficialReport.submittedToDeptAt` does not exist in the current database.
+Code: P2022
+Location: report.controller.js:511:21
+```
+
+#### Root Cause
+The `submittedToDeptAt` column is defined in the Prisma schema but was **never added to the production database**. The migration file `MANUAL_FIX_submittedToDeptAt.sql` exists but hasn't been executed on production.
+
+#### Affected Endpoints
+- ❌ `GET /api/reports/pending` - 500 Internal Server Error
+- ❌ All other report endpoints that query the OfficialReport table
+- ✅ Other endpoints (auth, sessions, students) working normally
+
+#### Immediate Fix Required
+
+**Step 1: Connect to Production Database**
+```bash
+# Get DATABASE_URL from Render environment variables
+# Connect using psql or your preferred PostgreSQL client
+```
+
+**Step 2: Execute Migration SQL**
+Run the commands from `backend/prisma/migrations/MANUAL_FIX_submittedToDeptAt.sql`:
+
+```sql
+-- Add the missing column
+ALTER TABLE "OfficialReport" ADD COLUMN IF NOT EXISTS "submittedToDeptAt" TIMESTAMP(3);
+
+-- Update existing SIGNED reports to APPROVED and set submittedToDeptAt
+UPDATE "OfficialReport" 
+SET 
+  status = 'APPROVED',
+  "submittedToDeptAt" = "signedAt"
+WHERE status = 'SIGNED' AND "signedAt" IS NOT NULL;
+
+-- Verify the changes
+SELECT 
+  id, 
+  status, 
+  "signedAt", 
+  "submittedToDeptAt",
+  "createdAt"
+FROM "OfficialReport"
+ORDER BY "createdAt" DESC
+LIMIT 10;
+```
+
+**Step 3: Verify Column Exists**
+```sql
+-- PostgreSQL command to describe table
+\d "OfficialReport"
+
+-- Should show submittedToDeptAt column
+```
+
+**Step 4: Restart Application**
+- Go to Render Dashboard
+- Manually restart the backend service to clear any cached schema
+- Or wait for automatic restart (may take a few minutes)
+
+**Step 5: Test Endpoints**
+```bash
+# Test the previously failing endpoint
+curl https://class-attendance-backend-o80x.onrender.com/api/reports/pending \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Should return 200 OK instead of 500
+```
+
+#### Prevention Measures
+1. **Always run migrations before deployment:**
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+2. **Add to CI/CD pipeline:**
+   - Verify all migrations are applied
+   - Run schema validation before deployment
+
+3. **Database Schema Validation:**
+   - Add a startup check to verify schema matches Prisma schema
+   - Log warnings if columns are missing
+
+4. **Migration Tracking:**
+   - Keep a log of which migrations have been applied to production
+   - Use Prisma's migration history table
+
+#### Related Files
+- Schema: `backend/prisma/schema.prisma` (line 267)
+- Migration: `backend/prisma/migrations/MANUAL_FIX_submittedToDeptAt.sql`
+- Controller: `backend/src/controllers/report.controller.js` (line 511)
 
 ---
 
@@ -15,6 +121,11 @@
 - **No hardcoded localhost URLs** - all use `import.meta.env.VITE_API_URL`
 
 ### ⚠️ ISSUES FOUND
+
+#### 🔴 CRITICAL - Production Breaking
+1. **Database Schema Mismatch** - Missing `submittedToDeptAt` column
+   - **Impact:** Report endpoints returning 500 errors
+   - **Action:** Execute manual migration SQL immediately
 
 #### 1. Frontend Code Quality Issues (38 errors, 7 warnings)
 - **Status:** Non-breaking (app still works)
@@ -155,7 +266,7 @@ import React from 'react';
 **Files Affected:**
 1. `AdminGrievancePanel.jsx` (line 38)
    - Missing: `toast`
-   
+   10GET /12.00ms1.19%
 2. `ExcusedAbsencesManager.jsx` (line 63)
    - Missing: `fetchExcusedRequests`
    
