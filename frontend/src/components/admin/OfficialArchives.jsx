@@ -15,6 +15,9 @@ export default function OfficialArchives() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterProgramme, setFilterProgramme] = useState('');
   const [filterLevel, setFilterLevel] = useState('');
+  const [previewReport, setPreviewReport] = useState(null);
+  const [previewHTML, setPreviewHTML] = useState('');
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   const fetchArchives = async () => {
     try {
@@ -32,6 +35,35 @@ export default function OfficialArchives() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openPreview = async (report) => {
+    setPreviewReport(report);
+    setLoadingPreview(true);
+    
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/file?token=${token}`
+      );
+      
+      if (response.ok) {
+        const html = await response.text();
+        setPreviewHTML(html);
+      } else {
+        setPreviewHTML('<div style="padding: 20px; text-align: center; color: #e74c3c;">Failed to load report preview</div>');
+      }
+    } catch (error) {
+      console.error('Preview error:', error);
+      setPreviewHTML('<div style="padding: 20px; text-align: center; color: #e74c3c;">Error loading preview</div>');
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  const closePreview = () => {
+    setPreviewReport(null);
+    setPreviewHTML('');
   };
 
   useEffect(() => {
@@ -278,53 +310,30 @@ export default function OfficialArchives() {
                                 </h5>
                                 <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                   {(reports || []).map(report => (
-                                    <div key={report.id} className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col justify-between hover:border-[#E5A93C]/50 hover:shadow transition duration-200">
+                                    <div 
+                                      key={report.id} 
+                                      onClick={() => openPreview(report)}
+                                      className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col justify-between hover:border-[#E5A93C] hover:shadow-lg transition duration-200 cursor-pointer group"
+                                    >
                                       <div>
                                         <div className="flex justify-between items-start mb-2">
-                                          <span className="text-xs font-bold px-2 py-1 bg-[#0c2340]/10 text-[#0c2340] rounded-lg">
+                                          <span className="text-xs font-bold px-2 py-1 bg-[#0c2340]/10 text-[#0c2340] rounded-lg group-hover:bg-[#E5A93C]/20 group-hover:text-[#E5A93C] transition">
                                             {report.course?.code || 'N/A'}
                                           </span>
                                           <span className="text-[10px] text-[#8392ab] font-bold">
                                             {report.signedAt ? new Date(report.signedAt).toLocaleDateString() : 'N/A'}
                                           </span>
                                         </div>
-                                        <h6 className="text-[#344767] font-semibold text-sm line-clamp-2 mb-1">{report.course?.name || 'Unknown Course'}</h6>
+                                        <h6 className="text-[#344767] font-semibold text-sm line-clamp-2 mb-1 group-hover:text-[#0c2340] transition">{report.course?.name || 'Unknown Course'}</h6>
                                         <p className="text-xs text-[#8392ab]">Signed by: {report.signedBy?.username || 'Unknown'}</p>
                                       </div>
 
-                                      <div className="flex gap-2">
-                                        <button
-                                          onClick={() => {
-                                            // Open report in new tab using the serve endpoint
-                                            const token = localStorage.getItem('token');
-                                            const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/file`;
-                                            
-                                            // Open in new window with auth header
-                                            window.open(url + `?token=${token}`, '_blank');
-                                          }}
-                                          className="mt-4 flex-1 flex items-center justify-center gap-2 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold rounded-lg border border-blue-150 transition"
-                                        >
-                                          <svg className="w-4 h-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                          </svg>
-                                          View
-                                        </button>
-                                        <button
-                                          onClick={() => {
-                                            // Download as PDF
-                                            const token = localStorage.getItem('token');
-                                            const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/pdf`;
-                                            
-                                            window.open(url + `?token=${token}`, '_blank');
-                                          }}
-                                          className="mt-4 flex-1 flex items-center justify-center gap-2 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-150 transition"
-                                        >
-                                          <svg className="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                          </svg>
-                                          PDF
-                                        </button>
+                                      <div className="mt-4 flex items-center justify-center gap-2 py-2 bg-gray-50 group-hover:bg-[#E5A93C]/10 text-[#8392ab] group-hover:text-[#E5A93C] text-xs font-bold rounded-lg border border-gray-200 group-hover:border-[#E5A93C]/30 transition">
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        Click to Preview
                                       </div>
                                     </div>
                                   ))}
@@ -351,6 +360,91 @@ export default function OfficialArchives() {
           </svg>
           <h3 className="text-lg font-bold text-[#0c2340] mb-2">No Reports Found</h3>
           <p className="text-[#8392ab] text-sm">Try adjusting your filters or search query.</p>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {previewReport && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-scale-in">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-[#0c2340] to-[#1a3c6d]">
+              <div className="flex items-center gap-3">
+                <svg className="w-6 h-6 text-[#E5A93C]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div>
+                  <h3 className="text-lg font-bold text-white">{previewReport.course?.name || 'Report Preview'}</h3>
+                  <p className="text-xs text-gray-300">
+                    {previewReport.course?.code} • Signed by {previewReport.signedBy?.username}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={closePreview}
+                className="text-white hover:text-[#E5A93C] transition p-2 rounded-lg hover:bg-white/10"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Body - Report Preview */}
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              {loadingPreview ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-[#0c2340] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-[#8392ab] font-semibold">Loading report preview...</p>
+                  </div>
+                </div>
+              ) : (
+                <div 
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+                  dangerouslySetInnerHTML={{ __html: previewHTML }}
+                />
+              )}
+            </div>
+
+            {/* Modal Footer - Action Buttons */}
+            <div className="flex items-center justify-between gap-3 p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={closePreview}
+                className="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-[#344767] text-sm font-bold rounded-xl transition"
+              >
+                Close
+              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${previewReport.id}/file`;
+                    window.open(url + `?token=${token}`, '_blank');
+                  }}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  Open in New Tab
+                </button>
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem('token');
+                    const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${previewReport.id}/pdf`;
+                    window.open(url + `?token=${token}`, '_blank');
+                  }}
+                  className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
