@@ -71,6 +71,8 @@ const LecturerPortal = () => {
       } else {
         setReports([]); // Clear stale data before fetching
         const repRes = await api.get('/reports/pending');
+        console.log('📊 Fetched reports:', repRes.data);
+        console.log('📊 Number of reports:', repRes.data?.length);
         setReports(repRes.data || []);
       }
     } catch (err) {
@@ -100,8 +102,20 @@ const LecturerPortal = () => {
   };
 
   const getFilteredReports = () => {
-    if (!selectedClass) return reports;
-    return reports.filter(r => r.classId === selectedClass.classId && r.courseId === selectedClass.courseId);
+    console.log('🔍 Filtering reports...');
+    console.log('  Total reports:', reports.length);
+    console.log('  Selected class:', selectedClass);
+    if (!selectedClass) {
+      console.log('  ✅ No class selected, returning all reports');
+      return reports;
+    }
+    const filtered = reports.filter(r => {
+      const match = r.classId === selectedClass.classId && r.courseId === selectedClass.courseId;
+      console.log(`  Report ${r.id}: classId=${r.classId}, courseId=${r.courseId}, match=${match}`);
+      return match;
+    });
+    console.log('  📋 Filtered reports:', filtered.length);
+    return filtered;
   };
 
   const handleSelectSession = async (session) => {
