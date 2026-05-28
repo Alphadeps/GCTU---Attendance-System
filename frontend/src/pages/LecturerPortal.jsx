@@ -581,13 +581,16 @@ const LecturerPortal = () => {
                               <p className="text-[13px] font-bold text-[#344767]">Generated Document Ready</p>
                               <p className="text-[11px] text-[#8392ab] mt-0.5">Please review the document before signing.</p>
                             </div>
-                            <a
-                              href={selectedReport.fileUrl}
-                              download
+                            <button
+                              onClick={() => {
+                                const token = localStorage.getItem('token');
+                                const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${selectedReport.id}/file`;
+                                window.open(url + `?token=${token}`, '_blank');
+                              }}
                               className="sip-btn-dark text-[11px] py-2 px-4"
                             >
-                              Download .docx
-                            </a>
+                              View Report
+                            </button>
                           </div>
 
                           <div className="border-t border-gray-100 pt-5">

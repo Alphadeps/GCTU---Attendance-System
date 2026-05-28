@@ -4,6 +4,8 @@ const path = require('path');
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const { createNotificationHelper } = require('./notification.controller');
+const puppeteer = require('puppeteer-core');
+const chromium = require('@sparticuz/chromium');
 
 // Helper function to generate default HTML report
 function generateDefaultReportHTML(data) {
@@ -749,6 +751,126 @@ const getRepReports = async (req, res) => {
   }
 };
 
+// Serve report file (HTML or DOCX) with proper headers
+const serveReportFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await prisma.officialReport.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        class: { include: { programme: true } }
+      }
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
+
+    const filePath = path.join(__dirname, '..', '..', 'public', report.fileUrl);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Report file not found on server' });
+    }
+
+    // Determine file type and set appropriate headers
+    const isHTML = report.fileUrl.endsWith('.html');
+    const isDOCX = report.fileUrl.endsWith('.docx');
+
+    if (isHTML) {
+      // Serve HTML with proper content type
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `inline; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.html"`);
+      
+      const htmlContent = fs.readFileSync(filePath, 'utf-8');
+      res.send(htmlContent);
+    } else if (isDOCX) {
+      // Serve DOCX as download
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `attachment; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.docx"`);
+      
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+    } else {
+      res.status(400).json({ error: 'Unsupported file type' });
+    }
+  } catch (err) {
+    console.error('Serve report file error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Convert HTML report to PDF and download
+const downloadReportAsPDF = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await prisma.officialReport.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        class: { include: { programme: true } }
+      }
+    });
+
+    if (!report) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
+
+    const filePath = path.join(__dirname, '..', '..', 'public', report.fileUrl);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Report file not found on server' });
+    }
+
+    // Only convert HTML files to PDF
+    if (!report.fileUrl.endsWith('.html')) {
+      return res.status(400).json({ error: 'Only HTML reports can be converted to PDF' });
+    }
+
+    // Read HTML content
+    const htmlContent = fs.readFileSync(filePath, 'utf-8');
+
+    // Launch puppeteer with chromium
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
+    });
+
+    const page = await browser.newPage();
+    
+    // Set content and wait for it to load
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+
+    // Generate PDF
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm'
+      }
+    });
+
+    await browser.close();
+
+    // Send PDF as download
+    const filename = `Report_${report.course.code}_${report.class.level}${report.class.group}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(pdfBuffer);
+
+  } catch (err) {
+    console.error('Download report as PDF error:', err);
+    res.status(500).json({ error: 'Failed to generate PDF', details: err.message });
+  }
+};
+
 module.exports = {
   uploadTemplate,
   getActiveTemplate,
@@ -758,5 +880,7 @@ module.exports = {
   getPendingReports,
   signReport,
   getArchivedReports,
-  getRepReports
+  getRepReports,
+  serveReportFile,
+  downloadReportAsPDF
 };

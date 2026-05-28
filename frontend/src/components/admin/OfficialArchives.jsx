@@ -292,16 +292,40 @@ export default function OfficialArchives() {
                                         <p className="text-xs text-[#8392ab]">Signed by: {report.signedBy?.username || 'Unknown'}</p>
                                       </div>
 
-                                      <a
-                                        href={report.fileUrl}
-                                        download
-                                        className="mt-4 flex items-center justify-center gap-2 w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-150 transition"
-                                      >
-                                        <svg className="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                        Download Report
-                                      </a>
+                                      <div className="flex gap-2">
+                                        <button
+                                          onClick={() => {
+                                            // Open report in new tab using the serve endpoint
+                                            const token = localStorage.getItem('token');
+                                            const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/file`;
+                                            
+                                            // Open in new window with auth header
+                                            window.open(url + `?token=${token}`, '_blank');
+                                          }}
+                                          className="mt-4 flex-1 flex items-center justify-center gap-2 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold rounded-lg border border-blue-150 transition"
+                                        >
+                                          <svg className="w-4 h-4 text-blue-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                          </svg>
+                                          View
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            // Download as PDF
+                                            const token = localStorage.getItem('token');
+                                            const url = `${import.meta.env.VITE_API_URL || 'https://class-attendance-backend-o80x.onrender.com'}/api/reports/${report.id}/pdf`;
+                                            
+                                            window.open(url + `?token=${token}`, '_blank');
+                                          }}
+                                          className="mt-4 flex-1 flex items-center justify-center gap-2 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold rounded-lg border border-emerald-150 transition"
+                                        >
+                                          <svg className="w-4 h-4 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                          </svg>
+                                          PDF
+                                        </button>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>

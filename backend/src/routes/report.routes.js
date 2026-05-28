@@ -47,4 +47,24 @@ router.patch('/:id/sign', protect, authorizeRoles('LECTURER'), reportController.
 // SuperAdmin: View archived reports
 router.get('/archived', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), reportController.getArchivedReports);
 
+// Serve report file (HTML or DOCX) - accessible to all authenticated users
+// Accepts token from query param for opening in new window
+router.get('/:id/file', (req, res, next) => {
+  // Check for token in query params (for new window opens)
+  const tokenFromQuery = req.query.token;
+  if (tokenFromQuery && !req.headers.authorization) {
+    req.headers.authorization = `Bearer ${tokenFromQuery}`;
+  }
+  next();
+}, protect, reportController.serveReportFile);
+
+// Download report as PDF - accessible to all authenticated users
+router.get('/:id/pdf', (req, res, next) => {
+  const tokenFromQuery = req.query.token;
+  if (tokenFromQuery && !req.headers.authorization) {
+    req.headers.authorization = `Bearer ${tokenFromQuery}`;
+  }
+  next();
+}, protect, reportController.downloadReportAsPDF);
+
 module.exports = router;
