@@ -139,11 +139,9 @@ model Attendance {
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  @@index([sessionId])
-  @@index([studentId])
+  @@unique([sessionId, studentId])
   @@index([status])
   @@index([checkInTime])
-  @@index([sessionId, studentId])
   @@index([studentId, status])
 }
 

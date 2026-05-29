@@ -28,29 +28,37 @@ const markAttendance = async (req, res) => {
 
     const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
 
-    // Save record
-    const newAttendance = await prisma.attendance.create({
-      data: {
-        sessionId: session.id,
-        studentId: student.id,
-        status: attendanceStatus,
-        ipAddress,
-        deviceInfo: deviceInfo || 'Unknown Browser',
-        locationData: latitude && longitude ? JSON.stringify({ latitude, longitude }) : null
+    // Save record — unique constraint on (sessionId, studentId) prevents duplicates at DB level
+    let newAttendance;
+    try {
+      newAttendance = await prisma.attendance.create({
+        data: {
+          sessionId: session.id,
+          studentId: student.id,
+          status: attendanceStatus,
+          ipAddress,
+          deviceInfo: deviceInfo || 'Unknown Browser',
+          locationData: latitude && longitude ? JSON.stringify({ latitude, longitude }) : null
+        }
+      });
+    } catch (err) {
+      // P2002 = unique constraint violation: concurrent duplicate check-in
+      if (err.code === 'P2002') {
+        return res.status(409).json({ error: 'You have already checked in for this session.' });
       }
-    });
+      throw err;
+    }
 
     // Reset security failure counters for this student and IP on successful check-in
     resetFailures(student.indexNumber);
     resetFailures(ipAddress);
 
-    // Trigger Notifications in background
-    (async () => {
+    // Trigger notifications asynchronously — does not block the response
+    setImmediate(async () => {
       try {
         const courseName = session.courseName || 'Class';
         const courseCode = session.courseCode || '';
 
-        // Student notification
         await createNotificationHelper({
           studentIndex: student.indexNumber,
           title: 'Attendance Checked In',
@@ -58,7 +66,6 @@ const markAttendance = async (req, res) => {
           type: 'SUCCESS'
         });
 
-        // Representative notification
         await createNotificationHelper({
           userId: session.repId,
           title: 'Student Checked In',
@@ -68,7 +75,7 @@ const markAttendance = async (req, res) => {
       } catch (notifyErr) {
         console.error('Failed to trigger attendance mark notifications:', notifyErr);
       }
-    })();
+    });
 
     res.status(201).json({
       message: `Check-in successful! Marked as ${attendanceStatus}.`,
