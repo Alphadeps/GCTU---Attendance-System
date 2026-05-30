@@ -21,6 +21,9 @@ const BASELINE_MIGRATIONS = [
   '20260522212135_init',
   '20260525204500_add_manual_code',
   '20260527000000_add_report_signatures',
+  // NOTE: Do NOT add '20260529_add_attendance_unique_constraint' here.
+  // It must be applied by `prisma migrate deploy` (step 3 below) so the
+  // ALTER TABLE actually runs.  Listing it as a baseline would skip the SQL.
 ];
 
 async function run() {

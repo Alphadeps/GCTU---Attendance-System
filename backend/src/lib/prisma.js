@@ -29,14 +29,15 @@ if (directUrl || !isAccelerate) {
   }
   
   // Configure connection pool with limits
-  const pool = new Pool({ 
+  const poolMax = parseInt(process.env.DB_POOL_MAX || '50', 10);
+  const pool = new Pool({
     connectionString,
-    max: 20, // Maximum number of clients in the pool
-    min: 5,  // Minimum number of clients in the pool
-    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-    connectionTimeoutMillis: 10000, // Return error after 10 seconds if connection cannot be established
-    statement_timeout: 30000, // Query timeout: 30 seconds
-    query_timeout: 30000, // Query timeout: 30 seconds
+    max: poolMax,
+    min: Math.min(5, poolMax),
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 30000, // raised from 10s to 30s for burst traffic
+    statement_timeout: 30000,
+    query_timeout: 30000,
   });
   
   // Handle pool errors
