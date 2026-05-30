@@ -219,10 +219,12 @@ const checkInLimiter = rateLimit({
   },
 
   handler: (req, res) => {
-    const indexNumber = req.body?.indexNumber;
-    if (indexNumber) {
-      trackSuspiciousActivity(`student:${String(indexNumber).toLowerCase()}`);
-    }
+    // NOTE: do NOT call trackSuspiciousActivity here.
+    // trackSuspiciousActivity expects a real IP address; passing a
+    // "student:LTxxxxxx" key causes blockIP() to store a student-key
+    // entry that isIPBlocked(req.ip) will never match — dead memory.
+    // Legitimate rate-limit enforcement is handled by the windowMs/max
+    // config above; no additional IP-block side-effect is needed.
     res.status(429).json({
       error: 'Too many check-in attempts. Please wait before trying again.',
       retryAfter: 60
