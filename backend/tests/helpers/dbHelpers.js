@@ -65,6 +65,11 @@ async function createTestFixture(overrides = {}) {
     data: { classId: cls.id, studentId: student.id }
   });
 
+  // Link course to class (required so real session-creation paths can validate it)
+  await prisma.classCourse.create({
+    data: { classId: cls.id, courseId: course.id }
+  });
+
   const now = new Date();
   const session = await prisma.attendanceSession.create({
     data: {
@@ -91,14 +96,16 @@ async function createTestFixture(overrides = {}) {
  */
 async function cleanupTestFixture({ programme, repUser, cls, course, student, session }) {
   // Cascade deletes handle most relations; explicit order for safety
-  if (session) await prisma.attendanceSession.deleteMany({ where: { id: session.id } });
+  // Cascade order: attendance → session → classCourse/classStudent → class/student → course/user → programme
+  if (session) await prisma.attendanceSession.deleteMany({ where: { id: session.id } }); // cascades Attendance
   if (student) {
     await prisma.classStudent.deleteMany({ where: { studentId: student.id } });
     await prisma.student.deleteMany({ where: { id: student.id } });
   }
+  if (cls && course) await prisma.classCourse.deleteMany({ where: { classId: cls.id, courseId: course.id } });
   if (cls) await prisma.class.deleteMany({ where: { id: cls.id } });
   if (course) await prisma.course.deleteMany({ where: { id: course.id } });
-  if (repUser) await prisma.user.deleteMany({ where: { id: repUser.id } });
+  if (repUser) await prisma.user.deleteMany({ where: { id: repUser.id } }); // cascades Notification
   if (programme) await prisma.programme.deleteMany({ where: { id: programme.id } });
 }
 
