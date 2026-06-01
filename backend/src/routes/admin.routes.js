@@ -87,5 +87,6 @@ router.get('/rep/my-class-students', protect, authorizeRoles('REP'), adminContro
 // Student Device Management
 router.patch('/students/:indexNumber/reset-device', superadminGuard, adminController.resetStudentDevice);
 router.post('/students/reset-duplicate-devices', superadminGuard, adminController.resetAllDuplicateDevices);
+router.post('/students/reset-all-devices', superadminGuard, adminController.resetAllDevices);
 
 module.exports = router;

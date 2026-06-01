@@ -2076,6 +2076,28 @@ const resetAllDuplicateDevices = async (req, res) => {
   }
 };
 
+const resetAllDevices = async (req, res) => {
+  try {
+    const result = await prisma.student.updateMany({
+      where: { deviceFingerprint: { not: null } },
+      data: { deviceFingerprint: null }
+    });
+
+    logAudit('ALL_DEVICES_RESET', {
+      adminId: req.user?.id,
+      studentsCleared: result.count
+    });
+
+    res.json({
+      message: `Cleared device fingerprints for all ${result.count} student(s). Everyone will re-register on next check-in.`,
+      cleared: result.count
+    });
+  } catch (err) {
+    console.error('Reset all devices error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   createProgramme,
   getAllProgrammes,
@@ -2112,5 +2134,6 @@ module.exports = {
   diagnoseProgrammes,
   cleanupDuplicateProgrammes,
   resetStudentDevice,
-  resetAllDuplicateDevices
+  resetAllDuplicateDevices,
+  resetAllDevices
 };
