@@ -84,4 +84,8 @@ router.delete('/reps/:id', superadminGuard, adminController.deleteRepAccount);
 // Rep-specific routes (accessible by REPs for their own class)
 router.get('/rep/my-class-students', protect, authorizeRoles('REP'), adminController.getRepClassStudents);
 
+// Student Device Management
+router.patch('/students/:indexNumber/reset-device', superadminGuard, adminController.resetStudentDevice);
+router.post('/students/reset-duplicate-devices', superadminGuard, adminController.resetAllDuplicateDevices);
+
 module.exports = router;

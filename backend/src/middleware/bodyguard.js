@@ -266,10 +266,22 @@ const bodyguard = async (req, res, next) => {
 
     // 6. ROUND-TRIP 3 (conditional): Bind device fingerprint on first check-in
     if (!student.deviceFingerprint) {
-      await prisma.student.update({
-        where: { id: student.id },
-        data: { deviceFingerprint }
-      });
+      try {
+        await prisma.student.update({
+          where: { id: student.id },
+          data: { deviceFingerprint }
+        });
+      } catch (err) {
+        // P2002 = unique constraint violation: concurrent request just bound this fingerprint to another student
+        if (err.code === 'P2002') {
+          return handleCheckInFailure(
+            indexNumber, ipAddress, res,
+            'Security Block: This device is registered to another student. Multiple index check-ins from a single device are prohibited.',
+            null
+          );
+        }
+        throw err;
+      }
     }
 
     // H. Determine attendance status
