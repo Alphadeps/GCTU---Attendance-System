@@ -462,11 +462,63 @@ const markProxyAttendance = async (req, res) => {
   }
 };
 
+/**
+ * Search classmates in a session's class by name (for proxy attendance)
+ */
+const searchClassmates = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const { q, submitterIndex } = req.query;
+
+    if (!q || String(q).trim().length < 2) {
+      return res.json({ students: [] });
+    }
+
+    const session = await prisma.attendanceSession.findUnique({
+      where: { id: sessionId },
+      select: { classId: true, status: true }
+    });
+
+    if (!session || session.status !== 'OPEN') {
+      return res.status(404).json({ error: 'Session not found or closed.' });
+    }
+
+    if (!session.classId) {
+      return res.json({ students: [] });
+    }
+
+    const classStudents = await prisma.classStudent.findMany({
+      where: {
+        classId: session.classId,
+        student: {
+          name: { contains: String(q).trim(), mode: 'insensitive' },
+          ...(submitterIndex ? { indexNumber: { not: String(submitterIndex) } } : {})
+        }
+      },
+      include: {
+        student: { select: { name: true, indexNumber: true } }
+      },
+      take: 10
+    });
+
+    res.json({
+      students: classStudents.map(cs => ({
+        name: cs.student.name,
+        indexNumber: cs.student.indexNumber
+      }))
+    });
+  } catch (err) {
+    console.error('Search classmates error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   markAttendance,
   getSessionAttendance,
   getStudentHistory,
   updateAttendanceStatus,
   repSelfCheckIn,
-  markProxyAttendance
+  markProxyAttendance,
+  searchClassmates
 };
