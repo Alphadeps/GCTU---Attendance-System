@@ -63,11 +63,13 @@ const StudentLoginPage = () => {
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const navigate = useNavigate();
   const auth = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (lockoutSeconds > 0) return;
     setErrorMsg('');
     setLoading(true);
     try {
@@ -93,6 +95,16 @@ const StudentLoginPage = () => {
       if (err.response?.data?.requiresPasswordSetup) {
         setRequiresPasswordSetup(true);
         setErrorMsg('');
+      } else if (err.response?.status === 429) {
+        const wait = err.response.data?.lockoutSeconds || err.response.data?.retryAfter || 30;
+        setErrorMsg('Too many attempts. Please wait before trying again.');
+        setLockoutSeconds(wait);
+        const interval = setInterval(() => {
+          setLockoutSeconds(prev => {
+            if (prev <= 1) { clearInterval(interval); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
       } else {
         setErrorMsg(err.response?.data?.error || 'Invalid credentials or connection error');
       }
@@ -301,7 +313,7 @@ const StudentLoginPage = () => {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || lockoutSeconds > 0}
                   className="sip-btn-dark"
                   style={{ marginTop: '0.4rem' }}
                 >
@@ -316,6 +328,11 @@ const StudentLoginPage = () => {
                         animation: 'spinSlow 0.7s linear infinite',
                       }}
                     />
+                  ) : lockoutSeconds > 0 ? (
+                    <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <span>Wait {lockoutSeconds}s</span>
+                      <span style={{ fontSize: '10px', opacity: 0.7, fontWeight: 400 }}>Too many attempts</span>
+                    </span>
                   ) : 'Sign In'}
                 </button>
               </form>

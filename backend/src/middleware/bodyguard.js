@@ -5,23 +5,19 @@ const { JWT_SECRET } = require('../middleware/auth');
 const { isLocked, getLockExpiration, recordFailure, getCachedSession, cacheSession } = require('../lib/securityCache');
 const { createNotificationHelper } = require('../controllers/notification.controller');
 
-// Haversine formula to compute distance in meters between two coordinates
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
   const phi1 = (lat1 * Math.PI) / 180;
   const phi2 = (lat2 * Math.PI) / 180;
   const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
   const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
-
   const a =
     Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
     Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
   return R * c;
 }
 
-// Module-level settings cache (60s TTL) — avoids a DB hit on every check-in
 let _settingsCache = null;
 let _settingsCacheExpiry = 0;
 
@@ -32,11 +28,9 @@ async function getCachedSettings() {
   return _settingsCache;
 }
 
-// Zod Schema to validate input
 const checkInSchema = z.object({
   indexNumber: z.string().min(5, 'Index number must be at least 5 digits').max(15, 'Index number must be under 15 digits'),
   name: z.string().min(2, 'Name must be at least 2 characters'),
-  deviceFingerprint: z.string().min(5, 'Invalid device fingerprint signature'),
   sessionId: z.string().uuid('Invalid session reference format').optional(),
   qrCode: z.string().optional(),
   latitude: z.union([z.number(), z.string(), z.null()]).optional(),
@@ -57,27 +51,27 @@ const bodyguard = async (req, res, next) => {
     if (indexNumber && isLocked(indexNumber)) {
       const expiry = getLockExpiration(indexNumber);
       return res.status(423).json({
-        error: `Security Lock: This index number is locked due to multiple failed check-in attempts. Try again after ${new Date(expiry).toLocaleTimeString()}.`
+        error: `Account locked due to multiple failed attempts. Try again after ${new Date(expiry).toLocaleTimeString()}.`
       });
     }
 
     if (isLocked(ipAddress)) {
       const expiry = getLockExpiration(ipAddress);
       return res.status(423).json({
-        error: `Security Lock: Your device IP is temporarily locked due to multiple security violations. Try again after ${new Date(expiry).toLocaleTimeString()}.`
+        error: `Too many failures from this device. Try again after ${new Date(expiry).toLocaleTimeString()}.`
       });
     }
 
-    // 2. Input Validation (Zod)
+    // 2. Input Validation
     const validation = checkInSchema.safeParse(req.body);
     if (!validation.success) {
       const errorMsg = validation.error.errors.map(err => err.message).join(', ');
       return handleCheckInFailure(indexNumber, ipAddress, res, errorMsg, null);
     }
 
-    const { name, deviceFingerprint, sessionId, qrCode, latitude, longitude, networkSSID } = validation.data;
+    const { name, sessionId, qrCode, latitude, longitude, networkSSID } = validation.data;
 
-    // 3. Parse QR code (sync) to derive targetSessionId early
+    // 3. Parse QR code / manual code
     let targetSessionId = sessionId;
     const isQrCheckIn = !!qrCode;
     let decodedQr = null;
@@ -86,18 +80,17 @@ const bodyguard = async (req, res, next) => {
     if (isQrCheckIn) {
       if (/^\d{6}$/.test(qrCode)) {
         isManualCode = true;
-        // targetSessionId resolved via DB below
       } else {
         try {
           decodedQr = jwt.verify(qrCode, JWT_SECRET);
           targetSessionId = decodedQr.sessionId;
         } catch (err) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid or expired QR code token. Please scan the current live QR code.', null);
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid or expired code. Please use the current live code.', null);
         }
       }
     }
 
-    // 4. ROUND-TRIP 1: Fetch settings + student + session in parallel
+    // 4. Fetch settings + student + session in parallel
     const sessionPromise = isManualCode
       ? prisma.attendanceSession.findFirst({
           where: { manualCode: qrCode, status: 'OPEN' },
@@ -113,14 +106,12 @@ const bodyguard = async (req, res, next) => {
       sessionPromise
     ]);
 
-    // Resolve session object into the flat format used throughout
     let session;
     if (isManualCode) {
       if (!rawSession) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid manual code. Please check with your representative.', null);
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid code. Please check with your representative.', null);
       }
       targetSessionId = rawSession.id;
-      // Build the flat session object matching the cache format
       session = {
         id: rawSession.id,
         courseId: rawSession.courseId,
@@ -139,18 +130,15 @@ const bodyguard = async (req, res, next) => {
         courseCode: rawSession.course?.code,
         courseName: rawSession.course?.name
       };
-      // Populate session cache for subsequent check-ins on the same session
       cacheSession(rawSession);
     } else {
       session = rawSession;
     }
 
-    // A. Validate student exists
     if (!student) {
-      return handleCheckInFailure(indexNumber, ipAddress, res, 'Student record not found. Please verify your Index Number.', null);
+      return handleCheckInFailure(indexNumber, ipAddress, res, 'Student record not found. Verify your Index Number.', null);
     }
 
-    // B. Validate session exists and is open
     if (!session) {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'Session not found.', null);
     }
@@ -158,47 +146,47 @@ const bodyguard = async (req, res, next) => {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'This attendance session has been closed.', session);
     }
 
-    // C. Validate QR code matches active session QR or manual code
+    // 5. Validate QR/manual code matches session
     if (isQrCheckIn) {
       const isManualMatch = isManualCode && session.manualCode === qrCode;
       const isQrMatch = !isManualCode && session.qrCode === qrCode;
 
       if (!isManualMatch && !isQrMatch) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Outdated or invalid code. Please use the current live code.', session);
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Outdated or invalid code. Use the current live code.', session);
       }
 
       if (isQrMatch && new Date() > new Date(session.qrCodeExpiry)) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'QR code has expired. Please scan the live QR code.', session);
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Code has expired. Please get the latest code.', session);
       }
     } else {
       if (session.latitude === null || session.longitude === null) {
         return handleCheckInFailure(
           indexNumber, ipAddress, res,
-          'Location-only check-in is not allowed for this session because classroom coordinates are not defined. Scan the QR code.',
+          'GPS check-in is unavailable for this session. Enter the manual code instead.',
           session
         );
       }
     }
 
-    // D. Geofencing & SSID check (sync computation, no DB)
+    // 6. Geofencing & SSID check
     const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
     if (session.sessionType === 'PHYSICAL' || !isQrCheckIn) {
       if (session.latitude !== null && session.longitude !== null) {
         if (!latitude || !longitude) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Location services (GPS) are required to verify your classroom presence.', session);
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'GPS location is required to verify your presence.', session);
         }
 
         const latFloat = parseFloat(latitude);
         const lonFloat = parseFloat(longitude);
         if (isNaN(latFloat) || isNaN(lonFloat)) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates format.', session);
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates.', session);
         }
 
         const distance = getDistance(session.latitude, session.longitude, latFloat, lonFloat);
         if (distance > geofenceRadius) {
           return handleCheckInFailure(
             indexNumber, ipAddress, res,
-            `Out of range. You are ${Math.round(distance)}m away. You must be within ${geofenceRadius}m of the classroom.`,
+            `Out of range. You are ${Math.round(distance)}m away. Must be within ${geofenceRadius}m of the classroom.`,
             session
           );
         }
@@ -208,19 +196,15 @@ const bodyguard = async (req, res, next) => {
         if (!networkSSID || networkSSID.toLowerCase().trim() !== session.networkSSID.toLowerCase().trim()) {
           return handleCheckInFailure(
             indexNumber, ipAddress, res,
-            `Network SSID mismatch. Please connect to the Wi-Fi network: ${session.networkSSID}`,
+            `Connect to the class Wi-Fi network: ${session.networkSSID}`,
             session
           );
         }
       }
     }
 
-    // 5. ROUND-TRIP 2: Device conflict + class enrollment + duplicate — all in parallel
-    const [otherStudent, isMember, existingAttendance] = await Promise.all([
-      prisma.student.findFirst({
-        where: { deviceFingerprint, NOT: { id: student.id } },
-        select: { id: true }
-      }),
+    // 7. Class enrollment + duplicate check in parallel
+    const [isMember, existingAttendance] = await Promise.all([
       session.classId
         ? prisma.classStudent.findUnique({
             where: { classId_studentId: { classId: session.classId, studentId: student.id } },
@@ -233,58 +217,19 @@ const bodyguard = async (req, res, next) => {
       })
     ]);
 
-    // E. Device fingerprint security checks
-    if (otherStudent) {
-      return handleCheckInFailure(
-        indexNumber, ipAddress, res,
-        'Security Block: This device is registered to another student. Multiple index check-ins from a single device are prohibited.',
-        null
-      );
-    }
-
-    if (student.deviceFingerprint && student.deviceFingerprint !== deviceFingerprint) {
-      return handleCheckInFailure(
-        indexNumber, ipAddress, res,
-        'Security Block: Device mismatch. This account is locked to a different physical device.',
-        null
-      );
-    }
-
-    // F. Class enrollment check
     if (session.classId && !isMember) {
       return handleCheckInFailure(
         indexNumber, ipAddress, res,
-        'You are not enrolled in the class for this session. Only class members can mark attendance.',
+        'You are not enrolled in this class.',
         session
       );
     }
 
-    // G. Duplicate check-in (fast path — DB unique constraint is the ultimate guard in the controller)
     if (existingAttendance) {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'You have already checked in for this session.', session);
     }
 
-    // 6. ROUND-TRIP 3 (conditional): Bind device fingerprint on first check-in
-    if (!student.deviceFingerprint) {
-      try {
-        await prisma.student.update({
-          where: { id: student.id },
-          data: { deviceFingerprint }
-        });
-      } catch (err) {
-        // P2002 = unique constraint violation: concurrent request just bound this fingerprint to another student
-        if (err.code === 'P2002') {
-          return handleCheckInFailure(
-            indexNumber, ipAddress, res,
-            'Security Block: This device is registered to another student. Multiple index check-ins from a single device are prohibited.',
-            null
-          );
-        }
-        throw err;
-      }
-    }
-
-    // H. Determine attendance status
+    // 8. Determine attendance status
     const lateWindow = settings ? settings.lateWindowMinutes : 15;
     const minutesElapsed = (new Date() - new Date(session.startTime)) / 60000;
     const attendanceStatus = minutesElapsed > lateWindow ? 'LATE' : 'PRESENT';
@@ -313,18 +258,18 @@ async function handleCheckInFailure(indexNumber, ip, res, reason, session) {
         try {
           await createNotificationHelper({
             userId: session.repId,
-            title: '🚨 GCTU Security Alert',
-            message: `Security block triggered for ${lockTarget} after 10 failed check-in attempts. Account locked until ${new Date(expiry).toLocaleTimeString()}. Last failure reason: ${reason}`,
+            title: 'Security Alert',
+            message: `Multiple failed check-in attempts for ${lockTarget}. Account locked until ${new Date(expiry).toLocaleTimeString()}. Last reason: ${reason}`,
             type: 'WARNING'
           });
         } catch (err) {
-          console.error('Failed to dispatch security alert notification to REP:', err);
+          console.error('Failed to dispatch security alert notification:', err);
         }
       });
     }
 
     return res.status(423).json({
-      error: `Security Lock: Account temporarily locked due to multiple verification failures. Try again after ${new Date(expiry).toLocaleTimeString()}.`
+      error: `Account locked due to multiple failures. Try again after ${new Date(expiry).toLocaleTimeString()}.`
     });
   }
 

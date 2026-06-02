@@ -64,9 +64,8 @@ model Student {
   indexNumber       String         @unique
   name              String
   email             String         @unique
-  password          String?        // Null until first login
+  password          String?
   isFirstLogin      Boolean        @default(true)
-  deviceFingerprint String?        @unique
   attendances       Attendance[]
   classes           ClassStudent[]
   createdAt         DateTime       @default(now())
@@ -136,6 +135,8 @@ model Attendance {
   ipAddress    String?
   deviceInfo   String?
   locationData String?
+  markedBy     String?
+  markReason   String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 

@@ -295,10 +295,178 @@ const repSelfCheckIn = async (req, res) => {
   }
 };
 
+/**
+ * Proxy Attendance — a present student marks attendance for an absent classmate
+ */
+const markProxyAttendance = async (req, res) => {
+  try {
+    const { submitterIndexNumber, targetIndexNumber, reason, sessionId, qrCode, latitude, longitude } = req.body;
+
+    if (!submitterIndexNumber || !targetIndexNumber || !reason) {
+      return res.status(400).json({ error: 'Submitter index number, target index number, and reason are all required.' });
+    }
+    if (!sessionId && !qrCode) {
+      return res.status(400).json({ error: 'A session ID or attendance code is required.' });
+    }
+    if (submitterIndexNumber.trim().toLowerCase() === targetIndexNumber.trim().toLowerCase()) {
+      return res.status(400).json({ error: 'You cannot mark attendance for yourself using this form.' });
+    }
+
+    const [submitter, target] = await Promise.all([
+      prisma.student.findUnique({ where: { indexNumber: submitterIndexNumber } }),
+      prisma.student.findUnique({ where: { indexNumber: targetIndexNumber } })
+    ]);
+
+    if (!submitter) return res.status(404).json({ error: 'Your student record was not found. Check your index number.' });
+    if (!target) return res.status(404).json({ error: 'Target student not found. Check the index number.' });
+
+    // Resolve session
+    let session;
+    const jwt = require('jsonwebtoken');
+    const { JWT_SECRET } = require('../middleware/auth');
+
+    if (qrCode) {
+      if (/^\d{6}$/.test(qrCode)) {
+        session = await prisma.attendanceSession.findFirst({
+          where: { manualCode: qrCode, status: 'OPEN' },
+          include: { course: { select: { code: true, name: true } } }
+        });
+      } else {
+        try {
+          const decoded = jwt.verify(qrCode, JWT_SECRET);
+          session = await prisma.attendanceSession.findUnique({
+            where: { id: decoded.sessionId },
+            include: { course: { select: { code: true, name: true } } }
+          });
+        } catch (_) {
+          return res.status(400).json({ error: 'Invalid or expired code.' });
+        }
+      }
+    } else {
+      session = await prisma.attendanceSession.findUnique({
+        where: { id: sessionId },
+        include: { course: { select: { code: true, name: true } } }
+      });
+    }
+
+    if (!session) return res.status(404).json({ error: 'Session not found.' });
+    if (session.status !== 'OPEN') return res.status(400).json({ error: 'This session is closed.' });
+
+    // Geofence check for the submitter
+    if (session.latitude !== null && session.longitude !== null) {
+      if (!latitude || !longitude) {
+        return res.status(400).json({ error: 'Your GPS location is required to mark attendance.' });
+      }
+      const dist = getDistance(
+        session.latitude, session.longitude,
+        parseFloat(latitude), parseFloat(longitude)
+      );
+      const settings = await prisma.systemSettings.findFirst();
+      const radius = settings?.geofenceRadiusMeters || 100;
+      if (dist > radius) {
+        return res.status(400).json({
+          error: `You are ${Math.round(dist)}m away. You must be within ${radius}m to mark attendance.`
+        });
+      }
+    }
+
+    // Enrollment checks
+    if (session.classId) {
+      const [submitterMember, targetMember] = await Promise.all([
+        prisma.classStudent.findUnique({
+          where: { classId_studentId: { classId: session.classId, studentId: submitter.id } }
+        }),
+        prisma.classStudent.findUnique({
+          where: { classId_studentId: { classId: session.classId, studentId: target.id } }
+        })
+      ]);
+
+      if (!submitterMember) {
+        return res.status(403).json({ error: 'You are not enrolled in this class.' });
+      }
+      if (!targetMember) {
+        return res.status(403).json({ error: `${target.name} is not enrolled in this class.` });
+      }
+    }
+
+    // Check target hasn't already checked in
+    const existing = await prisma.attendance.findFirst({
+      where: { sessionId: session.id, studentId: target.id }
+    });
+    if (existing) {
+      return res.status(409).json({ error: `${target.name} has already checked in for this session.` });
+    }
+
+    // Determine status
+    const settings = await prisma.systemSettings.findFirst();
+    const lateWindow = settings?.lateWindowMinutes || 15;
+    const minutesElapsed = (new Date() - new Date(session.startTime)) / 60000;
+    const status = minutesElapsed > lateWindow ? 'LATE' : 'PRESENT';
+
+    const ipAddress = req.ip || req.headers['x-forwarded-for'] || '127.0.0.1';
+
+    let newAttendance;
+    try {
+      newAttendance = await prisma.attendance.create({
+        data: {
+          sessionId: session.id,
+          studentId: target.id,
+          status,
+          ipAddress,
+          deviceInfo: `Proxy by ${submitterIndexNumber}`,
+          locationData: latitude && longitude ? JSON.stringify({ latitude, longitude }) : null,
+          markedBy: submitterIndexNumber,
+          markReason: reason.trim()
+        }
+      });
+    } catch (err) {
+      if (err.code === 'P2002') {
+        return res.status(409).json({ error: `${target.name} has already checked in for this session.` });
+      }
+      throw err;
+    }
+
+    // Notifications (non-blocking)
+    setImmediate(async () => {
+      try {
+        const courseName = session.course?.name || 'Class';
+        const courseCode = session.course?.code || '';
+
+        await createNotificationHelper({
+          studentIndex: target.indexNumber,
+          title: 'Attendance Marked',
+          message: `${submitter.name} marked you as ${status} for ${courseName} (${courseCode}). Reason: ${reason}`,
+          type: 'INFO'
+        });
+
+        if (session.repId) {
+          await createNotificationHelper({
+            userId: session.repId,
+            title: 'Proxy Attendance',
+            message: `${submitter.name} (${submitterIndexNumber}) marked ${target.name} (${targetIndexNumber}) as ${status} for ${courseName}. Reason: ${reason}`,
+            type: 'WARNING'
+          });
+        }
+      } catch (err) {
+        console.error('Proxy attendance notification error:', err);
+      }
+    });
+
+    res.status(201).json({
+      message: `${target.name} marked as ${status}.`,
+      attendance: newAttendance
+    });
+  } catch (err) {
+    console.error('Proxy attendance error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
   markAttendance,
   getSessionAttendance,
   getStudentHistory,
   updateAttendanceStatus,
-  repSelfCheckIn
+  repSelfCheckIn,
+  markProxyAttendance
 };

@@ -1,100 +1,50 @@
 import { useState } from 'react';
 import api from '../../services/api';
-import QRScanner from '../QRScanner';
 import { useToast } from '../ToastProvider';
 
 const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) => {
   const toast = useToast();
 
-  // Check-in state
-  const [checkInStep, setCheckInStep] = useState(1); // 1: QR/Manual Input, 2: Location, 3: Success, 4: Error
+  const [mode, setMode] = useState('self'); // 'self' | 'proxy'
+  const [inputMode, setInputMode] = useState('gps'); // 'gps' | 'code'
   const [manualCode, setManualCode] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
+  const [proxyIndex, setProxyIndex] = useState('');
+  const [proxyReason, setProxyReason] = useState('');
+  const [step, setStep] = useState(1); // 1: main, 2: loading, 3: success, 4: error
   const [submitting, setSubmitting] = useState(false);
-  const [gpsError, setGpsError] = useState('');
-  const [scannedCodeToken, setScannedCodeToken] = useState('');
   const [successDetails, setSuccessDetails] = useState({ status: '', time: '', courseName: '' });
   const [submitErrorMsg, setSubmitErrorMsg] = useState('');
   const [submittingStatus, setSubmittingStatus] = useState('');
-  const [gpsVerified, setGpsVerified] = useState(false);
-  const [gpsCoords, setGpsCoords] = useState({ lat: null, lng: null });
 
-  // Generate unique device fingerprint
-  const getDeviceFingerprint = () => {
-    const fingerprintString = `${navigator.userAgent}_${window.screen.width}_${window.screen.height}`;
-    return btoa(fingerprintString).substring(0, 32);
-  };
+  const deviceInfo = `${navigator.platform} (${navigator.language})`;
 
-  // QR Code scanned successfully
-  const handleQRScanSuccess = (scannedToken) => {
-    setScannedCodeToken(scannedToken);
-    toast.success('QR code scanned!');
-    advanceToLocation(scannedToken);
-  };
+  const collectGPS = () =>
+    new Promise((resolve) => {
+      if (!navigator.geolocation) { resolve({ lat: null, lng: null }); return; }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve({ lat: null, lng: null }),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
 
-  // Manual code confirm submit
-  const handleManualCodeSubmit = (e) => {
-    e.preventDefault();
-    if (!manualCode.trim()) {
-      toast.error('Please enter a valid token');
-      return;
-    }
-    setScannedCodeToken(manualCode);
-    advanceToLocation(manualCode);
-  };
-
-  // Transition to Location Step (Step 2)
-  const advanceToLocation = (codeToken, isLocationOnly = false) => {
-    setCheckInStep(2);
-    triggerGPSLocation(codeToken, isLocationOnly);
-  };
-
-  // Geolocation trigger
-  const triggerGPSLocation = (codeToken, isLocationOnly = false) => {
-    setGpsVerified(false);
-    setGpsError('');
-
-    if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your device');
-      setCheckInStep(4);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setGpsCoords({ lat: latitude, lng: longitude });
-        setGpsVerified(true);
-        submitAttendanceCheckIn(codeToken, latitude, longitude, isLocationOnly);
-      },
-      (err) => {
-        console.error('Location capture error:', err);
-        setGpsError('Could not verify location. Make sure GPS location is enabled.');
-        submitAttendanceCheckIn(codeToken, null, null, isLocationOnly);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  // Perform backend submit API with retry logic and offline support
-  const submitAttendanceCheckIn = async (codeToken, lat, lng, isLocationOnly = false) => {
+  const submitSelf = async (codeToken, useSessionId = false) => {
     setSubmitting(true);
-    setCheckInStep(2);
-    setSubmittingStatus('Initializing connection to check-in server...');
+    setStep(2);
+    setSubmittingStatus('Getting your location...');
 
-    const fingerprint = getDeviceFingerprint();
-    const deviceInfo = `${navigator.platform} (${navigator.language})`;
+    const { lat, lng } = await collectGPS();
+    setSubmittingStatus('Submitting attendance...');
 
     const payload = {
       indexNumber,
       name: fullName,
-      deviceFingerprint: fingerprint,
       latitude: lat,
       longitude: lng,
       deviceInfo
     };
 
-    if (isLocationOnly) {
+    if (useSessionId) {
       payload.sessionId = session?.id;
     } else {
       payload.qrCode = codeToken;
@@ -103,265 +53,313 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
     const maxRetries = 3;
     let attempt = 0;
 
-    const executeRequest = async () => {
+    const execute = async () => {
       attempt++;
       try {
-        if (!navigator.onLine) {
-          throw new Error('Offline');
-        }
-
-        setSubmittingStatus('Transmitting check-in report...');
+        if (!navigator.onLine) throw new Error('Offline');
         const response = await api.post('/attendance/mark', payload);
-
         setSuccessDetails({
           status: response.data.attendance?.status || 'PRESENT',
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           courseName: session?.courseName || 'Class'
         });
-
-        setCheckInStep(3); // Success Screen
-        onSuccess(); // Trigger parent refresh
+        setStep(3);
+        onSuccess();
       } catch (err) {
-        console.warn(`[Resilience] Check-in submission attempt ${attempt} failed:`, err);
-
-        // Do not retry if the backend specifically rejected the submission (e.g. 400, 403, 401, 429)
         if (err.response) {
-          const errMsg = err.response.data?.error || 'Check-in failed. Please verify credentials/fingerprint.';
-          setSubmitErrorMsg(errMsg);
-          setCheckInStep(4); // Error Screen
+          setSubmitErrorMsg(err.response.data?.error || 'Check-in failed.');
+          setStep(4);
           return;
         }
-
-        // If we ran out of retries, present the network failure message
         if (attempt >= maxRetries) {
-          setSubmitErrorMsg('Network connection lost. Please verify your internet connection and try again.');
-          setCheckInStep(4); // Error Screen
+          setSubmitErrorMsg('Network error. Check your connection and try again.');
+          setStep(4);
           return;
         }
-
-        // Wait with exponential backoff before the next attempt
-        const delayMs = attempt * 3000;
-        setSubmittingStatus(`Network failure. Retrying check-in (Attempt ${attempt + 1}/${maxRetries}) in ${delayMs / 1000}s...`);
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-        await executeRequest();
+        const delay = attempt * 3000;
+        setSubmittingStatus(`Retrying (${attempt + 1}/${maxRetries})...`);
+        await new Promise(r => setTimeout(r, delay));
+        await execute();
       }
     };
 
-    await executeRequest();
+    await execute();
     setSubmitting(false);
+  };
+
+  const submitProxy = async () => {
+    if (!proxyIndex.trim()) { toast.error('Enter the classmate\'s index number'); return; }
+    if (!proxyReason.trim()) { toast.error('Enter a reason for marking'); return; }
+
+    setSubmitting(true);
+    setStep(2);
+    setSubmittingStatus('Getting your location...');
+
+    const { lat, lng } = await collectGPS();
+    setSubmittingStatus('Submitting proxy attendance...');
+
+    const payload = {
+      submitterIndexNumber: indexNumber,
+      targetIndexNumber: proxyIndex.trim(),
+      reason: proxyReason.trim(),
+      sessionId: session?.id,
+      latitude: lat,
+      longitude: lng
+    };
+
+    try {
+      const response = await api.post('/attendance/mark-proxy', payload);
+      setSuccessDetails({
+        status: response.data.attendance?.status || 'PRESENT',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        courseName: session?.courseName || 'Class'
+      });
+      setStep(3);
+      onSuccess();
+    } catch (err) {
+      setSubmitErrorMsg(err.response?.data?.error || 'Proxy check-in failed.');
+      setStep(4);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    if (!manualCode.trim()) { toast.error('Enter a valid code'); return; }
+    submitSelf(manualCode.trim(), false);
+  };
+
+  const handleRetry = () => {
+    setSubmitErrorMsg('');
+    setStep(1);
   };
 
   if (!session) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-50 backdrop-blur-sm z-50 flex items-end justify-center">
-      {!submitting && (
-        <div className="absolute inset-0" onClick={onClose} />
-      )}
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end justify-center">
+      {!submitting && <div className="absolute inset-0" onClick={onClose} />}
 
-      {/* Sheet */}
-      <div className="w-full max-w-[430px] bg-white border-t border-gray-200 rounded-t-3xl p-6 shadow-2xl relative z-10 space-y-6 animate-[slideUp_0.25s_ease-out]">
+      <div className="w-full max-w-[430px] bg-white border-t border-gray-200 rounded-t-3xl p-6 shadow-2xl relative z-10 space-y-5 animate-[slideUp_0.25s_ease-out]">
         <div className="w-12 h-1 bg-[#002a63] rounded-full mx-auto" />
 
+        {/* Header */}
         <div className="text-center">
           <h3 className="font-extrabold text-[#344767] text-base leading-snug">{session.courseName}</h3>
           <p className="text-xs text-[#8392ab] mt-1 uppercase font-semibold tracking-wider">
             {session.sessionType} Session
           </p>
-          
-          {(checkInStep === 1 || checkInStep === 2) && (
-            <div className="text-[10px] text-[#344767] font-bold uppercase tracking-wider mt-2.5">
-              Step {checkInStep} of 2
-            </div>
-          )}
         </div>
 
-        {/* STEP 1: SCAN QR / ENTER MANUAL CODE */}
-        {checkInStep === 1 && (
+        {/* STEP 1: Main check-in UI */}
+        {step === 1 && (
           <div className="space-y-4">
-            <div className="text-center">
-              <p className="text-xs text-[#8392ab]">
-                Scan the QR code displayed by your Class Rep
-              </p>
+
+            {/* Mode toggle */}
+            <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
+              <button
+                onClick={() => { setMode('self'); setInputMode('gps'); }}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'self' ? 'bg-white shadow text-[#344767]' : 'text-[#8392ab]'}`}
+              >
+                My Attendance
+              </button>
+              <button
+                onClick={() => setMode('proxy')}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'proxy' ? 'bg-white shadow text-[#344767]' : 'text-[#8392ab]'}`}
+              >
+                For Classmate
+              </button>
             </div>
 
-            {!showManualInput ? (
-              <div className="space-y-4">
-                <div className="w-full aspect-square max-w-[240px] mx-auto overflow-hidden rounded-2xl border-2 border-dashed border-[#344767]/20 relative bg-slate-950">
-                  <QRScanner onScan={handleQRScanSuccess} />
-                </div>
-                <div className="text-center space-y-3">
-                  <button
-                    onClick={() => setShowManualInput(true)}
-                    className="text-xs text-[#344767] hover:text-[#b88a14] font-bold underline block mx-auto"
-                  >
-                    Enter code manually
-                  </button>
-
-                  {session?.sessionType === 'PHYSICAL' && (
-                    <div className="pt-2 border-t border-gray-200">
-                      <button
-                        onClick={() => advanceToLocation('', true)}
-                        className="w-full bg-[#344767] hover:bg-gray-100 text-[#344767] border border-gray-200 font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-2 shadow-md shadow-[#344767]/10"
-                      >
-                        <svg className="w-4 h-4 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        </svg>
-                        Check In via GPS Location (No Scan)
-                      </button>
+            {/* Self check-in */}
+            {mode === 'self' && (
+              <div className="space-y-3">
+                {inputMode === 'gps' && (
+                  <>
+                    <button
+                      onClick={() => submitSelf('', true)}
+                      className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-4 rounded-xl text-sm transition-colors shadow-lg"
+                    >
+                      Mark
+                      <span className="block text-[10px] font-normal opacity-70 mt-0.5">Tap to check in via GPS</span>
+                    </button>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-px bg-gray-200" />
+                      <span className="text-[10px] text-[#8392ab] font-bold uppercase">or</span>
+                      <div className="flex-1 h-px bg-gray-200" />
                     </div>
-                  )}
-                </div>
+                    <button
+                      onClick={() => setInputMode('code')}
+                      className="w-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-[#344767] font-bold py-3 rounded-xl text-xs transition-colors"
+                    >
+                      Use Code
+                      <span className="block text-[10px] font-normal text-[#8392ab] mt-0.5">Enter the attendance code manually</span>
+                    </button>
+                  </>
+                )}
+
+                {inputMode === 'code' && (
+                  <form onSubmit={handleManualSubmit} className="space-y-3">
+                    <div>
+                      <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">Attendance Code</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Enter code from your rep..."
+                        value={manualCode}
+                        onChange={(e) => setManualCode(e.target.value)}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767] font-mono"
+                        autoFocus
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white font-extrabold py-3.5 rounded-xl text-xs hover:opacity-90"
+                    >
+                      Verify
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setInputMode('gps')}
+                      className="w-full text-xs text-[#8392ab] hover:text-[#344767] font-semibold py-1"
+                    >
+                      Back
+                    </button>
+                  </form>
+                )}
               </div>
-            ) : (
-              <form onSubmit={handleManualCodeSubmit} className="space-y-4">
+            )}
+
+            {/* Proxy check-in */}
+            {mode === 'proxy' && (
+              <div className="space-y-3">
+                <p className="text-xs text-[#8392ab] text-center">
+                  You must be physically present in class to mark for a classmate.
+                </p>
                 <div>
-                  <label className="block text-[#8392ab] text-xs font-semibold mb-2">Manual Token Code</label>
+                  <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">Classmate's Index Number</label>
                   <input
                     type="text"
-                    required
-                    placeholder="Paste code from representative..."
-                    value={manualCode}
-                    onChange={(e) => setManualCode(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767] font-mono"
+                    placeholder="e.g. CS/2021/002"
+                    value={proxyIndex}
+                    onChange={(e) => setProxyIndex(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">Reason</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. At the clinic, flight delay..."
+                    value={proxyReason}
+                    onChange={(e) => setProxyReason(e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767]"
                   />
                 </div>
                 <button
-                  type="submit"
-                  className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white font-extrabold py-3.5 rounded-xl text-xs hover:opacity-90 transition-colors"
+                  onClick={submitProxy}
+                  disabled={!proxyIndex.trim() || !proxyReason.trim()}
+                  className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 disabled:opacity-40 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors"
                 >
-                  Verify Code
+                  Mark
+                  <span className="block text-[10px] font-normal opacity-70 mt-0.5">Mark attendance for classmate</span>
                 </button>
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowManualInput(false)}
-                    className="text-xs text-[#8392ab] hover:text-[#8392ab]"
-                  >
-                    Switch back to camera scanner
-                  </button>
-                </div>
-              </form>
+              </div>
             )}
 
             <button
               onClick={onClose}
               disabled={submitting}
-              className="w-full py-3.5 bg-gray-200 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-[#344767] font-bold rounded-xl text-xs transition-colors"
+              className="w-full py-3 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 text-[#344767] font-bold rounded-xl text-xs transition-colors"
             >
               Cancel
             </button>
           </div>
         )}
 
-        {/* STEP 2: LOCATION CAPTURE / WAITING SUBMISSION */}
-        {checkInStep === 2 && (
+        {/* STEP 2: Loading */}
+        {step === 2 && (
           <div className="space-y-6 text-center py-6">
             <div className="relative w-16 h-16 mx-auto flex items-center justify-center">
               <div className="absolute inset-0 bg-[#344767]/10 rounded-full animate-ping" />
-              <div className="w-10 h-10 bg-gradient-to-br from-[#14172B] to-[#3A416F] rounded-full flex items-center justify-center shadow-lg shadow-[#344767]/10">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#14172B] to-[#3A416F] rounded-full flex items-center justify-center shadow-lg">
                 <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 </svg>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-bold text-[#344767]">Verifying location...</h4>
-              <p className="text-xs text-[#8392ab] px-4">
-                Fetching your GPS coordinates. Ensure browser location settings are enabled.
-              </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-[#344767]">
+              <div className="w-4 h-4 border-2 border-[#344767] border-t-transparent rounded-full animate-spin" />
+              <span className="font-semibold">{submittingStatus || 'Submitting...'}</span>
             </div>
-
-            {submitting && (
-              <div className="flex flex-col items-center gap-3 text-xs text-[#8392ab] px-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-[#344767] border-t-transparent rounded-full animate-spin"></div>
-                  <span className="font-semibold text-[#344767]">
-                    {submittingStatus || 'Submitting check-in report...'}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
-        {/* STEP 3: SUCCESS ANIMATION & INFO */}
-        {checkInStep === 3 && (
-          <div className="space-y-6 text-center py-4">
+        {/* STEP 3: Success */}
+        {step === 3 && (
+          <div className="space-y-5 text-center py-4">
             <div className="w-16 h-16 bg-[#344767]/10 border border-[#344767]/20 rounded-full flex items-center justify-center mx-auto">
               <svg className="w-9 h-9 text-[#344767]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-
             <div>
-              <h3 className="text-xl font-black text-[#344767]">Attendance Marked!</h3>
+              <h3 className="text-xl font-black text-[#344767]">Marked!</h3>
               <p className="text-xs text-[#8392ab] mt-1">{successDetails.courseName}</p>
             </div>
-
-            <div className="bg-slate-950/40 p-4 border border-gray-200 rounded-2xl flex justify-between items-center text-xs">
+            <div className="bg-gray-50 p-4 border border-gray-200 rounded-2xl flex justify-between items-center text-xs">
               <div className="text-left space-y-1">
-                <span className="block text-[10px] text-[#8392ab] font-bold uppercase">Time Marked</span>
+                <span className="block text-[10px] text-[#8392ab] font-bold uppercase">Time</span>
                 <span className="text-[#344767] font-bold font-mono">{successDetails.time}</span>
               </div>
-              <div className="text-right">
-                <span className={`px-3 py-1 text-xs font-black rounded-full border ${
-                  successDetails.status === 'PRESENT' ? 'bg-[#344767]/10 text-[#344767] border-[#344767]/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                }`}>
-                  {successDetails.status}
-                </span>
-              </div>
+              <span className={`px-3 py-1 text-xs font-black rounded-full border ${
+                successDetails.status === 'PRESENT'
+                  ? 'bg-[#344767]/10 text-[#344767] border-[#344767]/20'
+                  : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+              }`}>
+                {successDetails.status}
+              </span>
             </div>
-
             <button
               onClick={onClose}
-              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors"
+              className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs"
             >
               Done
             </button>
           </div>
         )}
 
-        {/* STEP 4: ERROR DISPLAY & RETRY BUTTON */}
-        {checkInStep === 4 && (
-          <div className="space-y-6 text-center py-4">
+        {/* STEP 4: Error */}
+        {step === 4 && (
+          <div className="space-y-5 text-center py-4">
             <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto">
               <svg className="w-8 h-8 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-
             <div className="space-y-2">
-              <h3 className="text-lg font-black text-[#344767]">Verification Failed</h3>
-              <p className="text-xs text-rose-400 bg-rose-500/5 border border-rose-500/10 p-3 rounded-xl max-w-[290px] mx-auto leading-relaxed">
-                {submitErrorMsg || gpsError || 'Location coordinate check or dynamic QR code validation failed.'}
+              <h3 className="text-lg font-black text-[#344767]">Failed</h3>
+              <p className="text-xs text-rose-500 bg-rose-50 border border-rose-100 p-3 rounded-xl max-w-[290px] mx-auto leading-relaxed">
+                {submitErrorMsg || 'Something went wrong. Please try again.'}
               </p>
             </div>
-
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  if (scannedCodeToken) {
-                    advanceToLocation(scannedCodeToken);
-                  } else {
-                    setCheckInStep(1);
-                  }
-                }}
-                className="flex-1 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs transition-colors"
+                onClick={handleRetry}
+                className="flex-1 bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-3.5 rounded-xl text-xs"
               >
-                Try Again
+                Retry
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 bg-gray-200 hover:bg-gray-100 text-[#344767] font-bold py-3.5 rounded-xl text-xs transition-colors"
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-[#344767] font-bold py-3.5 rounded-xl text-xs"
               >
                 Close
               </button>
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

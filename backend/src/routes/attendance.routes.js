@@ -4,7 +4,8 @@ const {
   getSessionAttendance,
   getStudentHistory,
   updateAttendanceStatus,
-  repSelfCheckIn
+  repSelfCheckIn,
+  markProxyAttendance
 } = require('../controllers/attendance.controller');
 const bodyguard = require('../middleware/bodyguard');
 const { protect, authorizeRoles } = require('../middleware/auth');
@@ -15,6 +16,9 @@ const router = express.Router();
 
 // Student check-in endpoint (Public)
 router.post('/mark', checkInLimiter, bodyguard, markAttendance);
+
+// Proxy check-in: a present student marks for an absent classmate
+router.post('/mark-proxy', checkInLimiter, markProxyAttendance);
 
 // Rep self check-in endpoint (Protected - REP only)
 router.post('/rep-self-checkin', protect, authorizeRoles('REP'), repSelfCheckIn);
