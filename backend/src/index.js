@@ -117,9 +117,6 @@ app.use(requestTracker);
 // Apply request logging
 app.use(requestLogger);
 
-// Apply IP blocking check globally (before rate limiting)
-app.use('/api', checkIPBlock);
-
 // Apply rate limiter globally to all API endpoints
 app.use('/api', apiLimiter);
 
