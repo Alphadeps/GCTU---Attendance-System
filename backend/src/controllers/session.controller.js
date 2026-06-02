@@ -463,7 +463,7 @@ const getSessionById = async (req, res) => {
         attendances: {
           include: {
             student: {
-              select: { name: true, indexNumber: true, email: true, deviceFingerprint: true }
+              select: { name: true, indexNumber: true, email: true }
             }
           },
           orderBy: { checkInTime: 'asc' }
