@@ -2003,99 +2003,15 @@ const cleanupDuplicateProgrammes = async (req, res) => {
 // ==========================================
 
 const resetStudentDevice = async (req, res) => {
-  try {
-    const { indexNumber } = req.params;
-
-    const student = await prisma.student.findUnique({
-      where: { indexNumber },
-      select: { id: true, name: true, indexNumber: true, deviceFingerprint: true }
-    });
-
-    if (!student) {
-      return res.status(404).json({ error: 'Student not found' });
-    }
-
-    if (!student.deviceFingerprint) {
-      return res.json({ message: `${student.name} (${indexNumber}) has no registered device — nothing to clear.` });
-    }
-
-    await prisma.student.update({
-      where: { indexNumber },
-      data: { deviceFingerprint: null }
-    });
-
-    logAudit('STUDENT_DEVICE_RESET', {
-      adminId: req.user?.id,
-      studentIndexNumber: indexNumber,
-      studentName: student.name
-    });
-
-    res.json({ message: `Device fingerprint cleared for ${student.name} (${indexNumber}). They can now check in from any device.` });
-  } catch (err) {
-    console.error('Reset student device error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  res.json({ message: 'Device fingerprinting has been removed. Students can check in from any device.' });
 };
 
 const resetAllDuplicateDevices = async (req, res) => {
-  try {
-    const rows = await prisma.$queryRaw`
-      SELECT "deviceFingerprint", COUNT(*) AS cnt, ARRAY_AGG("indexNumber") AS students
-      FROM "Student"
-      WHERE "deviceFingerprint" IS NOT NULL
-      GROUP BY "deviceFingerprint"
-      HAVING COUNT(*) > 1
-    `;
-
-    if (rows.length === 0) {
-      return res.json({ message: 'No duplicate device fingerprints found. Database is clean.', cleared: 0 });
-    }
-
-    const duplicateFingerprints = rows.map(r => r.deviceFingerprint);
-    const result = await prisma.student.updateMany({
-      where: { deviceFingerprint: { in: duplicateFingerprints } },
-      data: { deviceFingerprint: null }
-    });
-
-    const affectedStudents = rows.flatMap(r => r.students);
-
-    logAudit('BULK_DEVICE_RESET', {
-      adminId: req.user?.id,
-      duplicateFingerprintsFound: rows.length,
-      studentsCleared: result.count
-    });
-
-    res.json({
-      message: `Cleared ${result.count} duplicate device registrations across ${rows.length} fingerprint(s).`,
-      cleared: result.count,
-      affectedStudents
-    });
-  } catch (err) {
-    console.error('Reset duplicate devices error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  res.json({ message: 'Device fingerprinting has been removed. No device records to clear.', cleared: 0 });
 };
 
 const resetAllDevices = async (req, res) => {
-  try {
-    const result = await prisma.student.updateMany({
-      where: { deviceFingerprint: { not: null } },
-      data: { deviceFingerprint: null }
-    });
-
-    logAudit('ALL_DEVICES_RESET', {
-      adminId: req.user?.id,
-      studentsCleared: result.count
-    });
-
-    res.json({
-      message: `Cleared device fingerprints for all ${result.count} student(s). Everyone will re-register on next check-in.`,
-      cleared: result.count
-    });
-  } catch (err) {
-    console.error('Reset all devices error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+  res.json({ message: 'Device fingerprinting has been removed. No device records to clear.', cleared: 0 });
 };
 
 module.exports = {
