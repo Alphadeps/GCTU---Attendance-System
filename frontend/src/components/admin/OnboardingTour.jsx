@@ -288,10 +288,6 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
                 <p className="text-xs text-[#8392ab]">How many minutes after session start before marking as "LATE" (default: 15 mins)</p>
               </div>
               <div>
-                <p className="font-bold text-[#0c2340]">QR Code Expiry</p>
-                <p className="text-xs text-[#8392ab]">How often QR codes refresh for security (default: 30 seconds)</p>
-              </div>
-              <div>
                 <p className="font-bold text-[#0c2340]">Geofence Radius</p>
                 <p className="text-xs text-[#8392ab]">Maximum distance from class location for check-in (default: 100 meters)</p>
               </div>
@@ -322,7 +318,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             </p>
             <ol className="text-gray-700 text-sm space-y-2 ml-4">
               <li>1. <strong className="text-[#0c2340]">Rep</strong> logs in and creates an attendance session for a course</li>
-              <li>2. <strong className="text-[#0c2340]">Students</strong> scan QR code or check in via portal</li>
+              <li>2. <strong className="text-[#0c2340]">Students</strong> check in via GPS; manual code as fallback</li>
               <li>3. <strong className="text-[#0c2340]">Rep</strong> closes session and generates attendance report</li>
               <li>4. <strong className="text-[#0c2340]">Lecturer</strong> reviews and signs the report</li>
               <li>5. <strong className="text-[#0c2340]">Admin</strong> views signed reports in Official Archives</li>

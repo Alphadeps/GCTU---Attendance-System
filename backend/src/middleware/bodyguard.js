@@ -1,7 +1,5 @@
-const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const prisma = require('../lib/prisma');
-const { JWT_SECRET } = require('../middleware/auth');
 const { isLocked, getLockExpiration, recordFailure, getCachedSession, cacheSession } = require('../lib/securityCache');
 const { createNotificationHelper } = require('../controllers/notification.controller');
 
@@ -32,14 +30,14 @@ const checkInSchema = z.object({
   indexNumber: z.string().min(5, 'Index number must be at least 5 digits').max(15, 'Index number must be under 15 digits'),
   name: z.string().min(2, 'Name must be at least 2 characters'),
   sessionId: z.string().uuid('Invalid session reference format').optional(),
-  qrCode: z.string().optional(),
+  manualCode: z.string().regex(/^\d{6}$/, 'Manual code must be exactly 6 digits').optional(),
   latitude: z.union([z.number(), z.string(), z.null()]).optional(),
   longitude: z.union([z.number(), z.string(), z.null()]).optional(),
   networkSSID: z.string().optional(),
   deviceInfo: z.string().optional()
-}).refine(data => data.sessionId || data.qrCode, {
-  message: 'Either QR Code token or Session ID is required to mark attendance',
-  path: ['sessionId', 'qrCode']
+}).refine(data => data.sessionId || data.manualCode, {
+  message: 'A session ID or 6-digit manual code is required to mark attendance',
+  path: ['sessionId', 'manualCode']
 });
 
 const bodyguard = async (req, res, next) => {
@@ -47,7 +45,7 @@ const bodyguard = async (req, res, next) => {
   const indexNumber = req.body?.indexNumber;
 
   try {
-    // 1. Lockout Checks
+    // 1. Lockout Check
     if (indexNumber && isLocked(indexNumber)) {
       const expiry = getLockExpiration(indexNumber);
       return res.status(423).json({
@@ -62,35 +60,17 @@ const bodyguard = async (req, res, next) => {
       return handleCheckInFailure(indexNumber, ipAddress, res, errorMsg, null);
     }
 
-    const { name, sessionId, qrCode, latitude, longitude, networkSSID } = validation.data;
+    const { name, sessionId, manualCode, latitude, longitude, networkSSID } = validation.data;
+    const isManualCode = !!manualCode;
 
-    // 3. Parse QR code / manual code
-    let targetSessionId = sessionId;
-    const isQrCheckIn = !!qrCode;
-    let decodedQr = null;
-    let isManualCode = false;
-
-    if (isQrCheckIn) {
-      if (/^\d{6}$/.test(qrCode)) {
-        isManualCode = true;
-      } else {
-        try {
-          decodedQr = jwt.verify(qrCode, JWT_SECRET);
-          targetSessionId = decodedQr.sessionId;
-        } catch (err) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid or expired code. Please use the current live code.', null);
-        }
-      }
-    }
-
-    // 4. Fetch settings + student + session in parallel
+    // 3. Resolve session — manual code queries DB directly; GPS path uses cache
     const sessionPromise = isManualCode
       ? prisma.attendanceSession.findFirst({
-          where: { manualCode: qrCode, status: 'OPEN' },
+          where: { manualCode, status: 'OPEN' },
           include: { course: { select: { code: true, name: true } } }
         })
-      : targetSessionId
-        ? getCachedSession(targetSessionId)
+      : sessionId
+        ? getCachedSession(sessionId)
         : Promise.resolve(null);
 
     const [settings, student, rawSession] = await Promise.all([
@@ -102,9 +82,8 @@ const bodyguard = async (req, res, next) => {
     let session;
     if (isManualCode) {
       if (!rawSession) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid code. Please check with your representative.', null);
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid code. Check the 6-digit code shown on your rep\'s screen.', null);
       }
-      targetSessionId = rawSession.id;
       session = {
         id: rawSession.id,
         courseId: rawSession.courseId,
@@ -116,8 +95,6 @@ const bodyguard = async (req, res, next) => {
         status: rawSession.status,
         latitude: rawSession.latitude,
         longitude: rawSession.longitude,
-        qrCode: rawSession.qrCode,
-        qrCodeExpiry: rawSession.qrCodeExpiry,
         manualCode: rawSession.manualCode,
         networkSSID: rawSession.networkSSID,
         courseCode: rawSession.course?.code,
@@ -139,47 +116,30 @@ const bodyguard = async (req, res, next) => {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'This attendance session has been closed.', session);
     }
 
-    // 5. Validate QR/manual code matches session
-    if (isQrCheckIn) {
-      const isManualMatch = isManualCode && session.manualCode === qrCode;
-      const isQrMatch = !isManualCode && session.qrCode === qrCode;
+    // 4. Geofencing & SSID check — skipped entirely for manual code (GPS fallback path)
+    if (!isManualCode) {
+      const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
 
-      if (!isManualMatch && !isQrMatch) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Outdated or invalid code. Use the current live code.', session);
-      }
-
-      if (isQrMatch && new Date() > new Date(session.qrCodeExpiry)) {
-        return handleCheckInFailure(indexNumber, ipAddress, res, 'Code has expired. Please get the latest code.', session);
-      }
-    } else {
-      if (session.latitude === null || session.longitude === null) {
-        return handleCheckInFailure(
-          indexNumber, ipAddress, res,
-          'GPS check-in is unavailable for this session. Enter the manual code instead.',
-          session
-        );
-      }
-    }
-
-    // 6. Geofencing & SSID check
-    const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
-    if (session.sessionType === 'PHYSICAL' || !isQrCheckIn) {
       if (session.latitude !== null && session.longitude !== null) {
         if (!latitude || !longitude) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'GPS location is required to verify your presence.', session);
+          return handleCheckInFailure(
+            indexNumber, ipAddress, res,
+            'Your GPS location is required for this session. Enable location services and try again, or ask your rep for the manual code.',
+            session
+          );
         }
 
         const latFloat = parseFloat(latitude);
         const lonFloat = parseFloat(longitude);
         if (isNaN(latFloat) || isNaN(lonFloat)) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates.', session);
+          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates received. Try again.', session);
         }
 
         const distance = getDistance(session.latitude, session.longitude, latFloat, lonFloat);
         if (distance > geofenceRadius) {
           return handleCheckInFailure(
             indexNumber, ipAddress, res,
-            `Out of range. You are ${Math.round(distance)}m away. Must be within ${geofenceRadius}m of the classroom.`,
+            `You are ${Math.round(distance)}m away from the classroom (limit: ${geofenceRadius}m). Move closer and try again, or ask your rep for the manual code.`,
             session
           );
         }
@@ -189,14 +149,14 @@ const bodyguard = async (req, res, next) => {
         if (!networkSSID || networkSSID.toLowerCase().trim() !== session.networkSSID.toLowerCase().trim()) {
           return handleCheckInFailure(
             indexNumber, ipAddress, res,
-            `Connect to the class Wi-Fi network: ${session.networkSSID}`,
+            `Connect to the class Wi-Fi network "${session.networkSSID}" and try again.`,
             session
           );
         }
       }
     }
 
-    // 7. Class enrollment + duplicate check in parallel
+    // 5. Class enrollment + duplicate check in parallel
     const [isMember, existingAttendance] = await Promise.all([
       session.classId
         ? prisma.classStudent.findUnique({
@@ -211,18 +171,14 @@ const bodyguard = async (req, res, next) => {
     ]);
 
     if (session.classId && !isMember) {
-      return handleCheckInFailure(
-        indexNumber, ipAddress, res,
-        'You are not enrolled in this class.',
-        session
-      );
+      return handleCheckInFailure(indexNumber, ipAddress, res, 'You are not enrolled in this class.', session);
     }
 
     if (existingAttendance) {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'You have already checked in for this session.', session);
     }
 
-    // 8. Determine attendance status
+    // 6. Determine attendance status
     const lateWindow = settings ? settings.lateWindowMinutes : 15;
     const minutesElapsed = (new Date() - new Date(session.startTime)) / 60000;
     const attendanceStatus = minutesElapsed > lateWindow ? 'LATE' : 'PRESENT';

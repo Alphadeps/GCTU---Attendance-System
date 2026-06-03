@@ -83,7 +83,6 @@ export default function SuperAdminDashboard() {
     deptName: 'Ghana Communication Technology University',
     deptLogoUrl: '/logo.jfif',
     lateWindowMinutes: 15,
-    qrExpirySeconds: 30,
     geofenceRadiusMeters: 100,
   });
   const [logoFile, setLogoFile] = useState(null);
@@ -1433,7 +1432,6 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     {label:'Late Grace Period', val:`${settings.lateWindowMinutes} min`, color:'#E5A93C'},
-                    {label:'QR Expiry', val:`${settings.qrExpirySeconds} sec`, color:'#0c2340'},
                     {label:'Geofence Radius', val:`${settings.geofenceRadiusMeters} m`, color:'#82d616'},
                   ].map((t,i) => (
                     <div key={i} className="bg-[#f8f9fa] rounded-xl p-3.5">
@@ -2104,12 +2102,11 @@ export default function SuperAdminDashboard() {
               <div className="sip-card p-6 space-y-5">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Thresholds</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Calibrate geofence, late window, and QR token settings</p>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Calibrate geofence radius and late check-in window</p>
                 </div>
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
                   {[
                     {label:'Late Grace Period (Minutes)', field:'lateWindowMinutes', val:settings.lateWindowMinutes},
-                    {label:'QR Expiry (Seconds)', field:'qrExpirySeconds', val:settings.qrExpirySeconds},
                     {label:'Geofence Radius (Meters)', field:'geofenceRadiusMeters', val:settings.geofenceRadiusMeters},
                   ].map(t => (
                     <div key={t.field}>

@@ -21,10 +21,8 @@ const SessionManager = () => {
 
   const [session, setSession] = useState(null);
   const [attendances, setAttendances] = useState([]);
-  const [qrImage, setQrImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [countdown, setCountdown] = useState(25);
   const [activePanelTab, setActivePanelTab] = useState('logs'); // 'logs' | 'security'
   
   // Confirm modal state
@@ -36,18 +34,12 @@ const SessionManager = () => {
 
   // Poll timers
   const pollTimerRef = useRef(null);
-  // Countdown interval ref — holds the single interval ID to prevent stacking
-  const countdownRef = useRef(null);
 
   const fetchSessionDetails = async () => {
     try {
       const response = await api.get(`/sessions/${id}`);
       setSession(response.data);
       setAttendances(response.data.attendances || []);
-      
-      if (response.data.qrCodeImage) {
-        setQrImage(response.data.qrCodeImage);
-      }
     } catch (err) {
       console.error('Fetch session details error:', err);
       setErrorMsg(err.response?.data?.error || 'Failed to load session details');
@@ -56,56 +48,12 @@ const SessionManager = () => {
     }
   };
 
-  const refreshQR = async () => {
-    try {
-      const response = await api.post(`/sessions/${id}/refresh-qr`);
-      setQrImage(response.data.qrCodeImage);
-      setCountdown(25);
-    } catch (err) {
-      console.error('Refresh QR error:', err);
-    }
-  };
-
   useEffect(() => {
     fetchSessionDetails();
-    
-    // Start polling every 10 seconds for attendance logs
     pollTimerRef.current = setInterval(fetchSessionDetails, 10000);
-
-    return () => {
-      clearInterval(pollTimerRef.current);
-    };
+    return () => { clearInterval(pollTimerRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  useEffect(() => {
-    // Clear any existing countdown interval
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-      countdownRef.current = null;
-    }
-
-    // Only start countdown when session is OPEN
-    if (session?.status === 'OPEN') {
-      countdownRef.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            refreshQR();
-            return 25;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-        countdownRef.current = null;
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.status, session?.id]);
 
   const handleUpdateStatus = async (attendanceId, newStatus) => {
     try {
@@ -629,56 +577,30 @@ const SessionManager = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ── Left Panel ───────────────────────────────────────────── */}
           <div className="space-y-5">
-            {/* Live QR */}
-            {session.status === 'OPEN' && (
+            {/* Manual code — shown while session is OPEN */}
+            {session.status === 'OPEN' && session.manualCode && (
               <div className="sip-card p-5 text-center animate-fade-in-up">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xs font-bold text-[#344767] uppercase tracking-wider">Live QR Code</h3>
+                  <h3 className="text-xs font-bold text-[#344767] uppercase tracking-wider">Attendance Code</h3>
                   <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                     LIVE
                   </span>
                 </div>
 
-                <div className="bg-[#f8f9fa] p-3 rounded-xl inline-block mb-3">
-                  {qrImage ? (
-                    <img src={qrImage} alt="Live QR Code" className="w-52 h-52 object-contain" />
-                  ) : (
-                    <div className="w-52 h-52 flex items-center justify-center">
-                      <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Manual Fallback Code */}
-                {session.manualCode && (
-                  <div className="mb-4 px-4">
-                    <div className="bg-slate-900 rounded-xl p-3 border border-slate-800 shadow-inner">
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Manual Entry Code</p>
-                      <div className="flex items-center justify-center gap-2">
-                        {session.manualCode.split('').map((digit, i) => (
-                          <span key={i} className="w-8 h-10 flex items-center justify-center bg-slate-800 text-white rounded-lg text-lg font-black font-mono border border-slate-700">
-                            {digit}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-inner mb-4">
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-3">Share this code with your class</p>
+                  <div className="flex items-center justify-center gap-2">
+                    {session.manualCode.split('').map((digit, i) => (
+                      <span key={i} className="w-10 h-12 flex items-center justify-center bg-slate-800 text-white rounded-xl text-2xl font-black font-mono border border-slate-700 shadow">
+                        {digit}
+                      </span>
+                    ))}
                   </div>
-                )}
-
-                {/* Countdown ring */}
-                <div className="flex items-center justify-center gap-2 bg-[#f0f2f5] rounded-xl py-2 px-4 w-fit mx-auto mb-3">
-                  <svg className="w-4 h-4 text-[#E5A93C] -rotate-90 animate-spin-slow" viewBox="0 0 36 36" fill="none">
-                    <circle cx="18" cy="18" r="15" stroke="#e9ecef" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15" stroke="#E5A93C" strokeWidth="3" strokeDasharray="94" strokeDashoffset={94 - (94 * countdown / 25)} strokeLinecap="round" />
-                  </svg>
-                  <span className="text-xs font-bold text-[#344767]">
-                    Rotates in <span className="font-mono text-[#E5A93C]">{countdown}s</span>
-                  </span>
                 </div>
 
                 <p className="text-[11px] text-[#8392ab] leading-relaxed">
-                  QR refreshes every 25 s. Screenshots will fail validation.
+                  Students check in via GPS. This code is only needed if their location is unavailable.
                 </p>
               </div>
             )}

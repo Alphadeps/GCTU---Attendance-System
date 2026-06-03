@@ -300,13 +300,13 @@ const repSelfCheckIn = async (req, res) => {
  */
 const markProxyAttendance = async (req, res) => {
   try {
-    const { submitterIndexNumber, targetIndexNumber, reason, sessionId, qrCode, latitude, longitude } = req.body;
+    const { submitterIndexNumber, targetIndexNumber, reason, sessionId, manualCode, latitude, longitude } = req.body;
 
     if (!submitterIndexNumber || !targetIndexNumber || !reason) {
       return res.status(400).json({ error: 'Submitter index number, target index number, and reason are all required.' });
     }
-    if (!sessionId && !qrCode) {
-      return res.status(400).json({ error: 'A session ID or attendance code is required.' });
+    if (!sessionId && !manualCode) {
+      return res.status(400).json({ error: 'A session ID or 6-digit manual code is required.' });
     }
     if (submitterIndexNumber.trim().toLowerCase() === targetIndexNumber.trim().toLowerCase()) {
       return res.status(400).json({ error: 'You cannot mark attendance for yourself using this form.' });
@@ -320,28 +320,16 @@ const markProxyAttendance = async (req, res) => {
     if (!submitter) return res.status(404).json({ error: 'Your student record was not found. Check your index number.' });
     if (!target) return res.status(404).json({ error: 'Target student not found. Check the index number.' });
 
-    // Resolve session
+    // Resolve session — manual code or direct session ID
     let session;
-    const jwt = require('jsonwebtoken');
-    const { JWT_SECRET } = require('../middleware/auth');
-
-    if (qrCode) {
-      if (/^\d{6}$/.test(qrCode)) {
-        session = await prisma.attendanceSession.findFirst({
-          where: { manualCode: qrCode, status: 'OPEN' },
-          include: { course: { select: { code: true, name: true } } }
-        });
-      } else {
-        try {
-          const decoded = jwt.verify(qrCode, JWT_SECRET);
-          session = await prisma.attendanceSession.findUnique({
-            where: { id: decoded.sessionId },
-            include: { course: { select: { code: true, name: true } } }
-          });
-        } catch (_) {
-          return res.status(400).json({ error: 'Invalid or expired code.' });
-        }
+    if (manualCode) {
+      if (!/^\d{6}$/.test(manualCode)) {
+        return res.status(400).json({ error: 'Manual code must be a 6-digit number.' });
       }
+      session = await prisma.attendanceSession.findFirst({
+        where: { manualCode, status: 'OPEN' },
+        include: { course: { select: { code: true, name: true } } }
+      });
     } else {
       session = await prisma.attendanceSession.findUnique({
         where: { id: sessionId },

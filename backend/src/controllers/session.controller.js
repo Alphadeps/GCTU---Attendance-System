@@ -1,9 +1,6 @@
-const jwt = require('jsonwebtoken');
-const QRCode = require('qrcode');
 const prisma = require('../lib/prisma');
-const { JWT_SECRET } = require('../middleware/auth');
 const { createNotificationHelper } = require('./notification.controller');
-const { cacheSession, removeCachedSession, updateCachedSession } = require('../lib/securityCache');
+const { cacheSession, removeCachedSession } = require('../lib/securityCache');
 const { logAudit } = require('../lib/logger');
 
 // 1. Create a session
@@ -60,11 +57,9 @@ const createSession = async (req, res) => {
       }
     }
 
-    // Fetch system settings for QR expiry
-    const settings = await prisma.systemSettings.findFirst();
-    const qrExpirySeconds = settings ? settings.qrExpirySeconds : 30;
+    // Generate a 6-digit manual check-in code (fallback for GPS failures)
+    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Initialize session with temporary QR values
     const startTime = new Date();
     const session = await prisma.attendanceSession.create({
       data: {
@@ -78,44 +73,16 @@ const createSession = async (req, res) => {
         latitude: latitude ? parseFloat(latitude) : null,
         longitude: longitude ? parseFloat(longitude) : null,
         networkSSID: networkSSID || null,
-        qrCode: '',
-        qrCodeExpiry: new Date()
-      }
-    });
-
-    // Generate first QR code (valid for qrExpirySeconds)
-    const qrExpiry = new Date(Date.now() + (qrExpirySeconds * 1000));
-    const qrCodeToken = jwt.sign(
-      { sessionId: session.id, expiry: qrExpiry.getTime() },
-      JWT_SECRET,
-      { expiresIn: `${qrExpirySeconds}s` }
-    );
-
-    // Generate a short 6-digit manual code for fallback
-    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Update session with QR code and manual code
-    const updatedSession = await prisma.attendanceSession.update({
-      where: { id: session.id },
-      data: {
-        qrCode: qrCodeToken,
-        qrCodeExpiry: qrExpiry,
         manualCode
       },
       include: { course: true }
     });
 
     // Register active session in security cache
-    cacheSession(updatedSession);
-
-    // Generate base64 QR code image
-    const qrCodeImage = await QRCode.toDataURL(qrCodeToken);
+    cacheSession(session);
 
     // Send response immediately
-    res.status(201).json({
-      ...updatedSession,
-      qrCodeImage
-    });
+    res.status(201).json(session);
 
     // Trigger Notifications in background (after response sent)
     setImmediate(async () => {
@@ -390,67 +357,7 @@ const approveSession = async (req, res) => {
   }
 };
 
-// 5. Refresh QR Code
-const refreshQRCode = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const session = await prisma.attendanceSession.findUnique({ where: { id } });
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
-    if (session.status !== 'OPEN') {
-      return res.status(400).json({ error: 'Cannot refresh QR code for closed or approved sessions' });
-    }
-
-    // Fetch system settings for QR expiry
-    const settings = await prisma.systemSettings.findFirst();
-    const qrExpirySeconds = settings ? settings.qrExpirySeconds : 30;
-
-    // Generate new QR code (valid for qrExpirySeconds)
-    const qrExpiry = new Date(Date.now() + (qrExpirySeconds * 1000));
-    const qrCodeToken = jwt.sign(
-      { sessionId: session.id, expiry: qrExpiry.getTime() },
-      JWT_SECRET,
-      { expiresIn: `${qrExpirySeconds}s` }
-    );
-
-    // Generate a short 6-digit manual code for fallback
-    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const updated = await prisma.attendanceSession.update({
-      where: { id },
-      data: {
-        qrCode: qrCodeToken,
-        qrCodeExpiry: qrExpiry,
-        manualCode
-      }
-    });
-
-    // Update refreshed QR parameters in security cache
-    updateCachedSession(id, {
-      qrCode: qrCodeToken,
-      qrCodeExpiry: qrExpiry,
-      manualCode
-    });
-
-    // Generate base64 QR code image
-    const qrCodeImage = await QRCode.toDataURL(qrCodeToken);
-
-    res.json({
-      message: 'QR code refreshed successfully',
-      qrCode: updated.qrCode,
-      qrCodeExpiry: updated.qrCodeExpiry,
-      qrCodeImage
-    });
-  } catch (err) {
-    console.error('Refresh QR code error:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
-
-// 6. Get Session by ID
+// 5. Get Session by ID
 const getSessionById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -487,6 +394,5 @@ module.exports = {
   getActiveSessions,
   closeSession,
   approveSession,
-  refreshQRCode,
   getSessionById
 };
