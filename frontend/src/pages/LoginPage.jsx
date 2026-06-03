@@ -191,6 +191,43 @@ const LoginPage = () => {
 
         <div className="login-right-inner animate-fade-in-up">
 
+          {/* Student login callout */}
+          <button
+            onClick={() => navigate('/student-login')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              width: '100%',
+              background: 'linear-gradient(135deg, #0c2340 0%, #1a3c6d 100%)',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '0.85rem 1rem',
+              cursor: 'pointer',
+              marginBottom: '1.75rem',
+              textAlign: 'left',
+            }}
+          >
+            <div style={{
+              width: 36, height: 36, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#fff' }}>Are you a student?</div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>Tap here — sign in with your index number</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
+
           {/* Heading */}
           <div style={{ marginBottom: '2rem' }}>
             <h2 style={{
@@ -200,7 +237,7 @@ const LoginPage = () => {
               margin: '0 0 6px 0',
               letterSpacing: '-0.3px',
             }}>
-              Sign In
+              Staff Sign In
             </h2>
             <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Staff &amp; Admin access — enter your credentials below
@@ -289,22 +326,6 @@ const LoginPage = () => {
 
           {/* Footer links */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'center' }}>
-            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
-              Are you a student?{' '}
-              <button
-                onClick={() => navigate('/student-login')}
-                style={{
-                  background: 'none', border: 'none', padding: 0,
-                  color: 'var(--sip-text-heading)', fontWeight: 700,
-                  fontSize: '13px', cursor: 'pointer',
-                  transition: 'color 150ms ease',
-                }}
-                onMouseEnter={(e) => { e.target.style.color = 'var(--sip-primary)'; }}
-                onMouseLeave={(e) => { e.target.style.color = 'var(--sip-text-heading)'; }}
-              >
-                Student Login
-              </button>
-            </p>
             <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Just checking in?{' '}
               <button

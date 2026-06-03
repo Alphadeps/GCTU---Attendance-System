@@ -55,13 +55,6 @@ const bodyguard = async (req, res, next) => {
       });
     }
 
-    if (isLocked(ipAddress)) {
-      const expiry = getLockExpiration(ipAddress);
-      return res.status(423).json({
-        error: `Too many failures from this device. Try again after ${new Date(expiry).toLocaleTimeString()}.`
-      });
-    }
-
     // 2. Input Validation
     const validation = checkInSchema.safeParse(req.body);
     if (!validation.success) {
@@ -244,22 +237,17 @@ const bodyguard = async (req, res, next) => {
 
 async function handleCheckInFailure(indexNumber, ip, res, reason, session) {
   let indexLock = { locked: false };
-  let ipLock = { locked: false };
 
   if (indexNumber) indexLock = recordFailure(indexNumber);
-  ipLock = recordFailure(ip);
 
-  if (indexLock.locked || ipLock.locked) {
-    const lockTarget = indexLock.locked ? `Index Number: ${indexNumber}` : `IP: ${ip}`;
-    const expiry = indexLock.locked ? indexLock.lockUntil : ipLock.lockUntil;
-
+  if (indexLock.locked) {
     if (session && session.repId) {
       setImmediate(async () => {
         try {
           await createNotificationHelper({
             userId: session.repId,
             title: 'Security Alert',
-            message: `Multiple failed check-in attempts for ${lockTarget}. Account locked until ${new Date(expiry).toLocaleTimeString()}. Last reason: ${reason}`,
+            message: `Multiple failed check-in attempts for Index Number: ${indexNumber}. Account locked until ${new Date(indexLock.lockUntil).toLocaleTimeString()}. Last reason: ${reason}`,
             type: 'WARNING'
           });
         } catch (err) {
@@ -269,7 +257,7 @@ async function handleCheckInFailure(indexNumber, ip, res, reason, session) {
     }
 
     return res.status(423).json({
-      error: `Account locked due to multiple failures. Try again after ${new Date(expiry).toLocaleTimeString()}.`
+      error: `Account locked due to multiple failed attempts. Try again after ${new Date(indexLock.lockUntil).toLocaleTimeString()}.`
     });
   }
 

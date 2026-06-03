@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
 // Import Pages
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import StudentLoginPage from './pages/StudentLoginPage';
 import RepDashboard from './pages/RepDashboard';
@@ -50,7 +51,7 @@ function App() {
         path="/"
         element={
           <PublicRoute>
-            <LoginPage />
+            <LandingPage />
           </PublicRoute>
         }
       />
