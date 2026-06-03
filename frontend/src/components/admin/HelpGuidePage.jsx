@@ -159,13 +159,11 @@ const HelpGuidePage = () => {
       steps: [
         'Go to "Thresholds & Settings" tab',
         'Adjust Late Grace Period (minutes after session start before marking as LATE)',
-        'Set QR Code Expiry (how often QR codes refresh for security)',
         'Configure Geofence Radius (maximum distance from class location for check-in)',
         'Click "Save Settings"'
       ],
       tips: [
         'Default late window: 15 minutes',
-        'Default QR expiry: 30 seconds',
         'Default geofence: 100 meters',
         'Changes apply immediately to new sessions'
       ]
@@ -178,7 +176,7 @@ const HelpGuidePage = () => {
       description: 'How the attendance system works',
       steps: [
         '1. Rep logs in and creates an attendance session for a course',
-        '2. Students scan QR code or check in via the student portal',
+        '2. Students check in via GPS geofencing through the student portal',
         '3. System marks attendance as PRESENT, LATE, or ABSENT based on time',
         '4. Rep closes the session when class ends',
         '5. Rep generates an attendance report',

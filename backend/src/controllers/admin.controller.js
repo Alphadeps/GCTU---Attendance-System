@@ -1446,7 +1446,6 @@ const getSettings = async (req, res) => {
           deptName: 'Ghana Communication Technology University',
           deptLogoUrl: '/logo.jfif',
           lateWindowMinutes: 15,
-          qrExpirySeconds: 25,
           geofenceRadiusMeters: 100
         }
       });
@@ -1460,7 +1459,7 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
   try {
-    const { deptName, deptLogoUrl, lateWindowMinutes, qrExpirySeconds, geofenceRadiusMeters } = req.body;
+    const { deptName, deptLogoUrl, lateWindowMinutes, geofenceRadiusMeters } = req.body;
 
     let settings = await prisma.systemSettings.findFirst();
 
@@ -1470,7 +1469,6 @@ const updateSettings = async (req, res) => {
           deptName: deptName || 'Ghana Communication Technology University',
           deptLogoUrl: deptLogoUrl || '/logo.jfif',
           lateWindowMinutes: lateWindowMinutes ? parseInt(lateWindowMinutes) : 15,
-          qrExpirySeconds: qrExpirySeconds ? parseInt(qrExpirySeconds) : 25,
           geofenceRadiusMeters: geofenceRadiusMeters ? parseInt(geofenceRadiusMeters) : 100
         }
       });
@@ -1481,7 +1479,6 @@ const updateSettings = async (req, res) => {
           deptName: deptName !== undefined ? deptName : settings.deptName,
           deptLogoUrl: deptLogoUrl !== undefined ? deptLogoUrl : settings.deptLogoUrl,
           lateWindowMinutes: lateWindowMinutes !== undefined ? parseInt(lateWindowMinutes) : settings.lateWindowMinutes,
-          qrExpirySeconds: qrExpirySeconds !== undefined ? parseInt(qrExpirySeconds) : settings.qrExpirySeconds,
           geofenceRadiusMeters: geofenceRadiusMeters !== undefined ? parseInt(geofenceRadiusMeters) : settings.geofenceRadiusMeters
         }
       });

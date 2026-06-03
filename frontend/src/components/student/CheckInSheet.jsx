@@ -31,10 +31,16 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
 
   const collectGPS = () =>
     new Promise((resolve) => {
-      if (!navigator.geolocation) { resolve({ lat: null, lng: null }); return; }
+      if (!navigator.geolocation) {
+        resolve({ lat: null, lng: null, gpsError: 'unsupported' });
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-        () => resolve({ lat: null, lng: null }),
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, gpsError: null }),
+        (err) => {
+          const gpsError = err.code === 1 ? 'denied' : err.code === 3 ? 'timeout' : 'unavailable';
+          resolve({ lat: null, lng: null, gpsError });
+        },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     });
@@ -72,18 +78,34 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
     setProxyReason('');
   };
 
+  const GPS_ERRORS = {
+    denied:      'Location access was denied. Please enable location services in your browser or device settings, then try again — or tap "Use Code" to enter the manual code from your rep.',
+    timeout:     'GPS timed out. Move closer to a window or enable Wi-Fi to improve signal accuracy, then try again — or tap "Use Code" to enter the manual code from your rep.',
+    unavailable: 'Your GPS signal is unavailable. Move to an open area and try again — or tap "Use Code" to enter the manual code from your rep.',
+    unsupported: 'Your device does not support GPS. Use the manual code from your rep to check in.',
+  };
+
   // Submit own attendance
-  const submitSelf = async (codeToken, useSessionId = false) => {
+  const submitSelf = async (manualCodeToken = null) => {
     setSubmitting(true);
     setStep(2);
     setSubmittingStatus('Getting your location...');
 
-    const { lat, lng } = await collectGPS();
+    const { lat, lng, gpsError } = await collectGPS();
+
+    // If GPS failed and we're not using a manual code, show actionable message
+    if ((lat === null || lng === null) && !manualCodeToken) {
+      setSubmitErrorMsg(GPS_ERRORS[gpsError] || GPS_ERRORS.unavailable);
+      setStep(4);
+      setSubmitting(false);
+      return;
+    }
+
     setSubmittingStatus('Submitting attendance...');
 
     const payload = { indexNumber, name: fullName, latitude: lat, longitude: lng, deviceInfo };
-    if (useSessionId) payload.sessionId = session?.id;
-    else payload.qrCode = codeToken;
+    if (manualCodeToken) payload.manualCode = manualCodeToken;
+    else payload.sessionId = session?.id;
 
     const maxRetries = 3;
     let attempt = 0;
@@ -152,7 +174,8 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
   const handleManualSubmit = (e) => {
     e.preventDefault();
     if (!manualCode.trim()) { toast.error('Enter a valid code'); return; }
-    submitSelf(manualCode.trim(), false);
+    if (!/^\d{6}$/.test(manualCode.trim())) { toast.error('Code must be exactly 6 digits'); return; }
+    submitSelf(manualCode.trim());
   };
 
   const handleRetry = () => {
@@ -220,7 +243,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                 {inputMode === 'gps' && (
                   <>
                     <button
-                      onClick={() => submitSelf('', true)}
+                      onClick={() => submitSelf()}
                       className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] hover:opacity-90 text-white font-extrabold py-4 rounded-xl text-sm transition-colors shadow-lg"
                     >
                       Mark
@@ -235,8 +258,8 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                       onClick={() => setInputMode('code')}
                       className="w-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-[#344767] font-bold py-3 rounded-xl text-xs transition-colors"
                     >
-                      Use Code
-                      <span className="block text-[10px] font-normal text-[#8392ab] mt-0.5">Enter the attendance code manually</span>
+                      Use Code Instead
+                      <span className="block text-[10px] font-normal text-[#8392ab] mt-0.5">GPS not working? Enter the 6-digit code from your rep</span>
                     </button>
                   </>
                 )}
@@ -244,14 +267,17 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                 {inputMode === 'code' && (
                   <form onSubmit={handleManualSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">Attendance Code</label>
+                      <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">6-Digit Code</label>
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="\d{6}"
+                        maxLength={6}
                         required
-                        placeholder="Enter code from your rep..."
+                        placeholder="000000"
                         value={manualCode}
-                        onChange={(e) => setManualCode(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767] font-mono"
+                        onChange={(e) => setManualCode(e.target.value.replace(/\D/g, ''))}
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#344767] text-sm focus:outline-none focus:border-[#344767] font-mono tracking-widest text-center text-lg"
                         autoFocus
                       />
                     </div>

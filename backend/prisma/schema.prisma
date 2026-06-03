@@ -102,8 +102,6 @@ model AttendanceSession {
   status             SessionStatus
   latitude           Float?
   longitude          Float?
-  qrCode             String?
-  qrCodeExpiry       DateTime?
   manualCode         String?
   networkSSID        String?
   attendances        Attendance[]
@@ -228,7 +226,6 @@ model SystemSettings {
   deptName              String   @default("Class Attendance System")
   deptLogoUrl           String?
   lateWindowMinutes     Int      @default(15)
-  qrExpirySeconds       Int      @default(30)
   geofenceRadiusMeters  Int      @default(100)
   updatedAt             DateTime @updatedAt
 }
