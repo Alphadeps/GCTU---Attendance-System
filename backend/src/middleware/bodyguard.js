@@ -116,43 +116,41 @@ const bodyguard = async (req, res, next) => {
       return handleCheckInFailure(indexNumber, ipAddress, res, 'This attendance session has been closed.', session);
     }
 
-    // 4. Geofencing & SSID check — skipped entirely for manual code (GPS fallback path)
-    if (!isManualCode) {
-      const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
+    // 4. Geofencing & SSID check — applies to all check-ins, including manual code
+    const geofenceRadius = settings ? settings.geofenceRadiusMeters : 100;
 
-      if (session.latitude !== null && session.longitude !== null) {
-        if (!latitude || !longitude) {
-          return handleCheckInFailure(
-            indexNumber, ipAddress, res,
-            'Your GPS location is required for this session. Enable location services and try again, or ask your rep for the manual code.',
-            session
-          );
-        }
-
-        const latFloat = parseFloat(latitude);
-        const lonFloat = parseFloat(longitude);
-        if (isNaN(latFloat) || isNaN(lonFloat)) {
-          return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates received. Try again.', session);
-        }
-
-        const distance = getDistance(session.latitude, session.longitude, latFloat, lonFloat);
-        if (distance > geofenceRadius) {
-          return handleCheckInFailure(
-            indexNumber, ipAddress, res,
-            `You are ${Math.round(distance)}m away from the classroom (limit: ${geofenceRadius}m). Move closer and try again, or ask your rep for the manual code.`,
-            session
-          );
-        }
+    if (session.latitude !== null && session.longitude !== null) {
+      if (!latitude || !longitude) {
+        return handleCheckInFailure(
+          indexNumber, ipAddress, res,
+          'Your GPS location is required for this session. Enable location services and try again.',
+          session
+        );
       }
 
-      if (session.networkSSID && session.networkSSID.trim() !== '') {
-        if (!networkSSID || networkSSID.toLowerCase().trim() !== session.networkSSID.toLowerCase().trim()) {
-          return handleCheckInFailure(
-            indexNumber, ipAddress, res,
-            `Connect to the class Wi-Fi network "${session.networkSSID}" and try again.`,
-            session
-          );
-        }
+      const latFloat = parseFloat(latitude);
+      const lonFloat = parseFloat(longitude);
+      if (isNaN(latFloat) || isNaN(lonFloat)) {
+        return handleCheckInFailure(indexNumber, ipAddress, res, 'Invalid GPS coordinates received. Try again.', session);
+      }
+
+      const distance = getDistance(session.latitude, session.longitude, latFloat, lonFloat);
+      if (distance > geofenceRadius) {
+        return handleCheckInFailure(
+          indexNumber, ipAddress, res,
+          `You are ${Math.round(distance)}m away from the classroom (limit: ${geofenceRadius}m). Move closer and try again.`,
+          session
+        );
+      }
+    }
+
+    if (session.networkSSID && session.networkSSID.trim() !== '') {
+      if (!networkSSID || networkSSID.toLowerCase().trim() !== session.networkSSID.toLowerCase().trim()) {
+        return handleCheckInFailure(
+          indexNumber, ipAddress, res,
+          `Connect to the class Wi-Fi network "${session.networkSSID}" and try again.`,
+          session
+        );
       }
     }
 

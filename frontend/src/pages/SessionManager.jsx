@@ -21,6 +21,7 @@ const SessionManager = () => {
 
   const [session, setSession] = useState(null);
   const [attendances, setAttendances] = useState([]);
+  const [paginationTotal, setPaginationTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [activePanelTab, setActivePanelTab] = useState('logs'); // 'logs' | 'security'
@@ -37,9 +38,25 @@ const SessionManager = () => {
 
   const fetchSessionDetails = async () => {
     try {
-      const response = await api.get(`/sessions/${id}`);
-      setSession(response.data);
-      setAttendances(response.data.attendances || []);
+      const first = await api.get(`/sessions/${id}?limit=200`);
+      const data = first.data;
+      setSession(data);
+
+      let allAttendances = data.attendances || [];
+      const pagination = data.pagination;
+
+      // Fetch remaining pages in parallel so all attendances are available for
+      // stats, security scans, and exports — not just the first page.
+      if (pagination && pagination.pages > 1) {
+        const pageNums = Array.from({ length: pagination.pages - 1 }, (_, i) => i + 2);
+        const rest = await Promise.all(
+          pageNums.map(p => api.get(`/sessions/${id}?limit=200&page=${p}`))
+        );
+        rest.forEach(r => { allAttendances = allAttendances.concat(r.data.attendances || []); });
+      }
+
+      setAttendances(allAttendances);
+      setPaginationTotal(pagination?.total ?? allAttendances.length);
     } catch (err) {
       console.error('Fetch session details error:', err);
       setErrorMsg(err.response?.data?.error || 'Failed to load session details');
@@ -483,7 +500,7 @@ const SessionManager = () => {
   }
 
   const totalCheckedIn = presentCount + lateCount;
-  const totalStudents = attendances.length || 1;
+  const totalStudents = paginationTotal || attendances.length || 1;
   const attendanceRate = Math.round((totalCheckedIn / totalStudents) * 100);
 
   return (

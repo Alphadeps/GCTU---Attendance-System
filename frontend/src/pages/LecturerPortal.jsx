@@ -123,8 +123,20 @@ const LecturerPortal = () => {
     setLoadingDetails(true);
     setSignature('');
     try {
-      const response = await api.get(`/sessions/${session.id}`);
-      setAttendances(response.data.attendances || []);
+      const first = await api.get(`/sessions/${session.id}?limit=200`);
+      let allAttendances = first.data.attendances || [];
+      const pagination = first.data.pagination;
+
+      // Fetch remaining pages so the lecturer sees the full register before signing.
+      if (pagination && pagination.pages > 1) {
+        const pageNums = Array.from({ length: pagination.pages - 1 }, (_, i) => i + 2);
+        const rest = await Promise.all(
+          pageNums.map(p => api.get(`/sessions/${session.id}?limit=200&page=${p}`))
+        );
+        rest.forEach(r => { allAttendances = allAttendances.concat(r.data.attendances || []); });
+      }
+
+      setAttendances(allAttendances);
     } catch (err) {
       console.error('Fetch session details error:', err);
       toast.error(err.response?.data?.error || 'Failed to load session details');
