@@ -3,6 +3,43 @@ const { createNotificationHelper } = require('./notification.controller');
 const { cacheSession, removeCachedSession } = require('../lib/securityCache');
 const { logAudit } = require('../lib/logger');
 
+// Shared helper: resolve which students are eligible for absent-marking on a session.
+// Exported so sessionExpiry.js can use the same logic without duplication.
+async function resolveEligibleStudents(classId, courseId) {
+  if (classId) {
+    const classStudents = await prisma.classStudent.findMany({
+      where: { classId },
+      select: { student: { select: { id: true, indexNumber: true, name: true } } }
+    });
+    return classStudents.map(cs => cs.student);
+  }
+
+  if (!courseId) {
+    console.warn('[AbsentMarking] Session has no classId and no courseId — skipping absent marking');
+    return [];
+  }
+
+  const classesWithCourse = await prisma.classCourse.findMany({
+    where: { courseId },
+    select: { classId: true }
+  });
+  const classIds = classesWithCourse.map(cc => cc.classId);
+
+  if (classIds.length === 0) {
+    console.warn(`[AbsentMarking] No classes linked to courseId ${courseId} — skipping absent marking`);
+    return [];
+  }
+
+  const classStudents = await prisma.classStudent.findMany({
+    where: { classId: { in: classIds } },
+    select: { student: { select: { id: true, indexNumber: true, name: true } } }
+  });
+  const seen = new Set();
+  return classStudents
+    .map(cs => cs.student)
+    .filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+}
+
 // 1. Create a session
 const createSession = async (req, res) => {
   try {
@@ -55,32 +92,47 @@ const createSession = async (req, res) => {
       ? { status: 'OPEN', classId }
       : { status: 'OPEN', classId: null };
 
-    const activeOpen = await prisma.attendanceSession.findFirst({ where: conflictWhere });
-    if (activeOpen) {
-      const scope = classId ? 'your class' : 'the system (no class assigned)';
-      return res.status(400).json({ error: `There is already an active open session for ${scope}. Close it first.` });
-    }
+    const scope = classId ? 'your class' : 'the system (no class assigned)';
 
     // Generate a 6-digit manual check-in code (fallback for GPS failures)
     const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
 
     const startTime = new Date();
-    const session = await prisma.attendanceSession.create({
-      data: {
-        courseId: course.id,
-        repId: req.user.id,
-        classId,
-        sessionType,
-        startTime,
-        endTime: new Date(endTime),
-        status: 'OPEN',
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
-        networkSSID: networkSSID || null,
-        manualCode
-      },
-      include: { course: true }
-    });
+
+    // Wrap the conflict check + create in a serializable transaction to prevent
+    // two concurrent requests from both passing the check and creating duplicate sessions.
+    let session;
+    try {
+      session = await prisma.$transaction(async (tx) => {
+        const conflict = await tx.attendanceSession.findFirst({ where: conflictWhere });
+        if (conflict) {
+          const err = new Error('SESSION_CONFLICT');
+          err.isConflict = true;
+          throw err;
+        }
+        return tx.attendanceSession.create({
+          data: {
+            courseId: course.id,
+            repId: req.user.id,
+            classId,
+            sessionType,
+            startTime,
+            endTime: new Date(endTime),
+            status: 'OPEN',
+            latitude: latitude ? parseFloat(latitude) : null,
+            longitude: longitude ? parseFloat(longitude) : null,
+            networkSSID: networkSSID || null,
+            manualCode
+          },
+          include: { course: true }
+        });
+      }, { isolationLevel: 'Serializable' });
+    } catch (txErr) {
+      if (txErr.isConflict || txErr.code === 'P2034') {
+        return res.status(400).json({ error: `There is already an active open session for ${scope}. Close it first.` });
+      }
+      throw txErr;
+    }
 
     // Register active session in security cache
     cacheSession(session);
@@ -183,31 +235,7 @@ const closeSession = async (req, res) => {
     removeCachedSession(id);
 
     // 2. Find eligible students for absent marking
-    let eligibleStudents = [];
-    if (session.classId) {
-      const classStudents = await prisma.classStudent.findMany({
-        where: { classId: session.classId },
-        select: { student: { select: { id: true, indexNumber: true, name: true } } }
-      });
-      eligibleStudents = classStudents.map(cs => cs.student);
-    } else {
-      // Scope to students enrolled in any class that takes this course — never all students
-      const classesWithCourse = await prisma.classCourse.findMany({
-        where: { courseId: session.courseId },
-        select: { classId: true }
-      });
-      const classIds = classesWithCourse.map(cc => cc.classId);
-      if (classIds.length > 0) {
-        const classStudents = await prisma.classStudent.findMany({
-          where: { classId: { in: classIds } },
-          select: { student: { select: { id: true, indexNumber: true, name: true } } }
-        });
-        const seen = new Set();
-        eligibleStudents = classStudents
-          .map(cs => cs.student)
-          .filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
-      }
-    }
+    const eligibleStudents = await resolveEligibleStudents(session.classId, session.courseId);
 
     // 3. Find students who checked in (use Set for O(1) lookup)
     const checkIns = await prisma.attendance.findMany({
@@ -382,29 +410,28 @@ const getSessionById = async (req, res) => {
     const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 50));
     const skip = (page - 1) * limit;
 
-    const [session, totalAttendances] = await Promise.all([
-      prisma.attendanceSession.findUnique({
-        where: { id },
-        include: {
-          course: true,
-          rep: { select: { username: true } },
-          approvedByLecturer: { select: { username: true } },
-          attendances: {
-            include: {
-              student: { select: { name: true, indexNumber: true, email: true } }
-            },
-            orderBy: { checkInTime: 'asc' },
-            take: limit,
-            skip
-          }
+    const session = await prisma.attendanceSession.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        rep: { select: { username: true } },
+        approvedByLecturer: { select: { username: true } },
+        attendances: {
+          include: {
+            student: { select: { name: true, indexNumber: true, email: true } }
+          },
+          orderBy: { checkInTime: 'asc' },
+          take: limit,
+          skip
         }
-      }),
-      prisma.attendance.count({ where: { sessionId: id } })
-    ]);
+      }
+    });
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
+
+    const totalAttendances = await prisma.attendance.count({ where: { sessionId: id } });
 
     res.json({
       ...session,
@@ -426,5 +453,6 @@ module.exports = {
   getActiveSessions,
   closeSession,
   approveSession,
-  getSessionById
+  getSessionById,
+  resolveEligibleStudents
 };
