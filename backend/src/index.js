@@ -44,6 +44,7 @@ const prisma = require('./lib/prisma');
 const { protect, authorizeRoles } = require('./middleware/auth');
 const { logger, requestLogger } = require('./lib/logger');
 const seed = require('./seed');
+const { startSessionExpiryScheduler } = require('./lib/sessionExpiry');
 
 const app = express();
 // Render provides PORT dynamically - don't override it
@@ -263,6 +264,7 @@ app.use(errorTracker);
 app.use(globalErrorHandler);
 
 let server;
+let expiryScheduler;
 
 // Verify Prisma database connection on boot with automatic retry support
 const connectWithRetry = async (attempts = 5, delay = 5000) => {
@@ -286,7 +288,9 @@ const connectWithRetry = async (attempts = 5, delay = 5000) => {
 // Graceful shutdown function to close active connections cleanly
 const gracefulShutdown = async (originSignal) => {
   logger.info(`Clean shutdown triggered via: ${originSignal}`);
-  
+
+  if (expiryScheduler) clearInterval(expiryScheduler);
+
   if (server) {
     server.close(async () => {
       logger.info('HTTP connection sockets closed');
@@ -377,6 +381,7 @@ const bootstrap = async () => {
       logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`Database: Connected`);
       logger.info(`Redis: ${process.env.REDIS_URL ? 'Enabled' : 'Disabled'}`);
+      expiryScheduler = startSessionExpiryScheduler();
     });
     
     server.on('error', (error) => {
