@@ -1,4 +1,9 @@
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
+
+// Normalise the client IP for rate-limit keys. ipKeyGenerator groups IPv6 addresses by
+// /56 subnet so one IPv6 client can't dodge limits by rotating addresses
+// (express-rate-limit v8 rejects custom keyGenerators that use req.ip directly).
+const ipKey = (req) => ipKeyGenerator(req.ip || '0.0.0.0');
 const { cache } = require('../lib/redis');
 
 const RedisStore = class {
@@ -105,10 +110,10 @@ const loginLimiter = rateLimit({
   store: new RedisStore({ prefix: 'rl:login:' }),
 
   keyGenerator: (req) => {
-    if (req.method === 'OPTIONS') return `options:${req.ip}`;
+    if (req.method === 'OPTIONS') return `options:${ipKey(req)}`;
     const username = req.body?.username;
     if (username) return `user:${String(username).toLowerCase().trim()}`;
-    return `ip:${req.ip || 'unknown'}`;
+    return `ip:${ipKey(req)}`;
   },
 
   handler: (req, res) => {
@@ -138,7 +143,7 @@ const studentAuthLimiter = rateLimit({
     const indexNumber = req.body?.indexNumber;
     if (indexNumber) return `idx:${String(indexNumber).toLowerCase().trim()}`;
     // If no index number in body, use a unique key that can't pool with other students
-    return `ip:${req.ip || 'unknown'}:${Date.now()}:${Math.random()}`;
+    return `ip:${ipKey(req)}:${Date.now()}:${Math.random()}`;
   },
 
   handler: (req, res) => {
@@ -165,7 +170,7 @@ const checkInLimiter = rateLimit({
   keyGenerator: (req) => {
     const indexNumber = req.body?.indexNumber;
     if (indexNumber) return `idx:${String(indexNumber).toLowerCase().trim()}`;
-    return `ip:${req.ip || 'unknown'}`;
+    return `ip:${ipKey(req)}`;
   },
 
   handler: (req, res) => {
@@ -241,7 +246,7 @@ const apiLimiter = rateLimit({
   store: new RedisStore({ prefix: 'rl:api:' }),
   keyGenerator: (req) => {
     if (req.user?.id) return `user:${req.user.id}`;
-    return req.ip || 'unknown';
+    return ipKey(req);
   },
   message: { error: 'Too many requests. Please slow down.' }
 });
