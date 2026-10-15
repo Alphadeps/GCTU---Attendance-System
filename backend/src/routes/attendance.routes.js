@@ -29,10 +29,10 @@ const asSignedInStudent = (field, nameField) => (req, res, next) => {
 };
 
 // Student check-in (student login required)
-router.post('/mark', checkInLimiter, protectStudent, asSignedInStudent('indexNumber', 'name'), bodyguard, markAttendance);
+router.post('/mark', protectStudent, asSignedInStudent('indexNumber', 'name'), checkInLimiter, bodyguard, markAttendance);
 
 // Proxy check-in: a present student marks for an absent classmate
-router.post('/mark-proxy', checkInLimiter, protectStudent, asSignedInStudent('submitterIndexNumber'), markProxyAttendance);
+router.post('/mark-proxy', protectStudent, asSignedInStudent('submitterIndexNumber'), checkInLimiter, markProxyAttendance);
 
 // Search classmates by name within a session's class (for proxy attendance)
 router.get('/session/:sessionId/classmates', protectStudent, asSignedInStudent('submitterIndex'), searchClassmates);
