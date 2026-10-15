@@ -32,7 +32,7 @@ const studentLogin = async (req, res) => {
   try {
     const validation = studentLoginSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       return res.status(400).json({ error: errorMsg });
     }
 
@@ -134,7 +134,7 @@ const studentSetPassword = async (req, res) => {
   try {
     const validation = studentSetPasswordSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       return res.status(400).json({ error: errorMsg });
     }
 
@@ -179,7 +179,7 @@ const repResetStudentPassword = async (req, res) => {
 
     const validation = repResetStudentPasswordSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       return res.status(400).json({ error: errorMsg });
     }
 

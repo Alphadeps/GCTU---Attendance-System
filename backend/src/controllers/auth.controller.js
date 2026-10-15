@@ -30,7 +30,7 @@ const register = async (req, res) => {
     // Validate inputs
     const validation = registerSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       return res.status(400).json({ error: errorMsg });
     }
 
@@ -88,7 +88,7 @@ const login = async (req, res) => {
     // Validate inputs
     const validation = loginSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       console.error('Login validation failed:', errorMsg);
       return res.status(400).json({ error: errorMsg });
     }
