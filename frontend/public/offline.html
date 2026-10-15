@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c2340" />
+  <title>Offline · GCTU Attendance</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+           font-family: 'Open Sans', system-ui, sans-serif; background: #f8f9fa; color: #344767; padding: 24px; box-sizing: border-box; }
+    .card { background: #fff; border-radius: 16px; padding: 28px 24px; max-width: 360px; text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    img { width: 64px; height: 64px; }
+    h1 { font-size: 18px; margin: 14px 0 6px; }
+    p { font-size: 13px; color: #8392ab; margin: 0 0 18px; line-height: 1.5; }
+    button { background: #0c2340; color: #fff; border: 0; border-radius: 10px; padding: 12px 20px; font-weight: 700; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="/icons/icon-192.png" alt="GCTU" />
+    <h1>You're offline</h1>
+    <p>Attendance needs an internet connection. Turn on mobile data or Wi-Fi, then try again.</p>
+    <button onclick="location.reload()">Try again</button>
+  </div>
+</body>
+</html>

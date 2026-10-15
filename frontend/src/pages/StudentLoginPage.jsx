@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import InstallAppButton from '../components/InstallAppButton';
 
 /* ─── Icon helpers ────────────────────────────────────────────────────────── */
 const QrIcon = () => (
@@ -90,6 +91,9 @@ const StudentLoginPage = () => {
         email: student.email,
         classes: student.classes,
       }));
+      // Signed in with a password, so the portal doesn't need to ask "Who are you?" again
+      localStorage.setItem('studentIndex', student.indexNumber);
+      localStorage.setItem('studentName', student.name);
       navigate('/student');
     } catch (err) {
       if (err.response?.data?.requiresPasswordSetup) {
@@ -339,6 +343,9 @@ const StudentLoginPage = () => {
               <p style={{ fontSize: '12px', textAlign: 'center', color: 'var(--sip-text-footer)', margin: '1.25rem 0 0' }}>
                 Not registered yet? <Link to="/join" style={{ color: '#1a3c6d', fontWeight: 600 }}>Join your class with a code</Link>
               </p>
+              <div style={{ marginTop: '1.25rem' }}>
+                <InstallAppButton />
+              </div>
             </>
           ) : (
             /* ── Password setup form ── */

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
+import InstallAppButton from '../components/InstallAppButton';
 
 // Public page a student opens from the join link their class rep shares.
 const JoinClassPage = () => {
@@ -86,6 +87,7 @@ const JoinClassPage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div className="sip-alert sip-alert-info">{successMsg}</div>
               <button type="button" className="sip-btn-dark" onClick={() => navigate('/student-login')}>Go to student sign in</button>
+              <InstallAppButton />
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
