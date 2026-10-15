@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
 const { countPresentByStudent } = require('../lib/attendanceStats');
+const { ensureRepStudent } = require('../lib/repStudent');
 const { saveFile } = require('../lib/fileStore');
 const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
@@ -422,37 +423,8 @@ const assignRep = async (req, res) => {
       return res.status(400).json({ error: `This representative is already assigned to: ${alreadyAssigned.displayName}` });
     }
 
-    // If rep has an index number, create/update student record and link to class
-    if (repUser.indexNumber) {
-      // Create or update student record for the rep
-      const repStudent = await prisma.student.upsert({
-        where: { indexNumber: repUser.indexNumber },
-        update: {
-          name: repUser.username,
-          email: `${repUser.indexNumber}@rep.gctu.edu.gh`
-        },
-        create: {
-          indexNumber: repUser.indexNumber,
-          name: repUser.username,
-          email: `${repUser.indexNumber}@rep.gctu.edu.gh`
-        }
-      });
-
-      // Link rep as student to the class
-      await prisma.classStudent.upsert({
-        where: {
-          classId_studentId: {
-            classId: id,
-            studentId: repStudent.id
-          }
-        },
-        update: {},
-        create: {
-          classId: id,
-          studentId: repStudent.id
-        }
-      });
-    }
+    // The rep is also a student of the class (keeps an existing student's own name and email)
+    await ensureRepStudent(repUser, id);
 
     // Update the class with repId
     const updated = await prisma.class.update({
@@ -1462,6 +1434,13 @@ const getSettings = async (req, res) => {
 const updateSettings = async (req, res) => {
   try {
     const { deptName, deptLogoUrl, lateWindowMinutes, geofenceRadiusMeters } = req.body;
+    let minAttendancePercent;
+    if (req.body.minAttendancePercent !== undefined) {
+      minAttendancePercent = parseInt(req.body.minAttendancePercent);
+      if (!Number.isInteger(minAttendancePercent) || minAttendancePercent < 1 || minAttendancePercent > 100) {
+        return res.status(400).json({ error: 'Minimum attendance must be a whole number from 1 to 100' });
+      }
+    }
 
     let settings = await prisma.systemSettings.findFirst();
 
@@ -1471,7 +1450,8 @@ const updateSettings = async (req, res) => {
           deptName: deptName || 'Ghana Communication Technology University',
           deptLogoUrl: deptLogoUrl || '/logo.jfif',
           lateWindowMinutes: lateWindowMinutes ? parseInt(lateWindowMinutes) : 15,
-          geofenceRadiusMeters: geofenceRadiusMeters ? parseInt(geofenceRadiusMeters) : 100
+          geofenceRadiusMeters: geofenceRadiusMeters ? parseInt(geofenceRadiusMeters) : 100,
+          ...(minAttendancePercent !== undefined && { minAttendancePercent })
         }
       });
     } else {
@@ -1481,7 +1461,8 @@ const updateSettings = async (req, res) => {
           deptName: deptName !== undefined ? deptName : settings.deptName,
           deptLogoUrl: deptLogoUrl !== undefined ? deptLogoUrl : settings.deptLogoUrl,
           lateWindowMinutes: lateWindowMinutes !== undefined ? parseInt(lateWindowMinutes) : settings.lateWindowMinutes,
-          geofenceRadiusMeters: geofenceRadiusMeters !== undefined ? parseInt(geofenceRadiusMeters) : settings.geofenceRadiusMeters
+          geofenceRadiusMeters: geofenceRadiusMeters !== undefined ? parseInt(geofenceRadiusMeters) : settings.geofenceRadiusMeters,
+          ...(minAttendancePercent !== undefined && { minAttendancePercent })
         }
       });
     }
