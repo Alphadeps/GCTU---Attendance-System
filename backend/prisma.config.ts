@@ -8,8 +8,9 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
+  // Prisma 7 has no separate directUrl: migrations use `url`. Prefer the direct (non-pooled)
+  // connection so `prisma migrate deploy` doesn't run through a transaction-mode pooler.
   datasource: {
-    url: process.env["DATABASE_URL"],
-    directUrl: process.env["DIRECT_URL"],
+    url: process.env["DIRECT_URL"] || process.env["DATABASE_URL"],
   },
 });

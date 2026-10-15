@@ -5,17 +5,19 @@ const { withAccelerate } = require('@prisma/extension-accelerate');
 
 let prisma;
 
-// Determine if we should use the driver adapter or Accelerate
+// Determine if we should use the driver adapter or Accelerate.
+// DATABASE_URL is the runtime connection (on Neon: the pooled "-pooler" host).
+// DIRECT_URL is for migrations only (see prisma.config.ts) and is used at runtime
+// only when DATABASE_URL is a prisma:// Accelerate URL that the pg driver can't open.
 const databaseUrl = process.env.DATABASE_URL || '';
 const directUrl = process.env.DIRECT_URL;
-const isAccelerate = databaseUrl.startsWith('prisma://');
+const isAccelerate = databaseUrl.startsWith('prisma://') || databaseUrl.startsWith('prisma+postgres://');
 
-if (directUrl || !isAccelerate) {
+if (!isAccelerate || directUrl) {
   console.log(`Database Connection: Using PostgreSQL connection via pg driver adapter.`);
-  
-  // Use directUrl if available, otherwise fall back to databaseUrl
-  let connectionString = directUrl || databaseUrl;
-  
+
+  let connectionString = isAccelerate ? directUrl : databaseUrl;
+
   if (!connectionString) {
     throw new Error('DATABASE_URL or DIRECT_URL must be provided');
   }
