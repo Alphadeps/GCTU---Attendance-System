@@ -955,8 +955,10 @@ const createRepAccount = async (req, res) => {
           indexNumber: indexNumber,
           name: username, // Use username as name initially
           email: `${indexNumber}@student.edu`, // Generate a default email
-          password: hashedPassword, // Same password as user account
-          isFirstLogin: false // Rep already has password
+          // No password copied from the rep account (that one is a temporary password the admin knows);
+          // the rep sets their own student password through the class join link
+          password: null,
+          isFirstLogin: true
         }
       });
     } catch (studentErr) {

@@ -149,9 +149,11 @@ router.get('/cache', protect, authorizeRoles('SUPERADMIN'), async (req, res) => 
 router.get('/security/blocked-ips', protect, authorizeRoles('SUPERADMIN'), (req, res) => {
   try {
     const blockedIPs = getBlockedIPs();
+    const intruders = require('../lib/intrusion').getBlockedIntruders();
     res.json({
-      count: blockedIPs.length,
-      ips: blockedIPs
+      count: blockedIPs.length + intruders.length,
+      ips: blockedIPs,
+      intruders
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

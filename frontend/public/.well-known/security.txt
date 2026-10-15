@@ -1,0 +1,5 @@
+Contact: mailto:security@gctu.edu.gh
+Expires: 2027-10-15T00:00:00.000Z
+Preferred-Languages: en
+# Found a weakness in GCTU Attendance? Report it here instead of exploiting it.
+# Attacks against this system are logged with IP address and device, and repeat attempts are blocked.

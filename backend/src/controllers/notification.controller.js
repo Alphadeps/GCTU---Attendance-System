@@ -19,24 +19,12 @@ const createNotificationHelper = async ({ userId, studentIndex, title, message, 
 };
 
 // Retrieve notifications for authenticated user or studentIndex
+// The signed-in person's own notifications: staff by user id, students by index number
+const ownerFilter = (req) => (req.user ? { userId: req.user.id } : { studentIndex: req.student.indexNumber });
+
 const getNotifications = async (req, res) => {
   try {
-    const { studentIndex } = req.query;
-    const userId = req.user?.id;
-
-    let whereClause = {};
-
-    if (userId) {
-      // Authenticated User (rep, lecturer, admin)
-      whereClause = { userId };
-    } else if (studentIndex) {
-      // Student portal querying notifications
-      whereClause = { studentIndex };
-    } else {
-      // No user or studentIndex - return empty array instead of error
-      // This allows the frontend to work even when not authenticated
-      return res.json([]);
-    }
+    const whereClause = ownerFilter(req);
 
     const notifications = await prisma.notification.findMany({
       where: whereClause,
@@ -62,12 +50,13 @@ const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const updated = await prisma.notification.update({
-      where: { id },
+    const result = await prisma.notification.updateMany({
+      where: { id, ...ownerFilter(req) },
       data: { isRead: true }
     });
+    if (result.count === 0) return res.status(404).json({ error: 'Notification not found' });
 
-    res.json(updated);
+    res.json({ id, isRead: true });
   } catch (err) {
     console.error('Mark notification as read error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -79,9 +68,10 @@ const deleteNotification = async (req, res) => {
   try {
     const { id } = req.params;
 
-    await prisma.notification.delete({
-      where: { id }
+    const result = await prisma.notification.deleteMany({
+      where: { id, ...ownerFilter(req) }
     });
+    if (result.count === 0) return res.status(404).json({ error: 'Notification not found' });
 
     res.json({ message: 'Notification deleted successfully' });
   } catch (err) {
@@ -93,21 +83,8 @@ const deleteNotification = async (req, res) => {
 // Clear all notifications
 const clearAll = async (req, res) => {
   try {
-    const { studentIndex } = req.query;
-    const userId = req.user?.id;
-
-    let whereClause = {};
-
-    if (userId) {
-      whereClause = { userId };
-    } else if (studentIndex) {
-      whereClause = { studentIndex };
-    } else {
-      return res.status(400).json({ error: 'User identifier or Student Index Number required' });
-    }
-
     await prisma.notification.deleteMany({
-      where: whereClause
+      where: ownerFilter(req)
     });
 
     res.json({ message: 'All notifications cleared successfully' });

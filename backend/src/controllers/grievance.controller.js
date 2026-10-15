@@ -18,8 +18,9 @@ exports.submitGrievance = async (req, res) => {
   try {
     const validatedData = submitGrievanceSchema.parse(req.body);
 
-    let finalIndex = validatedData.studentIndex;
-    let finalName = validatedData.studentName;
+    // Who submitted comes from the student's login, not from the form
+    let finalIndex = req.student?.indexNumber ?? null;
+    let finalName = req.student?.name ?? null;
 
     // Redact identification metrics if submission is flagged anonymous
     if (validatedData.anonymous) {
@@ -69,13 +70,21 @@ exports.listGrievances = async (req, res) => {
     const { status, type, studentIndex } = req.query;
 
     const filter = {};
-    if (status) filter.status = status.toUpperCase();
-    if (type) filter.type = type.toUpperCase();
-    
-    // If studentIndex is provided (student accessing their own), filter by it
-    if (studentIndex) {
-      filter.studentIndex = studentIndex;
-      filter.anonymous = false; // Only show non-anonymous ones for students
+    if (status) filter.status = String(status).toUpperCase();
+    if (type) filter.type = String(type).toUpperCase();
+    if (studentIndex) filter.studentIndex = String(studentIndex);
+
+    // Reps only see their own class's students, and never anonymous reports
+    if (req.user?.role === 'REP') {
+      const repClass = await prisma.class.findFirst({
+        where: { repId: req.user.id },
+        select: { students: { select: { student: { select: { indexNumber: true } } } } }
+      });
+      const indexes = (repClass?.students || []).map(cs => cs.student.indexNumber);
+      filter.anonymous = false;
+      filter.studentIndex = studentIndex
+        ? (indexes.includes(String(studentIndex)) ? String(studentIndex) : '__none__')
+        : { in: indexes };
     }
 
     const grievances = await prisma.grievance.findMany({

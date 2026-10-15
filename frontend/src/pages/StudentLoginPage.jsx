@@ -63,6 +63,7 @@ const StudentLoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [joinCode, setJoinCode] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ const StudentLoginPage = () => {
     if (newPassword.length < 6) { setErrorMsg('Password must be at least 6 characters long'); return; }
     setLoading(true);
     try {
-      await api.post('/student-auth/set-password', { indexNumber, password: newPassword, confirmPassword });
+      await api.post('/student-auth/set-password', { indexNumber, code: joinCode, password: newPassword, confirmPassword });
       alert('Password set successfully! Please login with your new password.');
       setRequiresPasswordSetup(false);
       setPassword('');
@@ -396,6 +397,24 @@ const StudentLoginPage = () => {
                     value={indexNumber}
                     className="sip-input"
                   />
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-joincode">Class Join Code</label>
+                  <input
+                    id="slp-joincode"
+                    type="text"
+                    required
+                    autoComplete="off"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                    placeholder="6-character code from your class rep"
+                    className="sip-input"
+                    style={{ fontFamily: 'monospace', letterSpacing: '0.25em' }}
+                  />
+                  <p style={{ fontSize: 11, color: 'var(--sip-text-footer)', margin: '6px 0 0' }}>
+                    Proves you're in the class, so nobody else can set your password.
+                  </p>
                 </div>
 
                 <div>

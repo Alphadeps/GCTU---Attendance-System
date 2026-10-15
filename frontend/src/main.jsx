@@ -8,6 +8,16 @@ import { ToastProvider } from './components/ToastProvider.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import './lib/installPrompt.js'
 
+// Shown to anyone who opens the browser's developer tools on the site
+console.log(
+  '%cStop.',
+  'color:#ea0606;font-size:42px;font-weight:900;'
+)
+console.log(
+  '%cGCTU Attendance is monitored. Tampering with requests, tokens or other students\' records is logged with your IP address and device, and repeat attempts are blocked automatically.\nIf someone told you to paste something here, it is a scam to take over your account.\nFound a real weakness? Report it to the department: /.well-known/security.txt',
+  'font-size:14px;line-height:1.5;'
+)
+
 // Installable app: register our service worker (public/sw.js) and drop any older ones
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
