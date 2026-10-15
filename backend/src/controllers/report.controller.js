@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { countPresentByStudent } = require('../lib/attendanceStats');
 const fs = require('fs');
 const path = require('path');
 const PizZip = require('pizzip');
@@ -366,14 +367,9 @@ const generateReport = async (req, res) => {
 
     const studentSessionIds = sessions.map(s => s.id);
 
+    const presentCounts = await countPresentByStudent(studentSessionIds);
     const studentsData = await Promise.all(classStudents.map(async (cs) => {
-      const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-        where: {
-          studentId: cs.student.id,
-          sessionId: { in: studentSessionIds },
-          status: { in: ['PRESENT', 'LATE'] }
-        }
-      }) : 0;
+      const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
       const rate = totalSessionsCount > 0
         ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
@@ -608,14 +604,9 @@ const signReport = async (req, res) => {
         const studentSessionIds = sessions.map(s => s.id);
         const totalSessionsCount = sessions.length;
 
+        const presentCounts = await countPresentByStudent(studentSessionIds);
         const studentsData = await Promise.all(classStudents.map(async (cs) => {
-          const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-            where: {
-              studentId: cs.student.id,
-              sessionId: { in: studentSessionIds },
-              status: { in: ['PRESENT', 'LATE'] }
-            }
-          }) : 0;
+          const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
           const rate = totalSessionsCount > 0
             ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
@@ -805,14 +796,9 @@ const serveReportFile = async (req, res) => {
       const studentSessionIds = sessions.map(s => s.id);
       const totalSessionsCount = sessions.length;
 
+      const presentCounts = await countPresentByStudent(studentSessionIds);
       const studentsData = await Promise.all(classStudents.map(async (cs) => {
-        const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-          where: {
-            studentId: cs.student.id,
-            sessionId: { in: studentSessionIds },
-            status: { in: ['PRESENT', 'LATE'] }
-          }
-        }) : 0;
+        const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
         const rate = totalSessionsCount > 0
           ? Math.round((presentOrLateCount / totalSessionsCount) * 100)

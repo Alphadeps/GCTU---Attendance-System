@@ -30,8 +30,11 @@ if (!isAccelerate || directUrl) {
     console.log('✓ SSL mode updated to verify-full for enhanced security');
   }
   
-  // Configure connection pool with limits
-  const poolMax = parseInt(process.env.DB_POOL_MAX || '50', 10);
+  // Configure connection pool with limits.
+  // Keep this below the database's per-role connection limit (hosted Postgres plans allow only a
+  // handful). A pool larger than that limit fails with "too many connections for role" under load.
+  // Queued queries wait for a free connection instead of opening new ones.
+  const poolMax = parseInt(process.env.DB_POOL_MAX || '10', 10);
   const pool = new Pool({
     connectionString,
     max: poolMax,
