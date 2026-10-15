@@ -233,6 +233,7 @@ model SystemSettings {
   deptLogoUrl           String?
   lateWindowMinutes     Int      @default(15)
   geofenceRadiusMeters  Int      @default(100)
+  minAttendancePercent  Int      @default(75)
   updatedAt             DateTime @updatedAt
 }
 

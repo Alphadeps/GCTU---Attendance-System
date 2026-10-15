@@ -1,6 +1,6 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
-const { countPresentByStudent } = require('../lib/attendanceStats');
+const { getMinAttendance, attendanceStatus, classCourseAttendance, warnLowAttendance } = require('../lib/lowAttendance');
 const { protect, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
@@ -64,7 +64,17 @@ router.get('/', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN', 'SUPERADMIN'
   }
 });
 
-// Get course analytics for 75% rule (REP, LECTURER, ADMIN, SUPERADMIN)
+// Classes whose attendance in a course the user may see: a rep's own class, otherwise every class taking it
+async function analyticsClassIds(req, courseId) {
+  if (req.user.role === 'REP') {
+    const repClass = await prisma.class.findFirst({ where: { repId: req.user.id }, select: { id: true } });
+    return repClass ? [repClass.id] : [];
+  }
+  const links = await prisma.classCourse.findMany({ where: { courseId }, select: { classId: true } });
+  return links.map(l => l.classId);
+}
+
+// Get course attendance analytics against the minimum attendance (REP, LECTURER, ADMIN, SUPERADMIN)
 router.get('/:id/analytics', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -77,74 +87,30 @@ router.get('/:id/analytics', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN',
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    const sessions = await prisma.attendanceSession.findMany({
-      where: { courseId: id, status: { in: ['CLOSED', 'APPROVED'] } },
-      select: { id: true }
-    });
+    const [min, classIds] = await Promise.all([getMinAttendance(), analyticsClassIds(req, id)]);
+    const classes = await prisma.class.findMany({ where: { id: { in: classIds } }, select: { id: true, displayName: true } });
 
-    const totalSessionsCount = sessions.length;
-
-    let students;
-    if (req.user.role === 'REP') {
-      const repClass = await prisma.class.findFirst({
-        where: { repId: req.user.id }
-      });
-      if (repClass) {
-        const classStudents = await prisma.classStudent.findMany({
-          where: { classId: repClass.id },
-          include: {
-            student: {
-              select: {
-                id: true,
-                name: true,
-                indexNumber: true,
-                email: true
-              }
-            }
-          }
+    let totalSessionsCount = 0;
+    const analytics = [];
+    for (const cls of classes) {
+      const { totalSessions, students } = await classCourseAttendance(cls.id, id);
+      totalSessionsCount += totalSessions;
+      for (const s of students) {
+        analytics.push({
+          ...s,
+          className: cls.displayName,
+          status: attendanceStatus(s.attendanceRate, min),
+          isAtRisk: s.attendanceRate < min
         });
-        students = classStudents.map(cs => cs.student);
-      } else {
-        students = [];
       }
-    } else {
-      students = await prisma.student.findMany({
-        select: {
-          id: true,
-          name: true,
-          indexNumber: true,
-          email: true
-        },
-        orderBy: { name: 'asc' }
-      });
     }
-
-    const studentSessionIds = sessions.map(s => s.id);
-
-    const presentCounts = await countPresentByStudent(studentSessionIds);
-    const analytics = await Promise.all(students.map(async (student) => {
-      const presentOrLateCount = presentCounts.get(student.id) || 0;
-
-      const attendanceRate = totalSessionsCount > 0
-        ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
-        : 100;
-
-      return {
-        id: student.id,
-        name: student.name,
-        indexNumber: student.indexNumber,
-        email: student.email,
-        presentCount: presentOrLateCount,
-        totalConcluded: totalSessionsCount,
-        attendanceRate,
-        isAtRisk: attendanceRate < 75
-      };
-    }));
+    analytics.sort((a, b) => a.name.localeCompare(b.name));
 
     res.json({
       course,
       analytics,
-      totalSessionsCount
+      totalSessionsCount,
+      minAttendancePercent: min
     });
   } catch (err) {
     console.error('Course analytics error:', err);
@@ -152,7 +118,7 @@ router.get('/:id/analytics', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN',
   }
 });
 
-// Trigger warning notifications to at-risk students (REP, ADMIN, SUPERADMIN)
+// Send warning notifications to students below the minimum attendance (REP, ADMIN, SUPERADMIN)
 router.post('/:id/warn-at-risk', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -165,68 +131,19 @@ router.post('/:id/warn-at-risk', protect, authorizeRoles('REP', 'ADMIN', 'SUPERA
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    const sessions = await prisma.attendanceSession.findMany({
-      where: { courseId: id, status: { in: ['CLOSED', 'APPROVED'] } },
-      select: { id: true }
+    const classIds = await analyticsClassIds(req, id);
+    const concluded = await prisma.attendanceSession.count({
+      where: { courseId: id, classId: { in: classIds }, status: { in: ['CLOSED', 'APPROVED'] } }
     });
-
-    const totalSessionsCount = sessions.length;
-    if (totalSessionsCount === 0) {
+    if (concluded === 0) {
       return res.status(400).json({ error: 'No sessions have concluded yet' });
     }
 
-    let students;
-    if (req.user.role === 'REP') {
-      const repClass = await prisma.class.findFirst({
-        where: { repId: req.user.id }
-      });
-      if (repClass) {
-        const classStudents = await prisma.classStudent.findMany({
-          where: { classId: repClass.id },
-          include: {
-            student: {
-              select: {
-                id: true,
-                name: true,
-                indexNumber: true,
-                email: true
-              }
-            }
-          }
-        });
-        students = classStudents.map(cs => cs.student);
-      } else {
-        students = [];
-      }
-    } else {
-      students = await prisma.student.findMany({
-        select: { id: true, name: true, indexNumber: true, email: true }
-      });
+    const min = await getMinAttendance();
+    let warningsSent = 0;
+    for (const classId of classIds) {
+      warningsSent += await warnLowAttendance(classId, id, { min, course });
     }
-
-    const studentSessionIds = sessions.map(s => s.id);
-    const presentCounts = await countPresentByStudent(studentSessionIds);
-
-    // Build all warnings first, then insert them in one batch instead of one query per student
-    const warnings = [];
-    for (const student of students) {
-      const presentOrLateCount = presentCounts.get(student.id) || 0;
-      const attendanceRate = Math.round((presentOrLateCount / totalSessionsCount) * 100);
-
-      if (attendanceRate < 75) {
-        warnings.push({
-          studentIndex: student.indexNumber,
-          title: '⚠️ GCTU Low Attendance Alert',
-          message: `Your attendance in ${course.name} (${course.code}) is currently at ${attendanceRate}%, which is below the required 75% examination threshold. Please attend upcoming lectures.`,
-          type: 'WARNING'
-        });
-      }
-    }
-
-    if (warnings.length > 0) {
-      await prisma.notification.createMany({ data: warnings });
-    }
-    const warningsSent = warnings.length;
 
     res.json({ message: 'Warning notifications sent successfully', warningsSent });
   } catch (err) {
