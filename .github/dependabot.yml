@@ -1,6 +1,13 @@
-# Dependabot: opens pull requests when a package we use has a known security hole or an update.
-# Security alerts and security fixes also need switching on in the repo's
-# Settings -> Code security (Dependabot alerts + Dependabot security updates).
+# Dependabot: opens pull requests when a package we use has an update.
+#
+# Kept quiet on purpose: only small (minor/patch) updates, grouped into one PR per folder per week.
+# Big version jumps (e.g. 5.x -> 6.x) can change how a package behaves, so they are skipped here
+# and done by hand when there is time to test them.
+#
+# Security fixes are handled by "Dependabot security updates" (repo Settings -> Code security),
+# which opens a PR as soon as a vulnerability is published. Note: GitHub applies the `ignore`
+# rules below to those security PRs as well, so a fix that only exists in a new major version
+# shows up as a Dependabot *alert* (Security tab) instead of a PR - check alerts now and then.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -8,7 +15,10 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       backend-minor-and-patch:
         update-types: [minor, patch]
@@ -18,7 +28,10 @@ updates:
     schedule:
       interval: weekly
       day: monday
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     groups:
       frontend-minor-and-patch:
         update-types: [minor, patch]
