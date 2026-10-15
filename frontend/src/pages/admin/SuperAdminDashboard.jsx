@@ -31,6 +31,10 @@ import SystemMonitoring from './SystemMonitoring';
 import SecurityLogs from './SecurityLogs';
 import PerformanceMetrics from './PerformanceMetrics';
 
+// Lecturer accounts are hidden for now: lecturers sign off each class on the rep's phone.
+// Set to true to bring back the Lecturer Allocations screen.
+const SHOW_LECTURERS = false;
+
 const MENU_GROUPS = [
   {
     title: 'Dashboard',
@@ -50,7 +54,7 @@ const MENU_GROUPS = [
     title: 'User Management',
     items: [
       { id: 'reps', label: 'Class Reps', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
-      { id: 'lecturers', label: 'Lecturer Allocations', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+      ...(SHOW_LECTURERS ? [{ id: 'lecturers', label: 'Lecturer Allocations', icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' }] : []),
       { id: 'grievances', label: 'Grievance Desk', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     ]
   },
@@ -255,10 +259,12 @@ export default function SuperAdminDashboard() {
         setCourses(courseRes.data);
       }
 
-      // Get lecturer assignments
-      const lecturerRes = await api.get('/lecturer/assignments').catch(() => null);
-      if (lecturerRes && lecturerRes.data) {
-        setLecturerAssignments(lecturerRes.data);
+      // Get lecturer assignments (lecturer accounts are hidden for now)
+      if (SHOW_LECTURERS) {
+        const lecturerRes = await api.get('/lecturer/assignments').catch(() => null);
+        if (lecturerRes && lecturerRes.data) {
+          setLecturerAssignments(lecturerRes.data);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -1769,7 +1775,7 @@ export default function SuperAdminDashboard() {
           )}
 
           {/* LECTURER ALLOCATIONS PANEL */}
-          {activeTab === 'lecturers' && !loading && (
+          {SHOW_LECTURERS && activeTab === 'lecturers' && !loading && (
             <div className="space-y-5 animate-fade-in-up">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>

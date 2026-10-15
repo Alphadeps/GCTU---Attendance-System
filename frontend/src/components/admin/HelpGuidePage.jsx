@@ -179,15 +179,15 @@ const HelpGuidePage = () => {
         '2. Students check in via GPS geofencing through the student portal',
         '3. System marks attendance as PRESENT, LATE, or ABSENT based on time',
         '4. Rep closes the session when class ends',
-        '5. Rep generates an attendance report',
-        '6. Lecturer reviews and signs the report',
-        '7. Signed report appears in Official Archives',
-        '8. Admin can view all signed reports organized by programme/level/group'
+        '5. Rep hands the phone to the lecturer, who types their name and signs',
+        '6. At the end of the course, the rep generates the attendance report',
+        '7. The report goes straight to Official Archives',
+        '8. Admin can view all reports organized by programme/level/group'
       ],
       tips: [
         'Reps can check themselves in during their own sessions',
         'Students receive notifications when they check in',
-        'Lecturers can approve sessions before signing reports',
+        'Lecturers sign each class on the rep\'s phone — no lecturer account needed',
         'All reports are archived permanently for record-keeping'
       ]
     }

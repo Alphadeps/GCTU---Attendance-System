@@ -6,6 +6,7 @@ import { useToast } from '../components/ToastProvider';
 import ConfirmModal from '../components/ConfirmModal';
 import { useAuth } from '../context/AuthContext';
 import ExcusedAbsencesManager from '../components/ExcusedAbsencesManager';
+import AddClassmatesCard from '../components/rep/AddClassmatesCard';
 
 const RepDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -115,6 +116,29 @@ const RepDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  const askConfirm = (message, action) => {
+    setConfirmState({
+      open: true,
+      message,
+      onConfirm: async () => {
+        setConfirmState({ open: false, message: '', onConfirm: null });
+        await action();
+      }
+    });
+  };
+
+  const handleRemoveStudent = (student) => {
+    askConfirm(`Remove ${student.name} (${student.indexNumber}) from your class?`, async () => {
+      try {
+        await api.delete(`/admin/rep/students/${student.id}`);
+        setStudents(prev => prev.filter(s => s.id !== student.id));
+        toast.success(`${student.name} removed from your class.`);
+      } catch (err) {
+        toast.error(err.response?.data?.error || 'Could not remove student');
+      }
+    });
+  };
+
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout');
@@ -189,7 +213,7 @@ const RepDashboard = () => {
     setGeneratingReportId(courseId);
     try {
       await api.post('/reports/generate', { courseId });
-      toast.success('Official report generated and sent to lecturers for signature!', 'Report Generated');
+      toast.success('Official report generated and submitted to the department.', 'Report Submitted');
     } catch (err) {
       console.error('Generate report error:', err);
       toast.error(err.response?.data?.error || 'Failed to generate report', 'Generation Failed');
@@ -647,6 +671,8 @@ const RepDashboard = () => {
           {/* ── TAB: STUDENTS ── */}
           {activeTab === 'students' && (
             <div className="space-y-5 animate-slide-left">
+              <AddClassmatesCard onStudentsChanged={fetchStudents} onConfirm={askConfirm} />
+
               <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)]">
                 <div>
                   <p className="text-[13px] font-bold text-[#344767]">Class Students</p>
@@ -675,6 +701,7 @@ const RepDashboard = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
                     <p className="text-[13px] font-semibold text-[#8392ab]">No students enrolled yet</p>
+                    <p className="text-[11px] text-[#adb5bd] mt-1">Share your join link or upload your class list above.</p>
                   </div>
                 ) : (
                   <>
@@ -685,6 +712,7 @@ const RepDashboard = () => {
                           <th>Index Number</th>
                           <th>Name</th>
                           <th className="hidden md:table-cell">Email</th>
+                          <th className="text-right">Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -699,6 +727,15 @@ const RepDashboard = () => {
                               <td><span className="font-mono text-[12px] font-bold text-[#344767]">{student.indexNumber}</span></td>
                               <td><span className="text-[13px] font-semibold text-[#344767]">{student.name}</span></td>
                               <td className="hidden md:table-cell text-[12px] text-[#8392ab]">{student.email || 'N/A'}</td>
+                              <td className="text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveStudent(student)}
+                                  className="text-[11px] font-semibold text-red-500 hover:text-red-700"
+                                >
+                                  Remove
+                                </button>
+                              </td>
                             </tr>
                           ))}
                       </tbody>

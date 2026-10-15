@@ -56,7 +56,7 @@ const bodyguard = async (req, res, next) => {
     // 2. Input Validation
     const validation = checkInSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.errors.map(err => err.message).join(', ');
+      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
       return handleCheckInFailure(indexNumber, ipAddress, res, errorMsg, null);
     }
 

@@ -6,6 +6,7 @@ const fs = require('fs');
 const { protect, authorizeRoles } = require('../middleware/auth');
 const { adminLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const adminController = require('../controllers/admin.controller');
+const classJoin = require('../controllers/classJoin.controller');
 
 const router = express.Router();
 
@@ -83,6 +84,15 @@ router.delete('/reps/:id', superadminGuard, adminController.deleteRepAccount);
 
 // Rep-specific routes (accessible by REPs for their own class)
 router.get('/rep/my-class-students', protect, authorizeRoles('REP'), adminController.getRepClassStudents);
+
+// Rep class management — every route below is locked to the rep's own class by repClassScope
+const repGuard = [protect, authorizeRoles('REP'), classJoin.repClassScope];
+const uploadClassList = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+router.get('/rep/join-code', repGuard, classJoin.getJoinCode);
+router.post('/rep/join-code/regenerate', repGuard, classJoin.regenerateJoinCode);
+router.post('/rep/parse-file', [...repGuard, uploadLimiter, uploadClassList.single('file')], adminController.parseImportFile);
+router.post('/rep/students', repGuard, adminController.addStudentsToClass);
+router.delete('/rep/students/:studentId', repGuard, adminController.removeStudentFromClass);
 
 // Student Device Management
 router.patch('/students/:indexNumber/reset-device', superadminGuard, adminController.resetStudentDevice);

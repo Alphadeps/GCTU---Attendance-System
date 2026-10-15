@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
+const { countPresentByStudent } = require('../lib/attendanceStats');
 const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
 const { normalizeProgrammeName, isValidProgramme, getSuggestions } = require('../lib/programmeMapper');
@@ -529,10 +530,11 @@ const addStudentsToClass = async (req, res) => {
 
           const studentEmail = email || `${indexNumber}@student.gctu.edu.gh`;
 
-          // Upsert student
+          // Upsert student. Reps only add students — they don't overwrite an existing
+          // student's details, which may have been set by the student or another class.
           const student = await prisma.student.upsert({
             where: { indexNumber },
-            update: { name, email: studentEmail },
+            update: req.user?.role === 'REP' ? {} : { name, email: studentEmail },
             create: { indexNumber, name, email: studentEmail }
           });
 
@@ -697,16 +699,11 @@ const getClassStudents = async (req, res) => {
     const totalSessions = sessions.length;
     const sessionIds = sessions.map(s => s.id);
 
+    const presentCounts = await countPresentByStudent(sessionIds);
     const studentsData = await Promise.all(classStudents.map(async (cs) => {
       const student = cs.student;
 
-      const presentOrLateCount = totalSessions > 0 ? await prisma.attendance.count({
-        where: {
-          studentId: student.id,
-          sessionId: { in: sessionIds },
-          status: { in: ['PRESENT', 'LATE'] }
-        }
-      }) : 0;
+      const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
       const attendanceRate = totalSessions > 0
         ? Math.round((presentOrLateCount / totalSessions) * 100)

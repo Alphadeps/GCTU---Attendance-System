@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { countPresentByStudent } = require('../lib/attendanceStats');
 const fs = require('fs');
 const path = require('path');
 const PizZip = require('pizzip');
@@ -7,14 +8,34 @@ const { createNotificationHelper } = require('./notification.controller');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
+// Escape user-supplied values (student names come from self-registration) before
+// putting them into the HTML report, so a name can't inject markup or scripts.
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Signatures drawn on the phone are PNG data URLs; show them as images, anything else as text.
+function renderSignature(value) {
+  if (typeof value === 'string' && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(value)) {
+    return `<img src="${value}" alt="Signature" style="height:60px;vertical-align:middle" />`;
+  }
+  return value ? escapeHtml(value) : '_____________________';
+}
+
 // Helper function to generate default HTML report
 function generateDefaultReportHTML(data) {
+  const e = escapeHtml;
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Attendance Report - ${data.courseCode}</title>
+  <title>Attendance Report - ${e(data.courseCode)}</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 40px; }
     .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
@@ -42,22 +63,22 @@ function generateDefaultReportHTML(data) {
 <body>
   <div class="header">
     <h1>OFFICIAL ATTENDANCE REPORT</h1>
-    <h2>${data.programmeName} - ${data.className}</h2>
+    <h2>${e(data.programmeName)} - ${e(data.className)}</h2>
   </div>
 
   <div class="info-section">
     <h3>Course Information</h3>
     <div class="info-row">
       <div class="info-label">Course Name:</div>
-      <div class="info-value">${data.courseName}</div>
+      <div class="info-value">${e(data.courseName)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Course Code:</div>
-      <div class="info-value">${data.courseCode}</div>
+      <div class="info-value">${e(data.courseCode)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Lecturer:</div>
-      <div class="info-value">${data.lecturerName}</div>
+      <div class="info-value">${e(data.lecturerName)}</div>
     </div>
   </div>
 
@@ -65,19 +86,19 @@ function generateDefaultReportHTML(data) {
     <h3>Class Information</h3>
     <div class="info-row">
       <div class="info-label">Programme:</div>
-      <div class="info-value">${data.programmeName}</div>
+      <div class="info-value">${e(data.programmeName)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Level:</div>
-      <div class="info-value">${data.level}</div>
+      <div class="info-value">${e(data.level)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Group:</div>
-      <div class="info-value">${data.group}</div>
+      <div class="info-value">${e(data.group)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Session:</div>
-      <div class="info-value">${data.session}</div>
+      <div class="info-value">${e(data.session)}</div>
     </div>
   </div>
 
@@ -85,15 +106,15 @@ function generateDefaultReportHTML(data) {
     <h3>Session Details</h3>
     <div class="info-row">
       <div class="info-label">Total Sessions:</div>
-      <div class="info-value">${data.totalSessions}</div>
+      <div class="info-value">${e(data.totalSessions)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">First Session:</div>
-      <div class="info-value">${data.firstSessionDate} at ${data.firstSessionTime}</div>
+      <div class="info-value">${e(data.firstSessionDate)} at ${e(data.firstSessionTime)}</div>
     </div>
     <div class="info-row">
       <div class="info-label">Last Session:</div>
-      <div class="info-value">${data.lastSessionDate} at ${data.lastSessionTime}</div>
+      <div class="info-value">${e(data.lastSessionDate)} at ${e(data.lastSessionTime)}</div>
     </div>
   </div>
 
@@ -114,12 +135,12 @@ function generateDefaultReportHTML(data) {
       ${data.students.map((student, index) => `
       <tr>
         <td>${index + 1}</td>
-        <td>${student.indexNumber}</td>
-        <td>${student.name}</td>
-        <td>${student.attended}</td>
-        <td>${student.total}</td>
-        <td>${student.rate}%</td>
-        <td class="status-${student.status.toLowerCase().replace(' ', '-')}">${student.status}</td>
+        <td>${e(student.indexNumber)}</td>
+        <td>${e(student.name)}</td>
+        <td>${e(student.attended)}</td>
+        <td>${e(student.total)}</td>
+        <td>${e(student.rate)}%</td>
+        <td class="status-${e(student.status.toLowerCase().replace(' ', '-'))}">${e(student.status)}</td>
       </tr>
       `).join('')}
     </tbody>
@@ -129,27 +150,27 @@ function generateDefaultReportHTML(data) {
     <div class="signature-box">
       <h3>Class Representative</h3>
       <div class="signature-content">
-        <div><strong>Name:</strong> ${data.repName}</div>
-        <div><strong>Signature:</strong> ${data.repSignature}</div>
-        <div><strong>Date:</strong> ${data.generatedDate}</div>
-        <div><strong>Time:</strong> ${data.generatedTime}</div>
+        <div><strong>Name:</strong> ${e(data.repName)}</div>
+        <div><strong>Signature:</strong> ${renderSignature(data.repSignature)}</div>
+        <div><strong>Date:</strong> ${e(data.generatedDate)}</div>
+        <div><strong>Time:</strong> ${e(data.generatedTime)}</div>
       </div>
     </div>
 
     <div class="signature-box">
       <h3>Course Lecturer</h3>
       <div class="signature-content">
-        <div><strong>Name:</strong> ${data.lecturerName}</div>
-        <div><strong>Signature:</strong> ${data.lecturerSignature || '_____________________'}</div>
-        <div><strong>Date:</strong> ${data.lecturerSignedDate || '_____________________'}</div>
-        <div><strong>Time:</strong> ${data.lecturerSignedTime || '_____________________'}</div>
+        <div><strong>Name:</strong> ${e(data.lecturerName)}</div>
+        <div><strong>Signature:</strong> ${renderSignature(data.lecturerSignature)}</div>
+        <div><strong>Date:</strong> ${e(data.lecturerSignedDate || '_____________________')}</div>
+        <div><strong>Time:</strong> ${e(data.lecturerSignedTime || '_____________________')}</div>
       </div>
     </div>
   </div>
 
   <div class="footer">
     <p>This is an official attendance report generated by the Class Attendance System</p>
-    <p>Generated on ${data.generatedDate} at ${data.generatedTime}</p>
+    <p>Generated on ${e(data.generatedDate)} at ${e(data.generatedTime)}</p>
   </div>
 </body>
 </html>
@@ -322,18 +343,20 @@ const generateReport = async (req, res) => {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    // Get lecturer assigned to this course/class
-    const lecturerAssignment = await prisma.lecturerAssignment.findFirst({
+    // Lecturers sign each session on the rep's phone; use those sign-offs for the report
+    // instead of a separate lecturer login.
+    const signedSessions = await prisma.attendanceSession.findMany({
       where: {
+        courseId,
         classId: repClass.id,
-        courseId: courseId
+        status: 'APPROVED',
+        lecturerSignature: { not: null }
       },
-      include: {
-        lecturer: {
-          select: { id: true, username: true }
-        }
-      }
+      select: { lecturerName: true, lecturerSignature: true, approvedAt: true },
+      orderBy: { approvedAt: 'desc' }
     });
+    const latestSignOff = signedSessions[0] || null;
+    const lecturerNames = [...new Set(signedSessions.map(s => s.lecturerName).filter(Boolean))];
 
     // Get analytics data for this course
     const sessions = await prisma.attendanceSession.findMany({
@@ -366,14 +389,9 @@ const generateReport = async (req, res) => {
 
     const studentSessionIds = sessions.map(s => s.id);
 
+    const presentCounts = await countPresentByStudent(studentSessionIds);
     const studentsData = await Promise.all(classStudents.map(async (cs) => {
-      const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-        where: {
-          studentId: cs.student.id,
-          sessionId: { in: studentSessionIds },
-          status: { in: ['PRESENT', 'LATE'] }
-        }
-      }) : 0;
+      const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
       const rate = totalSessionsCount > 0
         ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
@@ -407,7 +425,10 @@ const generateReport = async (req, res) => {
       generatedTime: new Date().toLocaleTimeString(),
       repName: req.user.username,
       repSignature: signature,
-      lecturerName: lecturerAssignment ? lecturerAssignment.lecturer.username : 'Not Assigned',
+      lecturerName: lecturerNames.length > 0 ? lecturerNames.join(', ') : 'Not signed',
+      lecturerSignature: latestSignOff?.lecturerSignature || null,
+      lecturerSignedDate: latestSignOff?.approvedAt ? new Date(latestSignOff.approvedAt).toLocaleDateString() : null,
+      lecturerSignedTime: latestSignOff?.approvedAt ? new Date(latestSignOff.approvedAt).toLocaleTimeString() : null,
       students: studentsData
     };
 
@@ -451,26 +472,35 @@ const generateReport = async (req, res) => {
 
     fileUrl = `/uploads/reports/${filename}`;
 
-    // 6. Save to database
+    // 6. Save to database — submitted straight to the department (lecturers sign per session
+    // on the rep's phone, so there is no separate lecturer approval step).
+    const now = new Date();
     const officialReport = await prisma.officialReport.create({
       data: {
         classId: repClass.id,
         courseId,
         generatedById: req.user.id,
         fileUrl,
-        status: 'PENDING_SIGNATURE',
+        status: 'APPROVED',
         repSignature: signature,
-        repSignedAt: new Date()
+        repSignedAt: now,
+        lecturerSignature: latestSignOff?.lecturerSignature || null,
+        signedAt: latestSignOff?.approvedAt || null,
+        submittedToDeptAt: now
       }
     });
 
-    // 7. Notify lecturer
-    if (lecturerAssignment) {
+    // 7. Notify the department (super admins)
+    const superAdmins = await prisma.user.findMany({
+      where: { role: 'SUPERADMIN', isActive: true },
+      select: { id: true }
+    });
+    for (const admin of superAdmins) {
       await createNotificationHelper({
-        userId: lecturerAssignment.lecturer.id,
-        title: 'New Report Pending Your Signature',
-        message: `${req.user.username} has generated an attendance report for ${course.name} (${course.code}). Please review and sign.`,
-        type: 'INFO'
+        userId: admin.id,
+        title: '📋 New Report Submitted to Department',
+        message: `${course.name} (${course.code}) - ${repClass.displayName}. Generated by ${req.user.username}.`,
+        type: 'SUCCESS'
       });
     }
 
@@ -608,14 +638,9 @@ const signReport = async (req, res) => {
         const studentSessionIds = sessions.map(s => s.id);
         const totalSessionsCount = sessions.length;
 
+        const presentCounts = await countPresentByStudent(studentSessionIds);
         const studentsData = await Promise.all(classStudents.map(async (cs) => {
-          const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-            where: {
-              studentId: cs.student.id,
-              sessionId: { in: studentSessionIds },
-              status: { in: ['PRESENT', 'LATE'] }
-            }
-          }) : 0;
+          const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
           const rate = totalSessionsCount > 0
             ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
@@ -805,14 +830,9 @@ const serveReportFile = async (req, res) => {
       const studentSessionIds = sessions.map(s => s.id);
       const totalSessionsCount = sessions.length;
 
+      const presentCounts = await countPresentByStudent(studentSessionIds);
       const studentsData = await Promise.all(classStudents.map(async (cs) => {
-        const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-          where: {
-            studentId: cs.student.id,
-            sessionId: { in: studentSessionIds },
-            status: { in: ['PRESENT', 'LATE'] }
-          }
-        }) : 0;
+        const presentOrLateCount = presentCounts.get(cs.student.id) || 0;
 
         const rate = totalSessionsCount > 0
           ? Math.round((presentOrLateCount / totalSessionsCount) * 100)

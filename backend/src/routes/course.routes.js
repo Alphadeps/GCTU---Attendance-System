@@ -1,5 +1,6 @@
 const express = require('express');
 const prisma = require('../lib/prisma');
+const { countPresentByStudent } = require('../lib/attendanceStats');
 const { protect, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
@@ -120,14 +121,9 @@ router.get('/:id/analytics', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN',
 
     const studentSessionIds = sessions.map(s => s.id);
 
+    const presentCounts = await countPresentByStudent(studentSessionIds);
     const analytics = await Promise.all(students.map(async (student) => {
-      const presentOrLateCount = totalSessionsCount > 0 ? await prisma.attendance.count({
-        where: {
-          studentId: student.id,
-          sessionId: { in: studentSessionIds },
-          status: { in: ['PRESENT', 'LATE'] }
-        }
-      }) : 0;
+      const presentOrLateCount = presentCounts.get(student.id) || 0;
 
       const attendanceRate = totalSessionsCount > 0
         ? Math.round((presentOrLateCount / totalSessionsCount) * 100)
@@ -157,7 +153,6 @@ router.get('/:id/analytics', protect, authorizeRoles('REP', 'LECTURER', 'ADMIN',
 });
 
 // Trigger warning notifications to at-risk students (REP, ADMIN, SUPERADMIN)
-const { createNotificationHelper } = require('../controllers/notification.controller');
 router.post('/:id/warn-at-risk', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -210,29 +205,28 @@ router.post('/:id/warn-at-risk', protect, authorizeRoles('REP', 'ADMIN', 'SUPERA
     }
 
     const studentSessionIds = sessions.map(s => s.id);
-    let warningsSent = 0;
+    const presentCounts = await countPresentByStudent(studentSessionIds);
 
-    await Promise.all(students.map(async (student) => {
-      const presentOrLateCount = await prisma.attendance.count({
-        where: {
-          studentId: student.id,
-          sessionId: { in: studentSessionIds },
-          status: { in: ['PRESENT', 'LATE'] }
-        }
-      });
-
+    // Build all warnings first, then insert them in one batch instead of one query per student
+    const warnings = [];
+    for (const student of students) {
+      const presentOrLateCount = presentCounts.get(student.id) || 0;
       const attendanceRate = Math.round((presentOrLateCount / totalSessionsCount) * 100);
 
       if (attendanceRate < 75) {
-        await createNotificationHelper({
+        warnings.push({
           studentIndex: student.indexNumber,
           title: '⚠️ GCTU Low Attendance Alert',
           message: `Your attendance in ${course.name} (${course.code}) is currently at ${attendanceRate}%, which is below the required 75% examination threshold. Please attend upcoming lectures.`,
           type: 'WARNING'
         });
-        warningsSent++;
       }
-    }));
+    }
+
+    if (warnings.length > 0) {
+      await prisma.notification.createMany({ data: warnings });
+    }
+    const warningsSent = warnings.length;
 
     res.json({ message: 'Warning notifications sent successfully', warningsSent });
   } catch (err) {

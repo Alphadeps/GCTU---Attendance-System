@@ -31,6 +31,7 @@ const SessionManager = () => {
 
   // Signature state
   const [signature, setSignature] = useState('');
+  const [lecturerName, setLecturerName] = useState('');
   const [approving, setApproving] = useState(false);
 
   // Poll timers
@@ -101,17 +102,22 @@ const SessionManager = () => {
   };
 
   const handleApproveSession = async () => {
+    if (lecturerName.trim().length < 2) {
+      toast.warning("Ask the lecturer to type their full name.", 'Lecturer Name Required');
+      return;
+    }
     if (!signature) {
-      toast.warning('Please provide your signature on the pad before approving.', 'Signature Required');
+      toast.warning('Ask the lecturer to sign on the pad before submitting.', 'Signature Required');
       return;
     }
 
     setApproving(true);
     try {
       await api.patch(`/sessions/${id}/approve`, {
-        lecturerSignature: signature
+        lecturerSignature: signature,
+        lecturerName: lecturerName.trim()
       });
-      toast.success('Session approved and signed successfully!', 'Approved!');
+      toast.success('Lecturer sign-off saved for this class.', 'Signed Off!');
       fetchSessionDetails();
     } catch (err) {
       console.error('Approve session error:', err);
@@ -394,7 +400,7 @@ const SessionManager = () => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
-    doc.text("Lecturer Approval & Digital Sign-off", 14, finalY);
+    doc.text(session.lecturerName ? `Lecturer Sign-off: ${session.lecturerName}` : "Lecturer Sign-off", 14, finalY);
 
     if (session.lecturerSignature) {
       try {
@@ -658,11 +664,23 @@ const SessionManager = () => {
             {/* Lecturer Approval */}
             {session.status === 'CLOSED' && (
               <div className="sip-card p-5 animate-fade-in-up delay-200">
-                <h3 className="text-xs font-bold text-[#344767] uppercase tracking-wider mb-4">Approval Required</h3>
-                <SignatureCanvas onSave={setSignature} label="Class Rep Sign-off" />
+                <h3 className="text-xs font-bold text-[#344767] uppercase tracking-wider mb-1">Lecturer Sign-off</h3>
+                <p className="text-[11px] text-[#8392ab] mb-4">Hand this phone to the lecturer to type their name and sign.</p>
+                <label className="sip-label" htmlFor="lecturer-name">Lecturer's full name</label>
+                <input
+                  id="lecturer-name"
+                  type="text"
+                  className="sip-input mb-4"
+                  placeholder="e.g. Dr. Kwame Mensah"
+                  value={lecturerName}
+                  onChange={(e) => setLecturerName(e.target.value)}
+                  maxLength={100}
+                  autoComplete="off"
+                />
+                <SignatureCanvas onSave={setSignature} label="Lecturer Signature" />
                 <button
                   onClick={handleApproveSession}
-                  disabled={approving || !signature}
+                  disabled={approving || !signature || lecturerName.trim().length < 2}
                   className="sip-btn-dark mt-4 flex items-center justify-center gap-2"
                 >
                   {approving ? (
@@ -672,7 +690,7 @@ const SessionManager = () => {
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Approve & Sign Class
+                      Submit Lecturer Sign-off
                     </>
                   )}
                 </button>
@@ -689,7 +707,9 @@ const SessionManager = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-emerald-600">Approved by Lecturer</p>
+                    <p className="text-xs font-bold text-emerald-600">
+                      {session.lecturerName ? `Signed off by ${session.lecturerName}` : 'Signed off by Lecturer'}
+                    </p>
                     <p className="text-[10px] text-[#8392ab]">{new Date(session.approvedAt).toLocaleString()}</p>
                   </div>
                 </div>

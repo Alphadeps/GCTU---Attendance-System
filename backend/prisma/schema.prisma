@@ -106,6 +106,7 @@ model AttendanceSession {
   networkSSID        String?
   attendances        Attendance[]
   lecturerSignature  String?
+  lecturerName       String?   // Name typed by the lecturer when signing on the rep's phone
   approvedByLecturerId String?
   approvedByLecturer   User?             @relation("LecturerApprovedSessions", fields: [approvedByLecturerId], references: [id])
   approvedAt         DateTime?
@@ -180,6 +181,7 @@ model Class {
   session      String    // "MORNING", "EVENING", "WEEKEND"
   displayName  String    // Auto-generated: "BIT LEVEL 300 TOP-UP GROUP B (EVENING)"
   repId        String?   @unique  // One rep per group
+  joinCode     String?   @unique  // Code the rep shares so classmates can add themselves
   rep          User?     @relation(fields: [repId], references: [id])
   students     ClassStudent[]
   courses      ClassCourse[]

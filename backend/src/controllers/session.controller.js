@@ -378,9 +378,14 @@ const approveSession = async (req, res) => {
   try {
     const { id } = req.params;
     const { lecturerSignature } = req.body; // Expect base64 signature
+    // The lecturer signs on the rep's phone at the end of class and types their name
+    const lecturerName = typeof req.body.lecturerName === 'string' ? req.body.lecturerName.trim() : '';
 
     if (!lecturerSignature) {
       return res.status(400).json({ error: 'Lecturer signature (base64 image) is required' });
+    }
+    if (lecturerName.length < 2 || lecturerName.length > 100) {
+      return res.status(400).json({ error: "Enter the lecturer's full name (2–100 characters)" });
     }
 
     const session = await prisma.attendanceSession.findUnique({
@@ -391,8 +396,16 @@ const approveSession = async (req, res) => {
       return res.status(404).json({ error: 'Session not found' });
     }
 
+    // Reps may only get sign-off on sessions they opened
+    if (req.user.role === 'REP' && session.repId !== req.user.id) {
+      return res.status(403).json({ error: 'You can only get sign-off for sessions you opened.' });
+    }
+
     if (session.status === 'OPEN') {
       return res.status(400).json({ error: 'Session must be closed before approval' });
+    }
+    if (session.status === 'APPROVED') {
+      return res.status(400).json({ error: 'This session has already been signed off.' });
     }
 
     const approvedSession = await prisma.attendanceSession.update({
@@ -400,6 +413,7 @@ const approveSession = async (req, res) => {
       data: {
         status: 'APPROVED',
         lecturerSignature,
+        lecturerName,
         approvedByLecturerId: req.user.id,
         approvedAt: new Date()
       }
@@ -413,6 +427,7 @@ const approveSession = async (req, res) => {
       sessionId: id,
       courseName: session.course?.name,
       repId: session.repId,
+      lecturerName,
       approvedAt: new Date().toISOString()
     });
 
@@ -423,7 +438,7 @@ const approveSession = async (req, res) => {
         await createNotificationHelper({
           userId: session.repId,
           title: 'Session Approved & Signed',
-          message: `The attendance session for ${courseName} has been signed and approved by ${req.user.username}.`,
+          message: `The attendance session for ${courseName} has been signed off by ${lecturerName}.`,
           type: 'SUCCESS'
         });
       } catch (notifyErr) {

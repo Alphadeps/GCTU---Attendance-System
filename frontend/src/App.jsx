@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import StudentLoginPage from './pages/StudentLoginPage';
+import JoinClassPage from './pages/JoinClassPage';
 import RepDashboard from './pages/RepDashboard';
 import SessionManager from './pages/SessionManager';
 import StudentPortal from './pages/StudentPortal';
@@ -63,6 +64,9 @@ function App() {
           </PublicRoute>
         }
       />
+      {/* Students join a class with the code their rep shares (public, no login) */}
+      <Route path="/join" element={<JoinClassPage />} />
+      <Route path="/join/:code" element={<JoinClassPage />} />
       <Route
         path="/student-login"
         element={
