@@ -5,6 +5,7 @@ const { protect, authorizeRoles } = require('../middleware/auth');
 const { adminLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const adminController = require('../controllers/admin.controller');
 const classJoin = require('../controllers/classJoin.controller');
+const repSignup = require('../controllers/repSignup.controller');
 
 const router = express.Router();
 
@@ -65,6 +66,9 @@ router.delete('/classes/:id/courses/:courseId', superadminGuard, adminController
 // Rep Account Management
 router.post('/reps', superadminGuard, adminController.createRepAccount);
 router.get('/reps', superadminGuard, adminController.getAllReps);
+router.get('/reps/pending', superadminGuard, repSignup.listPendingReps);
+router.post('/reps/:id/approve', superadminGuard, repSignup.approveRep);
+router.post('/reps/:id/reject', superadminGuard, repSignup.rejectRep);
 router.post('/reps/bulk-upload', [...superadminGuard, uploadLimiter, uploadCSV.single('file')], adminController.bulkUploadReps);
 router.patch('/reps/:id', superadminGuard, adminController.updateRep);
 router.patch('/reps/:id/reset-password', superadminGuard, adminController.resetRepPassword);
@@ -83,6 +87,8 @@ router.post('/rep/join-code/regenerate', repGuard, classJoin.regenerateJoinCode)
 router.post('/rep/parse-file', [...repGuard, uploadLimiter, uploadClassList.single('file')], adminController.parseImportFile);
 router.post('/rep/students', repGuard, adminController.addStudentsToClass);
 router.delete('/rep/students/:studentId', repGuard, adminController.removeStudentFromClass);
+router.post('/rep/courses', repGuard, classJoin.addRepCourse);
+router.delete('/rep/courses/:courseId', repGuard, classJoin.removeRepCourse);
 
 // Student Device Management
 router.patch('/students/:indexNumber/reset-device', superadminGuard, adminController.resetStudentDevice);

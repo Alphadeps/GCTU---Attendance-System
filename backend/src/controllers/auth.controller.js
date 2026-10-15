@@ -153,6 +153,14 @@ const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
 
+    // Self-signed-up reps can't sign in until a super admin approves them
+    if (user.pendingApproval) {
+      return res.status(403).json({
+        error: 'Your rep account is waiting for the administrator to approve it. Try again later.',
+        code: 'PENDING_APPROVAL'
+      });
+    }
+
     console.log('Password matched, fetching assigned class...');
     // For REPs, fetch their assigned class
     let assignedClass = null;

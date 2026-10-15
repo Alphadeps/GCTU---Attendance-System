@@ -328,6 +328,16 @@ const LoginPage = () => {
           {/* Footer links */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', textAlign: 'center' }}>
             <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
+              New class rep?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/rep-signup')}
+                style={{ background: 'none', border: 'none', padding: 0, color: '#1a3c6d', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
+              >
+                Create your account
+              </button>
+            </p>
+            <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
               Just checking in?{' '}
               <button
                 onClick={() => navigate('/student')}

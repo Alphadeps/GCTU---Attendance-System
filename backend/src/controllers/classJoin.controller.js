@@ -193,7 +193,69 @@ const joinClass = async (req, res) => {
   }
 };
 
+// REP: add a course to their class. Links the existing course with that code, or creates it.
+const addRepCourse = async (req, res) => {
+  try {
+    const code = String(req.body.code || '').trim().toUpperCase().replace(/\s+/g, ' ');
+    const name = String(req.body.name || '').trim().replace(/\s+/g, ' ');
+    if (code.length < 2 || code.length > 20) {
+      return res.status(400).json({ error: 'Enter the course code (e.g. BIT 301)' });
+    }
+
+    let course = await prisma.course.findFirst({ where: { code: { equals: code, mode: 'insensitive' } } });
+    if (!course) {
+      if (name.length < 3 || name.length > 120) {
+        return res.status(400).json({ error: 'Enter the course name (e.g. Networking)' });
+      }
+      const sameName = await prisma.course.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
+      if (sameName) {
+        return res.status(409).json({ error: `A course called "${sameName.name}" already exists with code ${sameName.code}. Use that code.` });
+      }
+      course = await prisma.course.create({ data: { code, name } });
+    }
+
+    const linkKey = { classId_courseId: { classId: req.repClassId, courseId: course.id } };
+    if (await prisma.classCourse.findUnique({ where: linkKey, select: { id: true } })) {
+      return res.status(409).json({ error: `${course.code} is already in your class` });
+    }
+    await prisma.classCourse.create({ data: { classId: req.repClassId, courseId: course.id } });
+    await cache.del(cacheKeys.classCourses(req.repClassId));
+    await cache.del(cacheKeys.class(req.repClassId));
+
+    res.status(201).json({ message: `${course.code} — ${course.name} added to your class`, course });
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(409).json({ error: 'That course code or name is already taken. Check the code and try again.' });
+    }
+    console.error('Add rep course error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// REP: remove a course from their class (only while it has no attendance sessions)
+const removeRepCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const sessions = await prisma.attendanceSession.count({ where: { classId: req.repClassId, courseId } });
+    if (sessions > 0) {
+      return res.status(400).json({ error: 'This course already has attendance records, so it cannot be removed.' });
+    }
+    const removed = await prisma.classCourse.deleteMany({ where: { classId: req.repClassId, courseId } });
+    if (removed.count === 0) {
+      return res.status(404).json({ error: 'That course is not in your class' });
+    }
+    await cache.del(cacheKeys.classCourses(req.repClassId));
+    await cache.del(cacheKeys.class(req.repClassId));
+    res.json({ message: 'Course removed from your class' });
+  } catch (err) {
+    console.error('Remove rep course error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 module.exports = {
+  addRepCourse,
+  removeRepCourse,
   repClassScope,
   getJoinCode,
   regenerateJoinCode,

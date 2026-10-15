@@ -208,6 +208,40 @@ const RepDashboard = () => {
     }
   };
 
+  // Rep adds/removes courses for their own class
+  const [newCourse, setNewCourse] = useState({ code: '', name: '' });
+  const [addingCourse, setAddingCourse] = useState(false);
+  const reloadCourses = async () => {
+    const res = await api.get('/courses');
+    setCourses(res.data || []);
+    if (!selectedCourseId && res.data?.length) setSelectedCourseId(res.data[0].id);
+  };
+  const handleAddCourse = async (e) => {
+    e.preventDefault();
+    setAddingCourse(true);
+    try {
+      const res = await api.post('/admin/rep/courses', newCourse);
+      toast.success(res.data.message, 'Course Added');
+      setNewCourse({ code: '', name: '' });
+      await reloadCourses();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Could not add the course');
+    } finally {
+      setAddingCourse(false);
+    }
+  };
+  const handleRemoveCourse = (course) => {
+    askConfirm(`Remove ${course.code} — ${course.name} from your class?`, async () => {
+      try {
+        await api.delete(`/admin/rep/courses/${course.id}`);
+        toast.success(`${course.code} removed from your class.`);
+        await reloadCourses();
+      } catch (err) {
+        toast.error(err.response?.data?.error || 'Could not remove the course');
+      }
+    });
+  };
+
   const [exportingCourseId, setExportingCourseId] = useState(null);
   const handleExportExcel = async (course) => {
     setExportingCourseId(course.id);
@@ -633,6 +667,33 @@ const RepDashboard = () => {
                 <span className="badge badge-info">{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
               </div>
 
+              <form onSubmit={handleAddCourse} className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)] space-y-3">
+                <div>
+                  <p className="text-[13px] font-bold text-[#344767]">Add a course</p>
+                  <p className="text-[11px] text-[#8392ab]">Enter the course code and name from your timetable. If the course already exists, it is linked to your class.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr_auto] gap-2">
+                  <input
+                    className="sip-input"
+                    placeholder="Code, e.g. BIT 301"
+                    value={newCourse.code}
+                    onChange={(e) => setNewCourse(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                    maxLength={20}
+                    required
+                  />
+                  <input
+                    className="sip-input"
+                    placeholder="Name, e.g. Networking"
+                    value={newCourse.name}
+                    onChange={(e) => setNewCourse(prev => ({ ...prev, name: e.target.value }))}
+                    maxLength={120}
+                  />
+                  <button type="submit" disabled={addingCourse || newCourse.code.trim().length < 2} className="sip-btn-dark" style={{ width: 'auto', padding: '10px 18px' }}>
+                    {addingCourse ? 'Adding…' : 'Add'}
+                  </button>
+                </div>
+              </form>
+
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[1, 2, 3, 4].map(i => <div key={i} className="skeleton h-28 rounded-2xl" />)}
@@ -643,7 +704,7 @@ const RepDashboard = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                   <p className="text-[13px] font-semibold text-[#8392ab]">No courses assigned yet</p>
-                  <p className="text-[11px] text-[#8392ab] mt-1 max-w-xs mx-auto">Your administrator needs to link courses to your class.</p>
+                  <p className="text-[11px] text-[#8392ab] mt-1 max-w-xs mx-auto">Add your courses above using their code and name.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -680,6 +741,12 @@ const RepDashboard = () => {
                         className="mt-2 w-full rounded-xl border border-emerald-200 bg-emerald-50 py-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
                       >
                         {exportingCourseId === c.id ? 'Preparing Excel…' : 'Download Excel Register'}
+                      </button>
+                      <button
+                        onClick={() => handleRemoveCourse(c)}
+                        className="mt-2 w-full text-[11px] font-semibold text-red-500 hover:text-red-700"
+                      >
+                        Remove course
                       </button>
                     </div>
                   ))}

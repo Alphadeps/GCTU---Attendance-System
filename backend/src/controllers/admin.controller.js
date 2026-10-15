@@ -1028,7 +1028,9 @@ const getAllReps = async (req, res) => {
     const formatted = reps.map(r => ({
       id: r.id,
       username: r.username,
+      fullName: r.fullName,
       isActive: r.isActive,
+      pendingApproval: r.pendingApproval,
       assignedClass: r.assignedClass ? {
         id: r.assignedClass.id,
         displayName: r.assignedClass.displayName

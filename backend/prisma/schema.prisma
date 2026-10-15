@@ -44,6 +44,8 @@ model User {
   role             UserRole
   isActive         Boolean             @default(true)
   mustChangePassword Boolean           @default(false) // Set when an admin sets/resets the password
+  fullName         String?             // Reps who sign up themselves give their name
+  pendingApproval  Boolean             @default(false) // Self-signed-up rep waiting for admin approval
   createdSessions  AttendanceSession[] @relation("RepSessions")
   approvedSessions AttendanceSession[] @relation("LecturerApprovedSessions")
   notifications    Notification[]
@@ -183,6 +185,7 @@ model Class {
   displayName  String    // Auto-generated: "BIT LEVEL 300 TOP-UP GROUP B (EVENING)"
   repId        String?   @unique  // One rep per group
   joinCode     String?   @unique  // Code the rep shares so classmates can add themselves
+  createdViaSignup Boolean @default(false) // Created by a rep's self-signup; removed if that signup is rejected
   rep          User?     @relation(fields: [repId], references: [id])
   students     ClassStudent[]
   courses      ClassCourse[]

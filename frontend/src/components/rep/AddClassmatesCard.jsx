@@ -116,7 +116,7 @@ const AddClassmatesCard = ({ onStudentsChanged, onConfirm }) => {
               <button type="button" onClick={shareOnWhatsApp} className="sip-btn-primary" style={COMPACT_BTN}>Share on WhatsApp</button>
               <button type="button" onClick={copyLink} className="sip-btn-dark" style={COMPACT_BTN}>Copy link</button>
               <button type="button" onClick={regenerate} disabled={regenerating} className="px-3 py-2 text-[12px] font-semibold text-[#8392ab] hover:text-[#344767]">
-                {regenerating ? 'Creating…' : 'New code'}
+                {regenerating ? 'Creating…' : 'Generate new link'}
               </button>
             </div>
           </>
