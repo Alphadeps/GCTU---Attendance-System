@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import HumanCheck from '../components/HumanCheck';
+import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 import ClassPicker from '../components/rep/ClassPicker';
 import { EMPTY_CLASS } from '../components/rep/classDefaults';
 
@@ -12,6 +14,8 @@ const RepSignupPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const humanCheck = useRef(null);
 
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
 
@@ -29,10 +33,11 @@ const RepSignupPage = () => {
     setSubmitting(true);
     try {
       const { fullName, indexNumber, password } = form;
-      const res = await api.post('/auth/rep-signup', { fullName, indexNumber, password, ...cls });
+      const res = await api.post('/auth/rep-signup', { fullName, indexNumber, password, ...cls, captchaToken });
       setSuccessMsg(res.data.message);
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Could not create your account. Try again.');
+      humanCheck.current?.reset();
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +87,8 @@ const RepSignupPage = () => {
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
 
-              <button type="submit" className="sip-btn-dark" disabled={submitting || !cls.programmeId}>
+              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+              <button type="submit" className="sip-btn-dark" disabled={submitting || !cls.programmeId || (HUMAN_CHECK_ENABLED && !captchaToken)}>
                 {submitting ? 'Creating account…' : 'Create account'}
               </button>
               <p style={{ fontSize: 12, textAlign: 'center', color: 'var(--sip-text-footer)', margin: 0 }}>
