@@ -45,6 +45,7 @@ const { protect, authorizeRoles } = require('./middleware/auth');
 const { logger, requestLogger } = require('./lib/logger');
 const { bootstrapAdminFromEnv } = require('./lib/bootstrapAdmin');
 const { startSessionExpiryScheduler } = require('./lib/sessionExpiry');
+const { serveFile } = require('./lib/fileStore');
 
 const app = express();
 // Render provides PORT dynamically - don't override it
@@ -237,6 +238,9 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/lecturer', lecturerRoutes);
 app.use('/api/admin', require('./routes/admin.routes'));
 app.use('/api/monitoring', monitoringRoutes);
+
+// Uploaded/generated files stored in the database (logos, templates, evidence, reports)
+app.get('/api/files/:id{/:name}', serveFile);
 
 // CSRF token endpoint
 const { getCsrfToken } = require('./middleware/security');

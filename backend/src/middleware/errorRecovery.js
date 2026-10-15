@@ -180,7 +180,17 @@ function getUserFriendlyError(error) {
 /**
  * Global error handler middleware
  */
+// Upload problems (wrong file type, too large) are the user's to fix: answer 400 with the reason
+const UPLOAD_LIMIT_MESSAGES = {
+  LIMIT_FILE_SIZE: 'File is too large. Please upload a smaller file.',
+  LIMIT_UNEXPECTED_FILE: 'Unexpected file field in the upload.'
+};
+
 function globalErrorHandler(err, req, res, next) {
+  if (err && (err.name === 'MulterError' || err.isUploadError)) {
+    return res.status(400).json({ error: UPLOAD_LIMIT_MESSAGES[err.code] || err.message });
+  }
+
   // Log error details
   console.error('❌ Error:', {
     message: err.message,

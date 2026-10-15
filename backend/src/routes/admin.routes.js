@@ -1,7 +1,5 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 
 const { protect, authorizeRoles } = require('../middleware/auth');
 const { adminLimiter, uploadLimiter } = require('../middleware/rateLimiter');
@@ -10,23 +8,15 @@ const classJoin = require('../controllers/classJoin.controller');
 
 const router = express.Router();
 
-// Ensure public/uploads exists
-const uploadDir = path.join(__dirname, '../../public/uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer configurations
-const logoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `logo_${Date.now()}${ext}`);
+// Logo is kept in memory and saved to the database (the server disk is wiped on restart)
+const uploadLogo = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(png|jpe?g|gif|webp)$/.test(file.mimetype)) return cb(null, true);
+    cb(Object.assign(new Error('Logo must be a PNG, JPEG, GIF or WebP image'), { isUploadError: true }));
   }
 });
-const uploadLogo = multer({ storage: logoStorage });
 
 const csvStorage = multer.memoryStorage();
 const uploadCSV = multer({ storage: csvStorage });

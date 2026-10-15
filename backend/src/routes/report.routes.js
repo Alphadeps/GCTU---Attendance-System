@@ -4,28 +4,20 @@ const path = require('path');
 const { protect, authorizeRoles } = require('../middleware/auth');
 const { reportLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const reportController = require('../controllers/report.controller');
+const { exportCourseAttendance } = require('../controllers/export.controller');
 
 const router = express.Router();
 
-// Multer setup for .docx templates
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '..', '..', 'public', 'uploads', 'templates');
-    require('fs').mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, `template-${Date.now()}${ext}`);
-  }
-});
-const upload = multer({ 
-  storage,
+// Multer setup for .docx templates — kept in memory and saved to the database
+// (the server disk is wiped on every restart/deploy)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       cb(null, true);
     } else {
-      cb(new Error('Only .docx files are allowed'));
+      cb(Object.assign(new Error('Only .docx files are allowed'), { isUploadError: true }));
     }
   }
 });
@@ -38,6 +30,9 @@ router.delete('/template/:id', protect, authorizeRoles('ADMIN', 'SUPERADMIN'), r
 
 // Rep: Generate Report
 router.post('/generate', protect, authorizeRoles('REP'), reportLimiter, reportController.generateReport);
+
+// Excel attendance register for one class + course (reps: own class only)
+router.get('/export', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), reportLimiter, exportCourseAttendance);
 router.get('/my-generated', protect, authorizeRoles('REP'), reportController.getRepReports);
 
 // Lecturer: View and sign pending reports

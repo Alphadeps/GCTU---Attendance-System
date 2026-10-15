@@ -1,4 +1,5 @@
 const prisma = require('../lib/prisma');
+const { saveFile } = require('../lib/fileStore');
 const { z } = require('zod');
 
 // Schema for Grievance Submissions
@@ -28,7 +29,12 @@ exports.submitGrievance = async (req, res) => {
 
     let evidenceUrl = null;
     if (req.file) {
-      evidenceUrl = `/uploads/evidence/${req.file.filename}`;
+      // Stored in the database: the server disk is wiped on every restart/deploy
+      ({ url: evidenceUrl } = await saveFile({
+        buffer: req.file.buffer,
+        filename: req.file.originalname,
+        mimeType: req.file.mimetype
+      }));
     }
 
     const grievance = await prisma.grievance.create({
@@ -50,7 +56,7 @@ exports.submitGrievance = async (req, res) => {
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return res.status(400).json({ error: err.errors[0].message });
+      return res.status(400).json({ error: err.issues[0].message });
     }
     console.error('Submit grievance error:', err);
     res.status(500).json({ error: 'Internal server error' });

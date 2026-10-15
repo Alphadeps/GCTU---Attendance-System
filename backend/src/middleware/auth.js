@@ -3,6 +3,8 @@ const prisma = require('../lib/prisma');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'attendance-secret-key';
 
+const PASSWORD_CHANGE_ALLOWED = ['/api/auth/change-password', '/api/auth/logout'];
+
 // Protect middleware to verify JWT
 const protect = async (req, res, next) => {
   try {
@@ -36,7 +38,7 @@ const protect = async (req, res, next) => {
     // Fetch user from DB
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, username: true, role: true, isActive: true }
+      select: { id: true, username: true, role: true, isActive: true, mustChangePassword: true }
     });
 
     if (!user) {
@@ -45,6 +47,14 @@ const protect = async (req, res, next) => {
 
     if (!user.isActive) {
       return res.status(403).json({ error: 'Account deactivated' });
+    }
+
+    // Until a temporary password is replaced, only allow changing it (or logging out)
+    if (user.mustChangePassword && !PASSWORD_CHANGE_ALLOWED.some(p => req.originalUrl.startsWith(p))) {
+      return res.status(403).json({
+        error: 'You must change your password before continuing.',
+        code: 'PASSWORD_CHANGE_REQUIRED'
+      });
     }
 
     req.user = user;

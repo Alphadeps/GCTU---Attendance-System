@@ -5,6 +5,7 @@ const path = require('path');
 const PizZip = require('pizzip');
 const Docxtemplater = require('docxtemplater');
 const { createNotificationHelper } = require('./notification.controller');
+const { saveFile, readFileByUrl, overwriteFileByUrl, deleteFileByUrl, idFromUrl } = require('../lib/fileStore');
 const puppeteer = require('puppeteer-core');
 const chromium = require('@sparticuz/chromium');
 
@@ -184,7 +185,12 @@ const uploadTemplate = async (req, res) => {
       return res.status(400).json({ error: 'Please upload a .docx template' });
     }
 
-    const fileUrl = `/uploads/templates/${req.file.filename}`;
+    // Stored in the database: the server disk is wiped on every restart/deploy
+    const { url: fileUrl } = await saveFile({
+      buffer: req.file.buffer,
+      filename: req.file.originalname,
+      mimeType: req.file.mimetype
+    });
 
     // Deactivate previous active templates
     await prisma.reportTemplate.updateMany({
@@ -262,10 +268,12 @@ const deleteTemplate = async (req, res) => {
       return res.status(404).json({ error: 'Template not found' });
     }
 
-    // Delete the file
-    const filePath = path.join(__dirname, '..', '..', 'public', template.fileUrl);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete the file (database copy, or legacy file on disk)
+    if (idFromUrl(template.fileUrl)) {
+      await deleteFileByUrl(template.fileUrl);
+    } else {
+      const filePath = path.join(__dirname, '..', '..', 'public', template.fileUrl);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
     // Delete from database
@@ -435,12 +443,15 @@ const generateReport = async (req, res) => {
     let fileUrl;
     let buf;
 
-    // 4. Process template or generate default
-    if (templateRecord) {
+    // 4. Process template or generate default. If the template file is missing (e.g. an old
+    // upload lost when the server disk was wiped), fall back to the default report.
+    const templateContent = templateRecord ? await readFileByUrl(templateRecord.fileUrl) : null;
+    if (templateRecord && !templateContent) {
+      console.warn(`[Reports] Template "${templateRecord.name}" file is missing — using the default report layout`);
+    }
+    if (templateContent) {
       // Use uploaded template
-      const templatePath = path.join(__dirname, '..', '..', 'public', templateRecord.fileUrl);
-      const content = fs.readFileSync(templatePath, 'binary');
-      const zip = new PizZip(content);
+      const zip = new PizZip(templateContent);
       
       const doc = new Docxtemplater(zip, {
         paragraphLoop: true,
@@ -459,18 +470,16 @@ const generateReport = async (req, res) => {
       buf = Buffer.from(htmlContent, 'utf-8');
     }
 
-    // 5. Save generated file
-    const reportsDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'reports');
-    if (!fs.existsSync(reportsDir)) {
-      fs.mkdirSync(reportsDir, { recursive: true });
-    }
-
-    const fileExtension = templateRecord ? 'docx' : 'html';
+    // 5. Save generated file (in the database, so it survives restarts)
+    const fileExtension = templateContent ? 'docx' : 'html';
     const filename = `Report_${course.code}_${repClass.level}${repClass.group}_${Date.now()}.${fileExtension}`;
-    const outputPath = path.join(reportsDir, filename);
-    fs.writeFileSync(outputPath, buf);
-
-    fileUrl = `/uploads/reports/${filename}`;
+    ({ url: fileUrl } = await saveFile({
+      buffer: buf,
+      filename,
+      mimeType: templateContent
+        ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        : 'text/html; charset=utf-8'
+    }));
 
     // 6. Save to database — submitted straight to the department (lecturers sign per session
     // on the rep's phone, so there is no separate lecturer approval step).
@@ -607,9 +616,6 @@ const signReport = async (req, res) => {
     // If report is HTML, regenerate it with lecturer signature
     if (existingReport.fileUrl.endsWith('.html')) {
       try {
-        // Read existing report to get data
-        const reportPath = path.join(__dirname, '..', '..', 'public', existingReport.fileUrl);
-        
         // Regenerate with lecturer signature
         const sessions = await prisma.attendanceSession.findMany({
           where: { 
@@ -681,7 +687,10 @@ const signReport = async (req, res) => {
         };
 
         const htmlContent = generateDefaultReportHTML(reportData);
-        fs.writeFileSync(reportPath, htmlContent);
+        const htmlBuf = Buffer.from(htmlContent, 'utf-8');
+        if (!(await overwriteFileByUrl(existingReport.fileUrl, htmlBuf))) {
+          fs.writeFileSync(path.join(__dirname, '..', '..', 'public', existingReport.fileUrl), htmlBuf);
+        }
       } catch (regenerateError) {
         console.error('Error regenerating report with signature:', regenerateError);
         // Continue anyway - signature is saved in database
@@ -795,11 +804,10 @@ const serveReportFile = async (req, res) => {
       return res.status(404).json({ error: 'Report not found' });
     }
 
-    const filePath = path.join(__dirname, '..', '..', 'public', report.fileUrl);
-    const fileExists = fs.existsSync(filePath);
+    const fileBuffer = await readFileByUrl(report.fileUrl);
 
-    // If file doesn't exist (ephemeral storage issue), regenerate it
-    if (!fileExists && report.fileUrl.endsWith('.html')) {
+    // If the file is gone (old reports stored on the wiped server disk), regenerate it
+    if (!fileBuffer && report.fileUrl.endsWith('.html')) {
       console.log(`Report file not found, regenerating: ${report.fileUrl}`);
       
       // Regenerate report data
@@ -888,14 +896,15 @@ const serveReportFile = async (req, res) => {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.setHeader('Content-Disposition', `inline; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.html"`);
       
-      const htmlContent = fs.readFileSync(filePath, 'utf-8');
-      res.send(htmlContent);
+      res.send(fileBuffer.toString('utf-8'));
     } else if (isDOCX) {
+      if (!fileBuffer) {
+        return res.status(404).json({ error: 'This report file is no longer available. Generate the report again.' });
+      }
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
       res.setHeader('Content-Disposition', `attachment; filename="Report_${report.course.code}_${report.class.level}${report.class.group}.docx"`);
       
-      const fileStream = fs.createReadStream(filePath);
-      fileStream.pipe(res);
+      res.send(fileBuffer);
     } else {
       res.status(400).json({ error: 'Unsupported file type' });
     }
@@ -922,9 +931,9 @@ const downloadReportAsPDF = async (req, res) => {
       return res.status(404).json({ error: 'Report not found' });
     }
 
-    const filePath = path.join(__dirname, '..', '..', 'public', report.fileUrl);
+    const fileBuffer = await readFileByUrl(report.fileUrl);
 
-    if (!fs.existsSync(filePath)) {
+    if (!fileBuffer) {
       return res.status(404).json({ error: 'Report file not found on server' });
     }
 
@@ -934,7 +943,7 @@ const downloadReportAsPDF = async (req, res) => {
     }
 
     // Read HTML content
-    const htmlContent = fs.readFileSync(filePath, 'utf-8');
+    const htmlContent = fileBuffer.toString('utf-8');
 
     // Launch puppeteer with chromium
     const browser = await puppeteer.launch({

@@ -6,6 +6,38 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 // Export the base URL without /api for file uploads and direct URLs
 export const BASE_URL = API_BASE_URL.replace('/api', '');
 
+// Download the Excel attendance register for a class + course (reps: classId is ignored)
+export const downloadAttendanceExcel = async ({ courseId, classId, fallbackName = 'attendance' }) => {
+  const res = await api.get('/reports/export', {
+    params: { courseId, ...(classId ? { classId } : {}) },
+    responseType: 'blob'
+  });
+  const match = /filename="([^"]+)"/.exec(res.headers['content-disposition'] || '');
+  const url = URL.createObjectURL(res.data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = match ? match[1] : `${fallbackName}.xlsx`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+
+// Turn an error from a blob request (e.g. the Excel download) back into its JSON message
+export const blobErrorMessage = async (err, fallback) => {
+  try {
+    const text = await err.response?.data?.text?.();
+    return (text && JSON.parse(text).error) || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+// Files stored by the backend (e.g. "/api/files/<id>/logo.png") live on the API server,
+// not on this frontend's domain. Other paths (blob:, /logo.jfif, https://...) pass through.
+export const assetUrl = (path) =>
+  typeof path === 'string' && (path.startsWith('/api/') || path.startsWith('/uploads/')) ? `${BASE_URL}${path}` : path;
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -50,6 +82,15 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Temporary password still in use: send the user to set their own
+    if (error.response?.status === 403 && error.response.data?.code === 'PASSWORD_CHANGE_REQUIRED') {
+      localStorage.setItem('needsPasswordChange', 'true');
+      if (window.location.pathname !== '/change-password') {
+        window.location.assign('/change-password');
+      }
+      return Promise.reject(error);
+    }
 
     // Check if error response is 401 Unauthorized and not already retried
     if (
