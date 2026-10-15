@@ -22,7 +22,7 @@ function loadTurnstile() {
   return scriptPromise;
 }
 
-const HumanCheck = forwardRef(({ onToken }, ref) => {
+const HumanCheck = forwardRef(({ onToken, action }, ref) => {
   const box = useRef(null);
   const widgetId = useRef(null);
   const onTokenRef = useRef(onToken);
@@ -43,6 +43,7 @@ const HumanCheck = forwardRef(({ onToken }, ref) => {
         if (cancelled || !box.current) return;
         widgetId.current = turnstile.render(box.current, {
           sitekey: TURNSTILE_SITE_KEY,
+          action,
           appearance: 'interaction-only',
           callback: (token) => onTokenRef.current?.(token),
           'expired-callback': () => onTokenRef.current?.(''),
@@ -56,7 +57,7 @@ const HumanCheck = forwardRef(({ onToken }, ref) => {
       if (window.turnstile && widgetId.current !== null) window.turnstile.remove(widgetId.current);
       widgetId.current = null;
     };
-  }, []);
+  }, [action]);
 
   if (!HUMAN_CHECK_ENABLED) return null;
   return <div ref={box} style={{ display: 'flex', justifyContent: 'center', minHeight: 0 }} />;

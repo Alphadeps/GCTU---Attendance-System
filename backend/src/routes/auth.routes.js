@@ -14,14 +14,14 @@ router.post('/register', (req, res, next) => {
 }, register);
 
 const { loginLimiter } = require('../middleware/rateLimiter');
-const { requireHuman } = require('../middleware/turnstile');
+const { requireHuman, TURNSTILE_ACTIONS } = require('../middleware/turnstile');
 const repSignup = require('../controllers/repSignup.controller');
 
-router.post('/login', loginLimiter, requireHuman, login);
+router.post('/login', loginLimiter, requireHuman(TURNSTILE_ACTIONS.staffLogin), login);
 
 // Class reps create their own account + class (stays pending until a super admin approves)
 router.get('/programmes', repSignup.listProgrammesPublic);
-router.post('/rep-signup', loginLimiter, requireHuman, repSignup.repSignup);
+router.post('/rep-signup', loginLimiter, requireHuman(TURNSTILE_ACTIONS.repSignup), repSignup.repSignup);
 router.post('/refresh', refresh);
 router.post('/logout', logout);
 router.patch('/change-password', protect, changePassword);

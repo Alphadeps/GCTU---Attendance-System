@@ -87,7 +87,7 @@ const RepSignupPage = () => {
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
 
-              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="rep_signup" />
               <button type="submit" className="sip-btn-dark" disabled={submitting || !cls.programmeId || (HUMAN_CHECK_ENABLED && !captchaToken)}>
                 {submitting ? 'Creating account…' : 'Create account'}
               </button>

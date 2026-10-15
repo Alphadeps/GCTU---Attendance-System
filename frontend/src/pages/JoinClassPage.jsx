@@ -143,7 +143,7 @@ const JoinClassPage = () => {
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
 
-              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="join_class" />
               <button type="submit" className="sip-btn-dark" disabled={submitting || !className || (HUMAN_CHECK_ENABLED && !captchaToken)}>
                 {submitting ? 'Joining…' : 'Join class'}
               </button>
