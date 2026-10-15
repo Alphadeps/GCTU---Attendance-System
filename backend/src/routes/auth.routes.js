@@ -14,8 +14,13 @@ router.post('/register', (req, res, next) => {
 }, register);
 
 const { loginLimiter } = require('../middleware/rateLimiter');
+const repSignup = require('../controllers/repSignup.controller');
 
 router.post('/login', loginLimiter, login);
+
+// Class reps create their own account + class (stays pending until a super admin approves)
+router.get('/programmes', repSignup.listProgrammesPublic);
+router.post('/rep-signup', loginLimiter, repSignup.repSignup);
 router.post('/refresh', refresh);
 router.post('/logout', logout);
 router.patch('/change-password', protect, changePassword);

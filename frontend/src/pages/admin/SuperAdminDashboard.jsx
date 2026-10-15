@@ -91,6 +91,9 @@ export default function SuperAdminDashboard() {
   });
   const [logoFile, setLogoFile] = useState(null);
   const [logoPreview, setLogoPreview] = useState('');
+  // Self-signed-up reps waiting for approval
+  const [pendingReps, setPendingReps] = useState([]);
+  const [decidingRepId, setDecidingRepId] = useState(null);
 
   // Overview Stats
   const [stats, setStats] = useState({
@@ -247,10 +250,16 @@ export default function SuperAdminDashboard() {
         setClasses(classRes.data);
       }
 
-      // Get reps
-      const repsRes = await api.get('/admin/reps').catch(() => null);
+      // Get reps (and self-signed-up reps waiting for approval)
+      const [repsRes, pendingRes] = await Promise.all([
+        api.get('/admin/reps').catch(() => null),
+        api.get('/admin/reps/pending').catch(() => null)
+      ]);
       if (repsRes && repsRes.data) {
         setReps(repsRes.data);
+      }
+      if (pendingRes && pendingRes.data) {
+        setPendingReps(pendingRes.data);
       }
 
       // Get global courses
@@ -515,6 +524,24 @@ export default function SuperAdminDashboard() {
       showNotification('Representative password reset successfully');
     } catch (_err) {
       showNotification('Failed to reset representative password', 'error');
+    }
+  };
+
+  const refreshReps = async () => {
+    const [repsRes, pendingRes] = await Promise.all([api.get('/admin/reps'), api.get('/admin/reps/pending')]);
+    setReps(repsRes.data);
+    setPendingReps(pendingRes.data);
+  };
+  const handleDecideRep = async (rep, decision) => {
+    setDecidingRepId(rep.id);
+    try {
+      const res = await api.post(`/admin/reps/${rep.id}/${decision}`);
+      showNotification(res.data.message, decision === 'approve' ? 'success' : 'info');
+      await refreshReps();
+    } catch (err) {
+      showNotification(err.response?.data?.error || `Could not ${decision} this rep`, 'error');
+    } finally {
+      setDecidingRepId(null);
     }
   };
 
@@ -1706,6 +1733,40 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
+              {pendingReps.length > 0 && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+                  <p className="text-xs font-bold text-amber-800">
+                    {pendingReps.length} rep sign-up{pendingReps.length > 1 ? 's' : ''} waiting for approval
+                  </p>
+                  {pendingReps.map(rep => (
+                    <div key={rep.id} className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-lg border border-amber-100 px-3 py-2.5">
+                      <div>
+                        <p className="text-sm font-semibold text-[#344767]">{rep.fullName || rep.username}</p>
+                        <p className="text-[11px] text-[#8392ab]">
+                          Index {rep.username} · {rep.assignedClass?.displayName || 'No class'} · {new Date(rep.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleDecideRep(rep, 'approve')}
+                          disabled={decidingRepId === rep.id}
+                          className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg px-3 py-1.5 disabled:opacity-50"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleDecideRep(rep, 'reject')}
+                          disabled={decidingRepId === rep.id}
+                          className="text-xs font-bold text-red-600 border border-red-200 hover:bg-red-50 rounded-lg px-3 py-1.5 disabled:opacity-50"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {reps.length === 0 ? (
                 <div className="text-center py-16 border-2 border-dashed border-[#e9ecef] rounded-xl">
                   <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1748,8 +1809,8 @@ export default function SuperAdminDashboard() {
                                 : <span className="text-[#adb5bd] italic">Unassigned</span>}
                             </td>
                             <td>
-                              <span className={`badge ${rep.isActive ? 'badge-success' : 'badge-danger'}`}>
-                                {rep.isActive ? 'Active' : 'Inactive'}
+                              <span className={`badge ${rep.pendingApproval ? 'badge-warning' : rep.isActive ? 'badge-success' : 'badge-danger'}`}>
+                                {rep.pendingApproval ? 'Pending' : rep.isActive ? 'Active' : 'Inactive'}
                               </span>
                             </td>
                             <td className="text-right space-x-1">
