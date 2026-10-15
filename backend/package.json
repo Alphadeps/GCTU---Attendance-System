@@ -7,6 +7,7 @@
     "start": "node scripts/migrate-prod.js && node src/index.js",
     "dev": "nodemon src/index.js",
     "seed": "node src/seed.js",
+    "create-admin": "node scripts/create-admin.js",
     "build": "npx prisma generate",
     "postinstall": "npx prisma generate",
     "migrate": "node scripts/migrate-prod.js",

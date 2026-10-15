@@ -43,7 +43,7 @@ const monitoringRoutes = require('./routes/monitoring.routes');
 const prisma = require('./lib/prisma');
 const { protect, authorizeRoles } = require('./middleware/auth');
 const { logger, requestLogger } = require('./lib/logger');
-const seed = require('./seed');
+const { bootstrapAdminFromEnv } = require('./lib/bootstrapAdmin');
 const { startSessionExpiryScheduler } = require('./lib/sessionExpiry');
 
 const app = express();
@@ -355,18 +355,12 @@ const bootstrap = async () => {
     await connectWithRetry();
     console.log('✅ Database connection established');
     
-    // Check if the database has any users; if not, auto-seed the initial records
+    // Create the super admin from SUPERADMIN_USERNAME / SUPERADMIN_PASSWORD (never wipes data).
+    // Demo data is no longer auto-seeded; run `npm run seed` manually on a dev database if needed.
     try {
-      const userCount = await prisma.user.count();
-      if (userCount === 0) {
-        console.log('Database appears to be empty (0 users found). Running auto-seed...');
-        await seed();
-        console.log('Database auto-seeded successfully.');
-      } else {
-        console.log(`Database has ${userCount} users. Auto-seed not needed.`);
-      }
+      await bootstrapAdminFromEnv();
     } catch (err) {
-      console.error('Failed to run auto-seed check:', err.message);
+      console.error('Failed to bootstrap admin account:', err.message);
     }
 
     console.log(`🌐 Starting HTTP server on port ${PORT}...`);
