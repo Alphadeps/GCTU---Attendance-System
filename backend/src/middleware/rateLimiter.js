@@ -6,43 +6,68 @@ const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const ipKey = (req) => ipKeyGenerator(req.ip || '0.0.0.0');
 const { cache } = require('../lib/redis');
 
+/**
+ * Rate-limit counter store. Uses Redis when it is connected, so limits survive restarts and
+ * are shared between server instances; otherwise counts in memory. (The old store returned
+ * "1 hit" whenever Redis was missing, which silently switched every rate limit off.)
+ */
 const RedisStore = class {
   constructor(options = {}) {
     this.prefix = options.prefix || 'rl:';
+    this.windowMs = 60 * 1000;
+    this.memory = new Map(); // key -> { hits, resetAt }
+  }
+
+  init(options) {
+    if (options?.windowMs) this.windowMs = options.windowMs;
+  }
+
+  memoryHit(key, delta) {
+    const now = Date.now();
+    let entry = this.memory.get(key);
+    if (!entry || entry.resetAt <= now) {
+      entry = { hits: 0, resetAt: now + this.windowMs };
+      this.memory.set(key, entry);
+    }
+    entry.hits = Math.max(0, entry.hits + delta);
+    if (this.memory.size > 50000) {
+      for (const [k, v] of this.memory) if (v.resetAt <= now) this.memory.delete(k);
+    }
+    return entry;
   }
 
   async increment(key) {
-    if (!cache) {
-      return { totalHits: 1, resetTime: new Date(Date.now() + 120000) };
+    const client = cache.client();
+    const fullKey = this.prefix + key;
+    if (client) {
+      try {
+        const [[, hits], [, ttl]] = await client.multi().incr(fullKey).pttl(fullKey).exec();
+        if (ttl < 0) await client.pexpire(fullKey, this.windowMs);
+        return { totalHits: hits, resetTime: new Date(Date.now() + (ttl > 0 ? ttl : this.windowMs)) };
+      } catch (error) {
+        console.error('Rate limit store error (falling back to memory):', error.message);
+      }
     }
-    try {
-      const fullKey = this.prefix + key;
-      const hits = await cache.incr(fullKey, 120);
-      const validHits = Math.max(1, parseInt(hits) || 1);
-      return {
-        totalHits: validHits,
-        resetTime: new Date(Date.now() + 120000)
-      };
-    } catch (error) {
-      console.error('RedisStore increment error:', error);
-      return { totalHits: 1, resetTime: new Date(Date.now() + 120000) };
-    }
+    const entry = this.memoryHit(fullKey, 1);
+    return { totalHits: entry.hits, resetTime: new Date(entry.resetAt) };
   }
 
   async decrement(key) {
-    if (!cache) return;
-    try {
-      const fullKey = this.prefix + key;
-      await cache.incr(fullKey + ':dec', 120);
-    } catch (_) {}
+    const client = cache.client();
+    const fullKey = this.prefix + key;
+    if (client) {
+      try { await client.decr(fullKey); return; } catch (_) {}
+    }
+    this.memoryHit(fullKey, -1);
   }
 
   async resetKey(key) {
-    if (!cache) return;
-    try {
-      const fullKey = this.prefix + key;
-      await cache.del(fullKey);
-    } catch (_) {}
+    const client = cache.client();
+    const fullKey = this.prefix + key;
+    this.memory.delete(fullKey);
+    if (client) {
+      try { await client.del(fullKey); } catch (_) {}
+    }
   }
 };
 
@@ -168,7 +193,7 @@ const checkInLimiter = rateLimit({
   skip: (req) => req.method === 'OPTIONS',
 
   keyGenerator: (req) => {
-    const indexNumber = req.body?.indexNumber;
+    const indexNumber = req.student?.indexNumber || req.body?.indexNumber;
     if (indexNumber) return `idx:${String(indexNumber).toLowerCase().trim()}`;
     return `ip:${ipKey(req)}`;
   },

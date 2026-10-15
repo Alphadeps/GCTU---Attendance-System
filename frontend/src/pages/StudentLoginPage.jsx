@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import InstallAppButton from '../components/InstallAppButton';
+import HumanCheck from '../components/HumanCheck';
+import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 
 /* ─── Icon helpers ────────────────────────────────────────────────────────── */
 const QrIcon = () => (
@@ -64,6 +66,8 @@ const StudentLoginPage = () => {
   const [requiresPasswordSetup, setRequiresPasswordSetup] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [joinCode, setJoinCode] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const humanCheck = useRef(null);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const navigate = useNavigate();
@@ -75,7 +79,7 @@ const StudentLoginPage = () => {
     setErrorMsg('');
     setLoading(true);
     try {
-      const response = await api.post('/student-auth/login', { indexNumber, password });
+      const response = await api.post('/student-auth/login', { indexNumber, password, captchaToken });
       const { token, student } = response.data;
       auth.login({
         token,
@@ -97,6 +101,7 @@ const StudentLoginPage = () => {
       localStorage.setItem('studentName', student.name);
       navigate('/student');
     } catch (err) {
+      humanCheck.current?.reset();
       if (err.response?.data?.requiresPasswordSetup) {
         setRequiresPasswordSetup(true);
         setErrorMsg('');
@@ -125,7 +130,7 @@ const StudentLoginPage = () => {
     if (newPassword.length < 6) { setErrorMsg('Password must be at least 6 characters long'); return; }
     setLoading(true);
     try {
-      await api.post('/student-auth/set-password', { indexNumber, code: joinCode, password: newPassword, confirmPassword });
+      await api.post('/student-auth/set-password', { indexNumber, code: joinCode, password: newPassword, confirmPassword, captchaToken });
       alert('Password set successfully! Please login with your new password.');
       setRequiresPasswordSetup(false);
       setPassword('');
@@ -133,6 +138,7 @@ const StudentLoginPage = () => {
       setConfirmPassword('');
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Failed to set password');
+      humanCheck.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -316,9 +322,11 @@ const StudentLoginPage = () => {
                   </div>
                 </div>
 
+                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+
                 <button
                   type="submit"
-                  disabled={loading || lockoutSeconds > 0}
+                  disabled={loading || lockoutSeconds > 0 || (HUMAN_CHECK_ENABLED && !captchaToken)}
                   className="sip-btn-dark"
                   style={{ marginTop: '0.4rem' }}
                 >
@@ -449,9 +457,11 @@ const StudentLoginPage = () => {
                   </div>
                 </div>
 
+                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || (HUMAN_CHECK_ENABLED && !captchaToken)}
                   className="sip-btn-dark"
                   style={{ marginTop: '0.4rem' }}
                 >

@@ -68,6 +68,16 @@ function initRedis() {
 
 // Cache helper functions
 const cache = {
+  /** True when a Redis server is connected and answering */
+  available() {
+    return !!redis && redis.status === 'ready';
+  },
+
+  /** The raw client, only when connected (for atomic counters) */
+  client() {
+    return this.available() ? redis : null;
+  },
+
   /**
    * Get value from cache
    * @param {string} key - Cache key

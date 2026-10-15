@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import api from '../services/api';
+import HumanCheck from '../components/HumanCheck';
+import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 import InstallAppButton from '../components/InstallAppButton';
 
 // Public page a student opens from the join link their class rep shares.
@@ -21,6 +23,8 @@ const JoinClassPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
+  const humanCheck = useRef(null);
 
   const checkCode = async (value) => {
     const cleaned = value.trim().toUpperCase();
@@ -63,11 +67,13 @@ const JoinClassPage = () => {
         indexNumber: indexNumber.trim(),
         name: name.trim(),
         email: email.trim(),
-        password
+        password,
+        captchaToken
       });
       setSuccessMsg(res.data.message);
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Could not join the class. Try again.');
+      humanCheck.current?.reset();
     } finally {
       setSubmitting(false);
     }
@@ -137,7 +143,8 @@ const JoinClassPage = () => {
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
 
-              <button type="submit" className="sip-btn-dark" disabled={submitting || !className}>
+              <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+              <button type="submit" className="sip-btn-dark" disabled={submitting || !className || (HUMAN_CHECK_ENABLED && !captchaToken)}>
                 {submitting ? 'Joining…' : 'Join class'}
               </button>
               <p style={{ fontSize: 12, textAlign: 'center', color: 'var(--sip-text-footer)', margin: 0 }}>

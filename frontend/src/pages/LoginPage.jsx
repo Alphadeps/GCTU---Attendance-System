@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import HumanCheck from '../components/HumanCheck';
+import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 
 /* ─── Icon helpers ────────────────────────────────────────────────────────── */
 const LockIcon = () => (
@@ -48,6 +50,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
+  const humanCheck = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
   const auth = useAuth();
@@ -58,7 +62,7 @@ const LoginPage = () => {
     setErrorMsg('');
     setLoading(true);
     try {
-      const response = await api.post('/auth/login', { username, password });
+      const response = await api.post('/auth/login', { username, password, captchaToken });
       const { token, user } = response.data;
       auth.login({
         token,
@@ -76,6 +80,7 @@ const LoginPage = () => {
       else setErrorMsg('Unauthorized role. Contact support.');
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Invalid credentials or connection error');
+      humanCheck.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -300,10 +305,12 @@ const LoginPage = () => {
               </div>
             </div>
 
+            <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+
             {/* Submit */}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (HUMAN_CHECK_ENABLED && !captchaToken)}
               className="sip-btn-dark"
               style={{ marginTop: '0.4rem' }}
             >
