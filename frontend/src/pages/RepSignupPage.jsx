@@ -1,42 +1,19 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
-
-const LEVELS = ['100', '200', '300', '400'];
-const GROUPS = 'ABCDEFGHIJK'.split('');
-const SESSIONS = [
-  { value: 'MORNING', label: 'Morning' },
-  { value: 'EVENING', label: 'Evening' },
-  { value: 'WEEKEND', label: 'Weekend' }
-];
+import ClassPicker from '../components/rep/ClassPicker';
+import { EMPTY_CLASS } from '../components/rep/classDefaults';
 
 // Public page: a class rep creates their own account and their class.
 // The account can't sign in until the administrator approves it.
 const RepSignupPage = () => {
-  const [programmes, setProgrammes] = useState([]);
-  const [programmesLoading, setProgrammesLoading] = useState(true);
-  const [form, setForm] = useState({
-    fullName: '', indexNumber: '', password: '', confirmPassword: '',
-    programmeId: '', level: '100', type: 'REGULAR', group: 'A', session: 'MORNING'
-  });
+  const [form, setForm] = useState({ fullName: '', indexNumber: '', password: '', confirmPassword: '' });
+  const [cls, setCls] = useState(EMPTY_CLASS);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  useEffect(() => {
-    api.get('/auth/programmes')
-      .then(res => setProgrammes(res.data || []))
-      .catch(() => setErrorMsg('Could not load programmes. Check your connection and refresh.'))
-      .finally(() => setProgrammesLoading(false));
-  }, []);
-
   const set = (field) => (e) => setForm(prev => ({ ...prev, [field]: e.target.value }));
-
-  const classPreview = useMemo(() => {
-    const programme = programmes.find(p => p.id === form.programmeId);
-    if (!programme) return '';
-    return `${programme.name} LEVEL ${form.level} ${form.type} GROUP ${form.group} (${form.session})`;
-  }, [programmes, form.programmeId, form.level, form.type, form.group, form.session]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,8 +28,8 @@ const RepSignupPage = () => {
     }
     setSubmitting(true);
     try {
-      const { fullName, indexNumber, password, programmeId, level, type, group, session } = form;
-      const res = await api.post('/auth/rep-signup', { fullName, indexNumber, password, programmeId, level, type, group, session });
+      const { fullName, indexNumber, password } = form;
+      const res = await api.post('/auth/rep-signup', { fullName, indexNumber, password, ...cls });
       setSuccessMsg(res.data.message);
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Could not create your account. Try again.');
@@ -60,8 +37,6 @@ const RepSignupPage = () => {
       setSubmitting(false);
     }
   };
-
-  const selectStyle = { appearance: 'auto' };
 
   return (
     <div className="login-root" style={{ justifyContent: 'center' }}>
@@ -94,43 +69,7 @@ const RepSignupPage = () => {
                 <input id="rs-index" className="sip-input" value={form.indexNumber} onChange={set('indexNumber')} required autoComplete="username" placeholder="This will be your username" />
               </div>
 
-              <div>
-                <label className="sip-label" htmlFor="rs-programme">Programme</label>
-                <select id="rs-programme" className="sip-input" style={selectStyle} value={form.programmeId} onChange={set('programmeId')} required disabled={programmesLoading}>
-                  <option value="">{programmesLoading ? 'Loading…' : programmes.length ? 'Choose your programme' : 'No programmes yet — ask the administrator'}</option>
-                  {programmes.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                </select>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                <div>
-                  <label className="sip-label" htmlFor="rs-level">Level</label>
-                  <select id="rs-level" className="sip-input" style={selectStyle} value={form.level} onChange={set('level')}>
-                    {LEVELS.map(l => <option key={l} value={l}>Level {l}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="sip-label" htmlFor="rs-type">Type</label>
-                  <select id="rs-type" className="sip-input" style={selectStyle} value={form.type} onChange={set('type')}>
-                    <option value="REGULAR">Regular</option>
-                    <option value="TOP-UP">Top-Up</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="sip-label" htmlFor="rs-group">Group</label>
-                  <select id="rs-group" className="sip-input" style={selectStyle} value={form.group} onChange={set('group')}>
-                    {GROUPS.map(g => <option key={g} value={g}>Group {g}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="sip-label" htmlFor="rs-session">Session</label>
-                  <select id="rs-session" className="sip-input" style={selectStyle} value={form.session} onChange={set('session')}>
-                    {SESSIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                  </select>
-                </div>
-              </div>
-              {classPreview && (
-                <p style={{ fontSize: 12, color: '#15803d', fontWeight: 600, margin: 0 }}>Your class: {classPreview}</p>
-              )}
+              <ClassPicker value={cls} onChange={setCls} idPrefix="rs" />
 
               <div>
                 <label className="sip-label" htmlFor="rs-password">Password</label>
@@ -143,7 +82,7 @@ const RepSignupPage = () => {
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
 
-              <button type="submit" className="sip-btn-dark" disabled={submitting || !form.programmeId}>
+              <button type="submit" className="sip-btn-dark" disabled={submitting || !cls.programmeId}>
                 {submitting ? 'Creating account…' : 'Create account'}
               </button>
               <p style={{ fontSize: 12, textAlign: 'center', color: 'var(--sip-text-footer)', margin: 0 }}>

@@ -31,16 +31,22 @@ const listProgrammesPublic = async (req, res) => {
   }
 };
 
-const signupSchema = z.object({
-  fullName: z.string().trim().min(3, 'Enter your full name').max(100, 'Name is too long'),
-  indexNumber: z.string().trim().regex(/^[A-Za-z0-9/-]{5,20}$/, 'Enter a valid index number'),
-  password: z.string().min(8, 'Password must be at least 8 characters long').max(100),
+const classFields = {
   programmeId: z.string().min(1, 'Choose your programme'),
   level: z.enum(LEVELS, { message: 'Choose your level' }),
   type: z.enum(TYPES, { message: 'Choose Regular or Top-Up' }),
   group: z.string().trim().toUpperCase().refine(g => GROUPS.includes(g), 'Choose your group (A–K)'),
   session: z.enum(SESSIONS, { message: 'Choose your session' })
+};
+
+const signupSchema = z.object({
+  fullName: z.string().trim().min(3, 'Enter your full name').max(100, 'Name is too long'),
+  indexNumber: z.string().trim().regex(/^[A-Za-z0-9/-]{5,20}$/, 'Enter a valid index number'),
+  password: z.string().min(8, 'Password must be at least 8 characters long').max(100),
+  ...classFields
 });
+
+const classSchema = z.object(classFields);
 
 /**
  * PUBLIC: a class rep creates their own account and their class.
@@ -211,4 +217,75 @@ const rejectRep = async (req, res) => {
   }
 };
 
-module.exports = { listProgrammesPublic, repSignup, listPendingReps, approveRep, rejectRep, LEVELS, TYPES, GROUPS, SESSIONS };
+/**
+ * REP (already approved, no class yet — e.g. created with the admin's "Create Rep" button):
+ * set up their own class from the dashboard. Takes an existing class with no rep, or creates it.
+ */
+const setupMyClass = async (req, res) => {
+  try {
+    const validation = classSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.issues.map(i => i.message).join(', ') });
+    }
+    const { programmeId, level, type, group, session } = validation.data;
+
+    const existing = await prisma.class.findFirst({ where: { repId: req.user.id }, select: { id: true, displayName: true } });
+    if (existing) {
+      return res.status(409).json({ error: `You already have a class: ${existing.displayName}` });
+    }
+    const programme = await prisma.programme.findUnique({ where: { id: programmeId } });
+    if (!programme) {
+      return res.status(400).json({ error: 'Choose your programme from the list' });
+    }
+
+    const classKey = { programmeId_level_type_group_session: { programmeId, level, type, group, session } };
+    const displayName = `${programme.name} LEVEL ${level} ${type} GROUP ${group} (${session})`;
+    const cls = await prisma.$transaction(async (tx) => {
+      const found = await tx.class.findUnique({ where: classKey, select: { id: true, repId: true } });
+      if (found?.repId) {
+        const err = new Error('CLASS_TAKEN');
+        err.classTaken = true;
+        throw err;
+      }
+      return found
+        ? tx.class.update({ where: { id: found.id }, data: { repId: req.user.id } })
+        : tx.class.create({ data: { programmeId, level, type, group, session, displayName, repId: req.user.id } });
+    });
+
+    await invalidateRepAndClassCaches(cls.id);
+    logAudit('REP_CLASS_SETUP', { user: req.user.username, classId: cls.id, className: cls.displayName });
+
+    res.status(201).json({
+      message: `Your class is set up: ${cls.displayName}`,
+      assignedClass: { id: cls.id, displayName: cls.displayName, courseCount: 0, studentCount: 0 }
+    });
+  } catch (err) {
+    if (err.classTaken || err.code === 'P2002') {
+      return res.status(409).json({ error: 'That class already has a rep. If that is wrong, contact the administrator.' });
+    }
+    console.error('Setup rep class error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// REP: current class from the database (the copy saved at login can be out of date)
+const getMyClass = async (req, res) => {
+  try {
+    const cls = await prisma.class.findFirst({
+      where: { repId: req.user.id },
+      include: { _count: { select: { courses: true, students: true } } }
+    });
+    res.json({
+      assignedClass: cls
+        ? { id: cls.id, displayName: cls.displayName, courseCount: cls._count.courses, studentCount: cls._count.students }
+        : null
+    });
+  } catch (err) {
+    console.error('Get rep class error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = {
+  setupMyClass,
+  getMyClass, listProgrammesPublic, repSignup, listPendingReps, approveRep, rejectRep, LEVELS, TYPES, GROUPS, SESSIONS };
