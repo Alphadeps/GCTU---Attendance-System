@@ -45,7 +45,7 @@ const classFields = {
 
 const signupSchema = z.object({
   fullName: z.string().trim().min(3, 'Enter your full name').max(100, 'Name is too long'),
-  indexNumber: z.string().trim().regex(/^[A-Za-z0-9/-]{5,20}$/, 'Enter a valid index number'),
+  indexNumber: z.string().trim().regex(/^[A-Za-z0-9/-]{5,15}$/, 'Enter a valid index number (5–15 characters)'),
   password: z.string().min(8, 'Password must be at least 8 characters long').max(100),
   ...classFields
 });

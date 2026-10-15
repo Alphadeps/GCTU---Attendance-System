@@ -17,6 +17,7 @@ import AdminGrievancePanel from '../../components/AdminGrievancePanel';
 import ReportSettings from '../../components/admin/ReportSettings';
 import OfficialArchives from '../../components/admin/OfficialArchives';
 import ConfirmModal from '../../components/ConfirmModal';
+import LowAttendanceCard from '../../components/LowAttendanceCard';
 import NotificationPanel from '../../components/NotificationPanel';
 import { useAuth } from '../../context/AuthContext';
 import AddProgrammeModal from '../../components/admin/modals/AddProgrammeModal';
@@ -87,6 +88,7 @@ export default function SuperAdminDashboard() {
     deptName: 'Ghana Communication Technology University',
     deptLogoUrl: '/logo.jfif',
     lateWindowMinutes: 15,
+    minAttendancePercent: 75,
     geofenceRadiusMeters: 100,
   });
   const [logoFile, setLogoFile] = useState(null);
@@ -334,7 +336,7 @@ export default function SuperAdminDashboard() {
       showNotification('System thresholds updated successfully');
     } catch (error) {
       console.error(error);
-      showNotification('Failed to update system thresholds', 'error');
+      showNotification(error.response?.data?.error || 'Failed to update system thresholds', 'error');
     }
   };
 
@@ -1456,6 +1458,8 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
+              <LowAttendanceCard showClass />
+
               {/* System thresholds summary row */}
               <div className="sip-card p-5 animate-fade-in-up delay-400">
                 <div className="flex items-center justify-between mb-3">
@@ -1466,6 +1470,7 @@ export default function SuperAdminDashboard() {
                   {[
                     {label:'Late Grace Period', val:`${settings.lateWindowMinutes} min`, color:'#E5A93C'},
                     {label:'Geofence Radius', val:`${settings.geofenceRadiusMeters} m`, color:'#82d616'},
+                    {label:'Minimum Attendance', val:`${settings.minAttendancePercent ?? 75}%`, color:'#ea0606'},
                   ].map((t,i) => (
                     <div key={i} className="bg-[#f8f9fa] rounded-xl p-3.5">
                       <p className="text-[10px] text-[#8392ab] font-medium mb-1">{t.label}</p>
@@ -2169,16 +2174,17 @@ export default function SuperAdminDashboard() {
               <div className="sip-card p-6 space-y-5">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Thresholds</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Calibrate geofence radius and late check-in window</p>
+                  <p className="text-xs text-[#8392ab] mt-0.5">Late check-in window, geofence radius, and the minimum attendance students must keep</p>
                 </div>
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
                   {[
                     {label:'Late Grace Period (Minutes)', field:'lateWindowMinutes', val:settings.lateWindowMinutes},
                     {label:'Geofence Radius (Meters)', field:'geofenceRadiusMeters', val:settings.geofenceRadiusMeters},
+                    {label:'Minimum Attendance (%)', field:'minAttendancePercent', val:settings.minAttendancePercent ?? 75, min:1, max:100},
                   ].map(t => (
                     <div key={t.field}>
                       <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">{t.label}</label>
-                      <input type="number" required value={t.val}
+                      <input type="number" required value={t.val} min={t.min} max={t.max}
                         onChange={(e) => setSettings(prev => ({ ...prev, [t.field]: parseInt(e.target.value) || 0 }))}
                         className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
                     </div>

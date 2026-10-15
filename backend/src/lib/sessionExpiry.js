@@ -2,6 +2,7 @@ const prisma = require('./prisma');
 const { removeCachedSession } = require('./securityCache');
 const { createNotificationHelper } = require('../controllers/notification.controller');
 const { resolveEligibleStudents } = require('../controllers/session.controller');
+const { warnLowAttendance } = require('./lowAttendance');
 
 const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;        // Check every 5 minutes
@@ -85,6 +86,11 @@ async function autoCloseSession(session, reason) {
       })),
       skipDuplicates: true
     });
+  }
+
+  if (session.classId && session.courseId) {
+    await warnLowAttendance(session.classId, session.courseId, { course: session.course })
+      .catch(err => console.error('[SessionExpiry] Low attendance warnings failed:', err.message));
   }
 
   try {

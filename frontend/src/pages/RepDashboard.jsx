@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api, { downloadAttendanceExcel, blobErrorMessage } from '../services/api';
 import NotificationPanel from '../components/NotificationPanel';
 import { useToast } from '../components/ToastProvider';
+import LowAttendanceCard from '../components/LowAttendanceCard';
 import ConfirmModal from '../components/ConfirmModal';
 import { useAuth } from '../context/AuthContext';
 import ExcusedAbsencesManager from '../components/ExcusedAbsencesManager';
@@ -307,13 +308,17 @@ const RepDashboard = () => {
   const handleSendWarnings = (courseId) => {
     setConfirmState({
       open: true,
-      message: 'Broadcast warning notifications to all students with attendance below 75%?',
+      message: `Send a warning to every student below ${analyticsData?.minAttendancePercent ?? 75}% attendance in this course? Students already warned in the last 24 hours are skipped.`,
       onConfirm: async () => {
         setConfirmState({ open: false, message: '', onConfirm: null });
         setBroadcasting(true);
         try {
           const response = await api.post(`/courses/${courseId}/warn-at-risk`);
-          toast.success(`Warnings sent to ${response.data.warningsSent} at-risk students.`, 'Broadcast Sent!');
+          if (response.data.warningsSent > 0) {
+            toast.success(`Warnings sent to ${response.data.warningsSent} student${response.data.warningsSent === 1 ? '' : 's'}.`, 'Warnings Sent');
+          } else {
+            toast.info('No new warnings to send. Students below the minimum were already warned in the last 24 hours.');
+          }
           const refreshRes = await api.get(`/courses/${courseId}/analytics`);
           setAnalyticsData(refreshRes.data);
         } catch (err) {
@@ -587,6 +592,10 @@ const RepDashboard = () => {
                   Open New Session
                 </button>
               </div>
+
+              {assignedClass && (
+                <LowAttendanceCard refreshKey={sessions.filter(s => s.status !== 'OPEN').length} />
+              )}
 
               {/* Sessions list */}
               <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden animate-fade-in-up delay-300">
@@ -1035,7 +1044,7 @@ const RepDashboard = () => {
                     <span className="block text-2xl font-bold text-rose-500 font-mono">
                       {analyticsData.analytics.filter(s => s.isAtRisk).length}
                     </span>
-                    <span className="text-[10px] text-rose-400 font-semibold uppercase">At-Risk (&lt;75%)</span>
+                    <span className="text-[10px] text-rose-400 font-semibold uppercase">Below {analyticsData.minAttendancePercent ?? 75}%</span>
                   </div>
                   <div className="bg-[#f8f9fa] rounded-xl p-4 flex items-center justify-center">
                     <button
@@ -1049,7 +1058,7 @@ const RepDashboard = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.003 6.003 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                           </svg>
                       }
-                      Broadcast Warnings
+                      Send Warnings
                     </button>
                   </div>
                 </div>
@@ -1079,8 +1088,9 @@ const RepDashboard = () => {
                       )
                       .map((student) => {
                         const rate = student.attendanceRate ?? 0;
-                        const barColor = rate >= 75 ? 'bg-emerald-500' : rate >= 60 ? 'bg-amber-400' : 'bg-rose-500';
-                        const badgeClass = rate >= 75 ? 'badge-success' : rate >= 60 ? 'badge-warning' : 'badge-danger';
+                        const status = student.status || (student.isAtRisk ? 'AT RISK' : 'SAFE');
+                        const barColor = status === 'SAFE' ? 'bg-emerald-500' : status === 'WARNING' ? 'bg-amber-400' : 'bg-rose-500';
+                        const badgeClass = status === 'SAFE' ? 'badge-success' : status === 'WARNING' ? 'badge-warning' : 'badge-danger';
                         return (
                           <tr key={student.id}>
                             <td>
@@ -1098,7 +1108,7 @@ const RepDashboard = () => {
                             </td>
                             <td>
                               <span className={`badge ${badgeClass}`}>
-                                {rate >= 75 ? 'SAFE' : rate >= 60 ? 'WARNING' : 'AT RISK'}
+                                {status}
                               </span>
                             </td>
                           </tr>

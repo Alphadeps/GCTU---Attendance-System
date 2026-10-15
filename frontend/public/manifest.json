@@ -1,20 +1,22 @@
 {
+  "id": "/",
   "name": "GCTU Attendance System",
   "short_name": "GCTU Attendance",
+  "description": "Mark and manage class attendance at Ghana Communication Technology University.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0c2340",
   "icons": [
-    {
-      "src": "logo2.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "logo2.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Student sign in", "url": "/student-login", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Rep / admin sign in", "url": "/login", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
   ]
 }

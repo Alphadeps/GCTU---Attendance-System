@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import InstallAppButton from '../components/InstallAppButton';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -140,6 +141,8 @@ const LandingPage = () => {
             <polyline points="9 18 15 12 9 6"/>
           </svg>
         </button>
+
+        <InstallAppButton dark />
       </div>
 
       <p style={{

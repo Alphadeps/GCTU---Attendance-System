@@ -3,6 +3,7 @@ const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
 const { createNotificationHelper } = require('./notification.controller');
 const { ensureRepStudent } = require('../lib/repStudent');
+const { getMinAttendance } = require('../lib/lowAttendance');
 const { cache, cacheKeys } = require('../lib/redis');
 
 // Haversine formula helper
@@ -142,7 +143,8 @@ const getStudentHistory = async (req, res) => {
         indexNumber: student.indexNumber,
         email: student.email
       },
-      history
+      history,
+      minAttendancePercent: await getMinAttendance()
     });
   } catch (err) {
     console.error('Get student history error:', err);

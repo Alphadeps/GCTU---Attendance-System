@@ -4,7 +4,7 @@ const path = require('path');
 const { protect, authorizeRoles } = require('../middleware/auth');
 const { reportLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 const reportController = require('../controllers/report.controller');
-const { exportCourseAttendance } = require('../controllers/export.controller');
+const { exportCourseAttendance, lowAttendanceReport } = require('../controllers/export.controller');
 
 const router = express.Router();
 
@@ -33,6 +33,8 @@ router.post('/generate', protect, authorizeRoles('REP'), reportLimiter, reportCo
 
 // Excel attendance register for one class + course (reps: own class only)
 router.get('/export', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), reportLimiter, exportCourseAttendance);
+// Students below the minimum attendance (reps: own class only)
+router.get('/low-attendance', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), lowAttendanceReport);
 router.get('/my-generated', protect, authorizeRoles('REP'), reportController.getRepReports);
 
 // Lecturer: View and sign pending reports

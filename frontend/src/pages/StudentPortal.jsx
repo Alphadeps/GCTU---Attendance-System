@@ -48,6 +48,7 @@ const StudentPortal = () => {
   // Data States
   const [activeSessions, setActiveSessions] = useState([]);
   const [history, setHistory] = useState([]);
+  const [minAttendance, setMinAttendance] = useState(75);
   const [loadingActive, setLoadingActive] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -93,6 +94,7 @@ const StudentPortal = () => {
     try {
       const response = await api.get(`/attendance/student/${indexNumber}`);
       setHistory(response.data.history || []);
+      if (response.data.minAttendancePercent) setMinAttendance(response.data.minAttendancePercent);
     } catch (err) {
       console.error('Fetch student history error:', err);
       toast.error('Could not load attendance history');
@@ -192,6 +194,34 @@ const StudentPortal = () => {
   const lateCount = history.filter(h => h.status === 'LATE').length;
   const absentCount = history.filter(h => h.status === 'ABSENT').length;
   const attendanceRate = totalClasses > 0 ? Math.round(((presentCount + lateCount) / totalClasses) * 100) : 0;
+
+  // Courses where this student is below the minimum attendance
+  const lowCourses = Object.values(history.reduce((acc, record) => {
+    const code = record.session?.course?.code;
+    if (!code) return acc;
+    acc[code] = acc[code] || { code, name: record.session.course.name, attended: 0, total: 0 };
+    acc[code].total++;
+    if (record.status === 'PRESENT' || record.status === 'LATE') acc[code].attended++;
+    return acc;
+  }, {}))
+    .map(c => ({ ...c, rate: Math.round((c.attended / c.total) * 100) }))
+    .filter(c => c.rate < minAttendance)
+    .sort((a, b) => a.rate - b.rate);
+
+  const lowAttendanceBanner = lowCourses.length > 0 && (
+    <div className="bg-rose-50 border border-rose-200 rounded-2xl p-4">
+      <p className="text-[13px] font-bold text-rose-600">⚠️ Your attendance is below {minAttendance}%</p>
+      <ul className="mt-2 space-y-1">
+        {lowCourses.map(c => (
+          <li key={c.code} className="flex items-center justify-between gap-3 text-[12px] text-rose-700">
+            <span className="truncate">{c.name} <span className="font-mono">({c.code})</span></span>
+            <span className="font-bold font-mono shrink-0">{c.rate}% · {c.attended}/{c.total}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-[11px] text-rose-500 mt-2">Attend upcoming lectures to get back above {minAttendance}%.</p>
+    </div>
+  );
 
   const filteredHistory = history.filter(record => {
     if (filter === 'All') return true;
@@ -349,6 +379,8 @@ const StudentPortal = () => {
         {activeTab === 'home' && (
           <div className="p-4 space-y-4">
 
+            {lowAttendanceBanner}
+
             {/* Active sessions header */}
             <div className="flex items-center justify-between">
               <p className="text-[14px] font-bold text-[#344767]">Active Sessions</p>
@@ -425,6 +457,8 @@ const StudentPortal = () => {
           <div className="p-4 space-y-4 animate-fade-in">
 
             <p className="text-[14px] font-bold text-[#344767]">My Attendance</p>
+
+            {lowAttendanceBanner}
 
             {/* Stats row */}
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
@@ -673,7 +707,7 @@ const StudentPortal = () => {
                 <div className="flex items-center gap-2">
                   <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
                     <div
-                      className={`h-full rounded-full ${attendanceRate >= 75 ? 'bg-emerald-500' : attendanceRate >= 60 ? 'bg-amber-400' : 'bg-rose-500'}`}
+                      className={`h-full rounded-full ${attendanceRate >= minAttendance ? 'bg-emerald-500' : attendanceRate >= minAttendance - 15 ? 'bg-amber-400' : 'bg-rose-500'}`}
                       style={{ width: `${attendanceRate}%` }}
                     />
                   </div>

@@ -1,5 +1,6 @@
 const xlsx = require('xlsx');
 const prisma = require('../lib/prisma');
+const { getMinAttendance, attendanceStatus, lowAttendanceList } = require('../lib/lowAttendance');
 
 const STATUS_CODE = { PRESENT: 'P', LATE: 'L', ABSENT: 'A' };
 
@@ -70,6 +71,7 @@ const exportCourseAttendance = async (req, res) => {
 
     // ── Sheet 1: attendance grid
     const total = sessions.length;
+    const min = await getMinAttendance();
     const header = ['No.', 'Index Number', 'Student Name', ...sessions.map(sessionLabel), 'Present', 'Late', 'Absent', 'Attendance %', 'Status'];
     const rows = classStudents.map(({ student }, i) => {
       let present = 0, late = 0, absent = 0;
@@ -81,7 +83,7 @@ const exportCourseAttendance = async (req, res) => {
         return STATUS_CODE[status] || 'A';
       });
       const rate = total > 0 ? Math.round(((present + late) / total) * 100) : 100;
-      const flag = rate >= 75 ? 'SAFE' : rate >= 60 ? 'WARNING' : 'AT RISK';
+      const flag = attendanceStatus(rate, min);
       return [i + 1, student.indexNumber, student.name, ...cells, present, late, absent, rate, flag];
     });
 
@@ -90,7 +92,7 @@ const exportCourseAttendance = async (req, res) => {
       [`${course.name} (${course.code}) — Attendance Register`],
       [`Class: ${cls.displayName}`],
       [`Sessions held: ${total}    Students: ${rows.length}    Generated: ${generated}`],
-      ['Key: P = Present, L = Late, A = Absent. Attendance % counts Present + Late. 75% and above = SAFE.'],
+      [`Key: P = Present, L = Late, A = Absent. Attendance % counts Present + Late. ${min}% and above = SAFE.`],
       [],
       header,
       ...rows
@@ -140,4 +142,23 @@ const exportCourseAttendance = async (req, res) => {
   }
 };
 
-module.exports = { exportCourseAttendance };
+/**
+ * GET /api/reports/low-attendance
+ * Students below the minimum attendance in any course: reps see their own class, admins every class.
+ */
+const lowAttendanceReport = async (req, res) => {
+  try {
+    let classIds;
+    if (req.user.role === 'REP') {
+      const repClass = await prisma.class.findFirst({ where: { repId: req.user.id }, select: { id: true } });
+      if (!repClass) return res.status(404).json({ error: 'You are not assigned to any class' });
+      classIds = [repClass.id];
+    }
+    res.json(await lowAttendanceList({ classIds }));
+  } catch (err) {
+    console.error('Low attendance report error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+module.exports = { exportCourseAttendance, lowAttendanceReport };

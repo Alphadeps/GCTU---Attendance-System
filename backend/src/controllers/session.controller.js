@@ -2,6 +2,7 @@ const prisma = require('../lib/prisma');
 const { createNotificationHelper } = require('./notification.controller');
 const { cacheSession, removeCachedSession } = require('../lib/securityCache');
 const { logAudit } = require('../lib/logger');
+const { warnLowAttendance } = require('../lib/lowAttendance');
 
 // Shared helper: resolve which students are eligible for absent-marking on a session.
 // Exported so sessionExpiry.js can use the same logic without duplication.
@@ -304,6 +305,12 @@ const closeSession = async (req, res) => {
     // Trigger Notifications in background
     (async () => {
       try {
+        // Students who have fallen below the minimum attendance get a warning
+        if (session.classId && session.courseId) {
+          await warnLowAttendance(session.classId, session.courseId, { course: session.course })
+            .catch(err => console.error('Low attendance warnings failed:', err));
+        }
+
         const courseName = session.course?.name || 'Class';
         const courseCode = session.course?.code || '';
 
