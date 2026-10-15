@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 
-const { protect, authorizeRoles } = require('../middleware/auth');
+const { protect, protectStudent, protectAny, ownStudentRecordOr, authorizeRoles } = require('../middleware/auth');
 const grievanceController = require('../controllers/grievance.controller');
 
 const router = express.Router();
@@ -24,13 +24,13 @@ const upload = multer({
 
 // Student Grievance Submission (Multer middleware single('evidence'))
 // Note: Anyone can submit a grievance (auth not strictly required to allow anonymous reports without logging in, but they can provide their index number)
-router.post('/submit', upload.single('evidence'), grievanceController.submitGrievance);
+router.post('/submit', protectStudent, upload.single('evidence'), grievanceController.submitGrievance);
 
 // Student fetch their own history
-router.get('/student/:studentIndex', grievanceController.getStudentGrievances);
+router.get('/student/:studentIndex', protectAny, ownStudentRecordOr('studentIndex'), grievanceController.getStudentGrievances);
 
 // Public/Student list grievances (with query filters) - no auth required for students to see their relevant grievances
-router.get('/', grievanceController.listGrievances);
+router.get('/', protect, authorizeRoles('SUPERADMIN', 'ADMIN', 'LECTURER', 'REP'), grievanceController.listGrievances);
 
 // Admin-only operations
 router.get('/list', protect, authorizeRoles('SUPERADMIN', 'ADMIN', 'LECTURER'), grievanceController.listGrievances);

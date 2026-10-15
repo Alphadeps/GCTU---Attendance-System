@@ -11,6 +11,7 @@
  */
 
 const helmet = require('helmet');
+const { rejectIntrusion } = require('../lib/intrusion');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 
@@ -289,49 +290,48 @@ const enforceHttps = (req, res, next) => {
  * This is an additional layer of validation
  */
 const preventSqlInjection = (req, res, next) => {
-  const sqlPatterns = [
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b)/gi,
-    /(UNION\s+SELECT)/gi,
-    /(--|\#|\/\*|\*\/)/g,
-    /(\bOR\b\s+\d+\s*=\s*\d+)/gi,
-    /(\bAND\b\s+\d+\s*=\s*\d+)/gi
+  // The database layer (Prisma) always sends values as parameters, so injected SQL never runs.
+  // This only spots requests that are clearly attack attempts, so ordinary words such as
+  // "select", "update" or "#" in a grievance message are not blocked.
+  const attackPatterns = [
+    /'\s*(or|and)\s*'?\s*\d+\s*'?\s*=\s*'?\s*\d+/i,         // ' OR 1=1
+    /'\s*(or|and)\s+'[^']*'\s*=\s*'/i,                            // ' or 'a'='a
+    /\bunion\b[\s\S]{0,20}\bselect\b/i,                          // UNION SELECT
+    /;\s*(drop|delete|truncate|alter|insert|update|create)\s+(table|database|from|into|user|schema)\b/i,
+    /\b(pg_sleep|sleep|benchmark|waitfor\s+delay)\s*\(/i,         // time-based probes
+    /\binformation_schema\b|\bpg_catalog\b/i,
+    /'\s*;?\s*--/,                                                  // quote then comment
+    /<script[\s>]|javascript:|onerror\s*=|onload\s*=/i,            // XSS payloads
+    /\.\.[\/\\]/,                                               // path traversal ../
+    /\$where|\$ne\b|\$gt\b/                                     // NoSQL operators
   ];
-  
-  const checkForSqlInjection = (obj) => {
-    if (typeof obj === 'string') {
-      for (const pattern of sqlPatterns) {
-        if (pattern.test(obj)) {
-          return true;
-        }
-      }
-    } else if (typeof obj === 'object' && obj !== null) {
-      for (const key in obj) {
-        if (checkForSqlInjection(obj[key])) {
-          return true;
-        }
+
+  const UNSCANNED_FIELDS = new Set(['password', 'newPassword', 'currentPassword', 'confirmPassword', 'signature', 'lecturerSignature']);
+
+  const findAttack = (value, depth = 0) => {
+    if (depth > 6 || value == null) return null;
+    if (typeof value === 'string') return attackPatterns.find(p => p.test(value)) || null;
+    if (typeof value === 'object') {
+      for (const key of Object.keys(value)) {
+        if (key.startsWith('$')) return /\$operator key/;
+        if (UNSCANNED_FIELDS.has(key)) continue; // hashed or image data, never used in a query
+        const hit = findAttack(value[key], depth + 1);
+        if (hit) return hit;
       }
     }
-    return false;
+    return null;
   };
-  
-  // Check body, query, and params
-  if (checkForSqlInjection(req.body) || 
-      checkForSqlInjection(req.query) || 
-      checkForSqlInjection(req.params)) {
-    console.warn('⚠️  Potential SQL injection attempt detected:', {
-      ip: req.ip,
-      path: req.path,
-      method: req.method
-    });
-    
-    return res.status(400).json({
-      error: 'Invalid input detected',
-      message: 'Your request contains potentially malicious content'
-    });
+
+  const hit = findAttack(req.body) || findAttack(req.query) || findAttack(req.params) || findAttack(decodeSafe(req.path));
+  if (hit) {
+    return rejectIntrusion(req, res, 'INJECTION_PAYLOAD', { details: { pattern: String(hit) } });
   }
-  
   next();
 };
+
+function decodeSafe(path) {
+  try { return decodeURIComponent(path); } catch { return path; }
+}
 
 /**
  * Rate limit bypass prevention

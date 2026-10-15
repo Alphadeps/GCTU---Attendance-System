@@ -61,6 +61,20 @@ console.log(`📌 All environment check:`, {
 // Trust proxy (required for rate limiting and security behind reverse proxy)
 app.set('trust proxy', 1);
 
+// Addresses that kept attacking are refused everywhere for an hour (see lib/intrusion.js)
+const { blockIntruders } = require('./lib/intrusion');
+app.use(blockIntruders);
+
+// Where security researchers report problems (RFC 9116)
+app.get('/.well-known/security.txt', (req, res) => {
+  const contact = process.env.SECURITY_CONTACT || 'mailto:security@gctu.edu.gh';
+  const expires = new Date(Date.now() + 365 * 24 * 3600e3).toISOString();
+  res.type('text/plain').send(
+    `Contact: ${contact}\nExpires: ${expires}\nPreferred-Languages: en\n` +
+    '# Found a weakness in GCTU Attendance? Report it here. Attacks are logged and blocked.\n'
+  );
+});
+
 // Performance: Response compression (gzip)
 app.use(compressionMiddleware);
 

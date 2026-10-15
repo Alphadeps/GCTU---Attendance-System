@@ -4,6 +4,7 @@ const { z } = require('zod');
 const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
 const { logAuthEvent } = require('../lib/logger');
+const { rejectIntrusion } = require('../lib/intrusion');
 
 // Validation schemas
 const studentLoginSchema = z.object({
@@ -12,7 +13,8 @@ const studentLoginSchema = z.object({
 });
 
 const studentSetPasswordSchema = z.object({
-  indexNumber: z.string().min(1, 'Index number is required'),
+  indexNumber: z.string().trim().min(1, 'Index number is required'),
+  code: z.string().trim().min(1, 'Enter your class join code (ask your class rep)'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
   confirmPassword: z.string().min(1, 'Please confirm your password')
 }).refine(data => data.password === data.confirmPassword, {
@@ -138,15 +140,26 @@ const studentSetPassword = async (req, res) => {
       return res.status(400).json({ error: errorMsg });
     }
 
-    const { indexNumber, password } = validation.data;
+    const { indexNumber, code, password } = validation.data;
 
     const student = await prisma.student.findUnique({
-      where: { indexNumber }
+      where: { indexNumber },
+      select: { id: true, password: true, classes: { select: { class: { select: { joinCode: true } } } } }
     });
 
-    if (!student) {
-      return res.status(404).json({ error: 'Student not found' });
+    // Same answer whether the student exists or not, so index numbers can't be probed
+    const refuse = () => res.status(400).json({ error: 'Index number or class join code is not correct.' });
+    if (!student) return refuse();
+
+    // A password can only be set once here. Changing an existing one is an account takeover attempt.
+    if (student.password) {
+      return rejectIntrusion(req, res, 'PASSWORD_TAKEOVER', { details: { indexNumber } });
     }
+
+    // Prove you belong to the class: the join code your rep shared
+    const normalized = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const inClass = student.classes.some(cs => cs.class.joinCode && cs.class.joinCode === normalized);
+    if (!inClass) return refuse();
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,6 +172,7 @@ const studentSetPassword = async (req, res) => {
         isFirstLogin: false
       }
     });
+    logAuthEvent('STUDENT_PASSWORD_SET', { indexNumber, ip: req.ip });
 
     res.json({ message: 'Password set successfully. You can now login.' });
   } catch (err) {

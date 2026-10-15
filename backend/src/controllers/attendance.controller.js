@@ -161,6 +161,19 @@ const updateAttendanceStatus = async (req, res) => {
       return res.status(400).json({ error: 'Invalid attendance status. Must be PRESENT, ABSENT, or LATE' });
     }
 
+    // Reps may only change records in their own class's sessions
+    if (req.user.role === 'REP') {
+      const record = await prisma.attendance.findUnique({
+        where: { id },
+        select: { session: { select: { classId: true, repId: true } } }
+      });
+      if (!record) return res.status(404).json({ error: 'Attendance record not found' });
+      const repClass = await prisma.class.findFirst({ where: { repId: req.user.id }, select: { id: true } });
+      if (record.session.repId !== req.user.id && record.session.classId !== repClass?.id) {
+        return res.status(403).json({ error: 'You can only change attendance for your own class' });
+      }
+    }
+
     const updated = await prisma.attendance.update({
       where: { id },
       data: { status }
@@ -455,7 +468,9 @@ const markProxyAttendance = async (req, res) => {
 const searchClassmates = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    const { q, submitterIndex } = req.query;
+    const { q } = req.query;
+    // Express 5 rebuilds req.query on each read, so take the signed-in student directly
+    const submitterIndex = req.student?.indexNumber || req.query.submitterIndex;
 
     if (!q || String(q).trim().length < 2) {
       return res.json({ students: [] });
