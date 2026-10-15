@@ -86,7 +86,6 @@ const createSession = async (req, res) => {
       }
     }
 
-    // Check for an existing open session scoped to this class only.
     // Each class can have at most one OPEN session at a time; different classes are independent.
     const conflictWhere = classId
       ? { status: 'OPEN', classId }
@@ -94,22 +93,38 @@ const createSession = async (req, res) => {
 
     const scope = classId ? 'your class' : 'the system (no class assigned)';
 
-    // Generate a 6-digit manual check-in code (fallback for GPS failures)
-    const manualCode = Math.floor(100000 + Math.random() * 900000).toString();
-
     const startTime = new Date();
 
-    // Wrap the conflict check + create in a serializable transaction to prevent
-    // two concurrent requests from both passing the check and creating duplicate sessions.
+    // Serialize the conflict check + create per class with a transaction-scoped advisory lock.
+    // A SERIALIZABLE transaction was used here before, but Postgres' predicate locking on the
+    // shared `status = 'OPEN'` index (or a whole-table seq scan) made concurrent requests from
+    // reps in *different* classes abort each other with a serialization failure — so when one
+    // rep opened a session, other reps opening at the same time were rejected.
+    // The advisory lock only blocks requests for the same class key.
     let session;
     try {
       session = await prisma.$transaction(async (tx) => {
-        const conflict = await tx.attendanceSession.findFirst({ where: conflictWhere });
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`session-open:${classId || 'none'}`}))`;
+
+        const conflict = await tx.attendanceSession.findFirst({ where: conflictWhere, select: { id: true } });
         if (conflict) {
           const err = new Error('SESSION_CONFLICT');
           err.isConflict = true;
           throw err;
         }
+
+        // 6-digit manual check-in code (fallback for GPS failures). Check-in resolves sessions by
+        // code across all OPEN sessions, so avoid handing out a code another open session uses.
+        let manualCode;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          manualCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const clash = await tx.attendanceSession.findFirst({
+            where: { manualCode, status: 'OPEN' },
+            select: { id: true }
+          });
+          if (!clash) break;
+        }
+
         return tx.attendanceSession.create({
           data: {
             courseId: course.id,
@@ -126,10 +141,13 @@ const createSession = async (req, res) => {
           },
           include: { course: true }
         });
-      }, { isolationLevel: 'Serializable' });
+      });
     } catch (txErr) {
-      if (txErr.isConflict || txErr.code === 'P2034') {
+      if (txErr.isConflict) {
         return res.status(400).json({ error: `There is already an active open session for ${scope}. Close it first.` });
+      }
+      if (txErr.code === 'P2034' || txErr.code === 'P2028') {
+        return res.status(503).json({ error: 'The server is busy. Please try opening the session again.' });
       }
       throw txErr;
     }
@@ -190,15 +208,27 @@ const createSession = async (req, res) => {
 // 2. Get active (OPEN) sessions
 const getActiveSessions = async (req, res) => {
   try {
+    // Public endpoint (student portal): never expose manualCode or geofence coordinates.
     const sessions = await prisma.attendanceSession.findMany({
       where: { status: 'OPEN' },
-      include: {
-        course: true,
+      select: {
+        id: true,
+        courseId: true,
+        classId: true,
+        sessionType: true,
+        startTime: true,
+        endTime: true,
+        status: true,
+        course: { select: { id: true, name: true, code: true } },
         rep: { select: { username: true } }
       },
       orderBy: { startTime: 'desc' }
     });
-    res.json(sessions);
+    res.json(sessions.map(s => ({
+      ...s,
+      courseName: s.course?.name,
+      courseCode: s.course?.code
+    })));
   } catch (err) {
     console.error('Get active sessions error:', err);
     res.status(500).json({ error: 'Internal server error' });
@@ -218,18 +248,27 @@ const closeSession = async (req, res) => {
       return res.status(404).json({ error: 'Session not found' });
     }
 
+    // Reps may only close sessions they opened
+    if (req.user.role === 'REP' && session.repId !== req.user.id) {
+      return res.status(403).json({ error: 'You can only close sessions you opened.' });
+    }
+
     if (session.status !== 'OPEN') {
       return res.status(400).json({ error: 'Session is already closed or approved' });
     }
 
-    // 1. Update session status to CLOSED
-    const closedSession = await prisma.attendanceSession.update({
-      where: { id },
+    // 1. Update session status to CLOSED — guarded so a concurrent auto-expiry/close can't double-process
+    const updated = await prisma.attendanceSession.updateMany({
+      where: { id, status: 'OPEN' },
       data: {
         status: 'CLOSED',
         endTime: new Date()
       }
     });
+    if (updated.count === 0) {
+      return res.status(400).json({ error: 'Session is already closed or approved' });
+    }
+    const closedSession = await prisma.attendanceSession.findUnique({ where: { id } });
 
     // Remove closed session from security cache
     removeCachedSession(id);
