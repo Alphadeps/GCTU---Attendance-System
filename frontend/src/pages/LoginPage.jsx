@@ -305,7 +305,7 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+            <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="staff_login" />
 
             {/* Submit */}
             <button

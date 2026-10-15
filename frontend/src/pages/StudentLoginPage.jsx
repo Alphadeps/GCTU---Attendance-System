@@ -322,7 +322,7 @@ const StudentLoginPage = () => {
                   </div>
                 </div>
 
-                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="student_login" />
 
                 <button
                   type="submit"
@@ -457,7 +457,7 @@ const StudentLoginPage = () => {
                   </div>
                 </div>
 
-                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} />
+                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="set_password" />
 
                 <button
                   type="submit"
