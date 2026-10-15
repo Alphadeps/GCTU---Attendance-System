@@ -7,6 +7,7 @@ import ConfirmModal from '../components/ConfirmModal';
 import { useAuth } from '../context/AuthContext';
 import ExcusedAbsencesManager from '../components/ExcusedAbsencesManager';
 import AddClassmatesCard from '../components/rep/AddClassmatesCard';
+import SetupClassCard from '../components/rep/SetupClassCard';
 
 const RepDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -106,8 +107,26 @@ const RepDashboard = () => {
 
   useEffect(() => {
     fetchData();
+    // Re-load when the class changes (e.g. the rep just set it up)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignedClass?.id]);
+
+  // The class saved at login can be out of date (e.g. the admin linked one since) — check the server
+  useEffect(() => {
+    api.get('/admin/rep/my-class')
+      .then(res => {
+        if (res.data.assignedClass && res.data.assignedClass.id !== assignedClass?.id) {
+          auth.login({ assignedClass: res.data.assignedClass });
+        }
+      })
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleClassReady = (newClass, message) => {
+    auth.login({ assignedClass: newClass });
+    toast.success(message, 'Class Ready');
+  };
 
   useEffect(() => {
     if (activeTab === 'students') {
@@ -505,12 +524,8 @@ const RepDashboard = () => {
 
           {/* No class assigned */}
           {!loading && !assignedClass && (
-            <div className="bg-white rounded-2xl p-10 text-center shadow-[0_1px_3px_rgba(0,0,0,.08)]">
-              <svg className="w-10 h-10 text-[#8392ab] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
-              </svg>
-              <p className="text-[14px] font-bold text-[#344767]">No Class Assigned</p>
-              <p className="text-[12px] text-[#8392ab] mt-1">Contact your administrator.</p>
+            <div className="mb-5">
+              <SetupClassCard onClassReady={handleClassReady} />
             </div>
           )}
 
@@ -667,7 +682,7 @@ const RepDashboard = () => {
                 <span className="badge badge-info">{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
               </div>
 
-              <form onSubmit={handleAddCourse} className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)] space-y-3">
+              {assignedClass && <form onSubmit={handleAddCourse} className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)] space-y-3">
                 <div>
                   <p className="text-[13px] font-bold text-[#344767]">Add a course</p>
                   <p className="text-[11px] text-[#8392ab]">Enter the course code and name from your timetable. If the course already exists, it is linked to your class.</p>
@@ -692,7 +707,7 @@ const RepDashboard = () => {
                     {addingCourse ? 'Adding…' : 'Add'}
                   </button>
                 </div>
-              </form>
+              </form>}
 
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -758,7 +773,7 @@ const RepDashboard = () => {
           {/* ── TAB: STUDENTS ── */}
           {activeTab === 'students' && (
             <div className="space-y-5 animate-slide-left">
-              <AddClassmatesCard onStudentsChanged={fetchStudents} onConfirm={askConfirm} />
+              {assignedClass && <AddClassmatesCard onStudentsChanged={fetchStudents} onConfirm={askConfirm} />}
 
               <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)]">
                 <div>

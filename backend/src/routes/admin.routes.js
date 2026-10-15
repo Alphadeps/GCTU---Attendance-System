@@ -79,6 +79,10 @@ router.delete('/reps/:id', superadminGuard, adminController.deleteRepAccount);
 // Rep-specific routes (accessible by REPs for their own class)
 router.get('/rep/my-class-students', protect, authorizeRoles('REP'), adminController.getRepClassStudents);
 
+// Rep without a class (e.g. made with "Create Rep") sets it up from the dashboard
+router.get('/rep/my-class', protect, authorizeRoles('REP'), repSignup.getMyClass);
+router.post('/rep/my-class', protect, authorizeRoles('REP'), repSignup.setupMyClass);
+
 // Rep class management — every route below is locked to the rep's own class by repClassScope
 const repGuard = [protect, authorizeRoles('REP'), classJoin.repClassScope];
 const uploadClassList = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
