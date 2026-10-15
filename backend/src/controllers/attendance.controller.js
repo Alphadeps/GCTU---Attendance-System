@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../lib/prisma');
 const { JWT_SECRET } = require('../middleware/auth');
 const { createNotificationHelper } = require('./notification.controller');
+const { ensureRepStudent } = require('../lib/repStudent');
+const { cache, cacheKeys } = require('../lib/redis');
 
 // Haversine formula helper
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -198,7 +200,7 @@ const repSelfCheckIn = async (req, res) => {
       }),
       prisma.user.findUnique({
         where: { id: req.user.id },
-        select: { indexNumber: true }
+        select: { id: true, indexNumber: true, fullName: true, username: true }
       })
     ]);
 
@@ -222,14 +224,9 @@ const repSelfCheckIn = async (req, res) => {
       return res.status(400).json({ error: 'Your account does not have an index number. Please contact admin.' });
     }
 
-    const repStudent = await prisma.student.findUnique({
-      where: { indexNumber: repUser.indexNumber },
-      select: { id: true, indexNumber: true }
-    });
-
-    if (!repStudent) {
-      return res.status(400).json({ error: 'Student record not found. Please contact admin.' });
-    }
+    // Reps who signed up or set up their class themselves have no student record yet
+    const repStudent = await ensureRepStudent(repUser, repClass.id);
+    await cache.del(cacheKeys.classStudents(repClass.id));
 
     // Check if already checked in
     const existingAttendance = await prisma.attendance.findFirst({

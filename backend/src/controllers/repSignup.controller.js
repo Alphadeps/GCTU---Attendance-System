@@ -4,6 +4,7 @@ const prisma = require('../lib/prisma');
 const { cache, cacheKeys } = require('../lib/redis');
 const { logAudit } = require('../lib/logger');
 const { createNotificationHelper } = require('./notification.controller');
+const { ensureRepStudent } = require('../lib/repStudent');
 
 const LEVELS = ['100', '200', '300', '400'];
 const TYPES = ['REGULAR', 'TOP-UP'];
@@ -14,7 +15,10 @@ const COMMON_PASSWORDS = ['rep123', 'admin123', 'password123', 'password', '1234
 async function invalidateRepAndClassCaches(classId) {
   await cache.del(cacheKeys.reps());
   await cache.del(cacheKeys.classes());
-  if (classId) await cache.del(cacheKeys.class(classId));
+  if (classId) {
+    await cache.del(cacheKeys.class(classId));
+    await cache.del(cacheKeys.classStudents(classId));
+  }
 }
 
 // PUBLIC: programme list for the sign-up form (names only)
@@ -176,6 +180,8 @@ const approveRep = async (req, res) => {
         ? [prisma.class.update({ where: { id: rep.assignedClass.id }, data: { createdViaSignup: false } })]
         : [])
     ]);
+    // The rep is also a student of their class, so they can check themselves in
+    if (rep.assignedClass) await ensureRepStudent(rep, rep.assignedClass.id);
     await invalidateRepAndClassCaches(rep.assignedClass?.id);
     logAudit('REP_APPROVED', { user: req.user.username, repId: rep.id, indexNumber: rep.username });
 
@@ -252,6 +258,11 @@ const setupMyClass = async (req, res) => {
         : tx.class.create({ data: { programmeId, level, type, group, session, displayName, repId: req.user.id } });
     });
 
+    const me = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, indexNumber: true, fullName: true, username: true }
+    });
+    await ensureRepStudent(me, cls.id);
     await invalidateRepAndClassCaches(cls.id);
     logAudit('REP_CLASS_SETUP', { user: req.user.username, classId: cls.id, className: cls.displayName });
 
