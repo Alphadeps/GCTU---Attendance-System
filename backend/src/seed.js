@@ -57,7 +57,6 @@ async function seed() {
         deptName: 'Ghana Communication Technology University',
         deptLogoUrl: '/logo.jfif',
         lateWindowMinutes: 15,
-        qrExpirySeconds: 25,
         geofenceRadiusMeters: 100
       }
     });
