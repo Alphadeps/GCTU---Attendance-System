@@ -69,7 +69,8 @@ const LoginPage = () => {
         dept_name: user.dept_name || null,
         dept_logo: user.dept_logo || null,
       });
-      if (user.role === 'SUPERADMIN') navigate('/admin');
+      if (user.needsPasswordChange && (user.role === 'REP' || user.role === 'ADMIN')) navigate('/change-password');
+      else if (user.role === 'SUPERADMIN') navigate('/admin');
       else if (user.role === 'LECTURER') navigate('/lecturer');
       else if (user.role === 'REP' || user.role === 'ADMIN') navigate('/rep/dashboard');
       else setErrorMsg('Unauthorized role. Contact support.');

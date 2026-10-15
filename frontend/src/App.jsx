@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import StudentLoginPage from './pages/StudentLoginPage';
 import JoinClassPage from './pages/JoinClassPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import RepDashboard from './pages/RepDashboard';
 import SessionManager from './pages/SessionManager';
 import StudentPortal from './pages/StudentPortal';
@@ -14,14 +15,25 @@ import SuperAdminDashboard from './pages/admin/SuperAdminDashboard';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { token, role } = useAuth();
+  const { token, role, needsPasswordChange } = useAuth();
 
   if (!token) return <Navigate to="/" replace />;
   if (allowedRoles && !allowedRoles.includes(role)) {
     return <Navigate to="/" replace state={{ accessDenied: true }} />;
   }
+  // Reps on a temporary password must set their own before using the app
+  if (needsPasswordChange && (role === 'REP' || role === 'ADMIN')) {
+    return <Navigate to="/change-password" replace />;
+  }
 
   return children;
+};
+
+// Change-password screen: any logged-in staff member
+const ChangePasswordRoute = () => {
+  const { token, role } = useAuth();
+  if (!token || !['REP', 'ADMIN', 'SUPERADMIN', 'LECTURER'].includes(role)) return <Navigate to="/" replace />;
+  return <ChangePasswordPage />;
 };
 
 // Public Route Component - redirects authenticated users to their dashboard
@@ -92,6 +104,11 @@ function App() {
             <SuperAdminDashboard />
           </ProtectedRoute>
         }
+      />
+
+      <Route
+        path="/change-password"
+        element={<ChangePasswordRoute />}
       />
 
       {/* Protected REP Routes */}

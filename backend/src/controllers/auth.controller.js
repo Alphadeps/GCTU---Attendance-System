@@ -190,7 +190,7 @@ const login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
     });
 
-    const needsPasswordChange = user.role === 'SUPERADMIN' && password === 'admin123';
+    const needsPasswordChange = user.mustChangePassword || (user.role === 'SUPERADMIN' && password === 'admin123');
 
     console.log('Logging success event...');
     // Log successful login
@@ -314,6 +314,15 @@ const changePassword = async (req, res) => {
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Current password and new password are required' });
     }
+    if (typeof newPassword !== 'string' || newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters long' });
+    }
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ error: 'Choose a password different from your current one' });
+    }
+    if (['rep123', 'admin123', 'password123'].includes(newPassword.toLowerCase())) {
+      return res.status(400).json({ error: 'That password is too common. Choose another one.' });
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: req.user.id }
@@ -331,7 +340,7 @@ const changePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     await prisma.user.update({
       where: { id: user.id },
-      data: { password: hashedPassword }
+      data: { password: hashedPassword, mustChangePassword: false }
     });
 
     res.json({ message: 'Password changed successfully' });

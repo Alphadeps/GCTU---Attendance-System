@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api, { assetUrl, downloadAttendanceExcel, blobErrorMessage } from '../../services/api';
 
 const PencilIcon = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -298,8 +298,8 @@ export default function SuperAdminDashboard() {
       showNotification('New passwords do not match', 'error');
       return;
     }
-    if (pwdChangeForm.newPassword.length < 6) {
-      showNotification('Password must be at least 6 characters long', 'error');
+    if (pwdChangeForm.newPassword.length < 8) {
+      showNotification('Password must be at least 8 characters long', 'error');
       return;
     }
 
@@ -1145,7 +1145,7 @@ export default function SuperAdminDashboard() {
         {/* Brand */}
         <div className="px-5 py-5 flex items-center gap-3 border-b border-[#f0f2f5]">
           <img
-            src={logoPreview || '/logo.jfif'}
+            src={assetUrl(logoPreview) || '/logo.jfif'}
             alt="Logo"
             onError={(e) => { e.target.src = '/logo.jfif'; }}
             className="w-9 h-9 rounded-xl object-cover flex-shrink-0"
@@ -2069,7 +2069,7 @@ export default function SuperAdminDashboard() {
                     <div className="flex items-center gap-4">
                       <div className="h-20 w-20 bg-[#f8f9fa] rounded-xl border border-[#e9ecef] flex items-center justify-center overflow-hidden flex-shrink-0">
                         {logoPreview
-                          ? <img src={logoPreview} alt="Logo" className="h-full w-full object-cover" />
+                          ? <img src={assetUrl(logoPreview)} alt="Logo" className="h-full w-full object-cover" />
                           : <span className="text-xs text-[#adb5bd] font-semibold">No Logo</span>}
                       </div>
                       <div className="space-y-2">
@@ -3105,12 +3105,26 @@ export default function SuperAdminDashboard() {
                     {classCourses.map(cc => (
                       <div key={cc.id} className="flex justify-between items-center p-2.5 bg-[#f0f2f5] rounded-lg border border-gray-200 text-xs">
                         <span className="text-[#344767] font-semibold">{cc.name} ({cc.code})</span>
-                        <button
-                          onClick={() => handleUnlinkCourseFromClass(cc.id)}
-                          className="text-red-400 hover:text-red-300 font-bold text-[10px] uppercase"
-                        >
-                          Unlink
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await downloadAttendanceExcel({ courseId: cc.id, classId: selectedClassForCourses.id, fallbackName: `Attendance_${cc.code}` });
+                              } catch (err) {
+                                showNotification(await blobErrorMessage(err, 'Could not export attendance'), 'error');
+                              }
+                            }}
+                            className="text-emerald-600 hover:text-emerald-500 font-bold text-[10px] uppercase"
+                          >
+                            Excel
+                          </button>
+                          <button
+                            onClick={() => handleUnlinkCourseFromClass(cc.id)}
+                            className="text-red-400 hover:text-red-300 font-bold text-[10px] uppercase"
+                          >
+                            Unlink
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

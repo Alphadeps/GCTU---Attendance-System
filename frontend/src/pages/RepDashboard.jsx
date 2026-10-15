@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { downloadAttendanceExcel, blobErrorMessage } from '../services/api';
 import NotificationPanel from '../components/NotificationPanel';
 import { useToast } from '../components/ToastProvider';
 import ConfirmModal from '../components/ConfirmModal';
@@ -205,6 +205,19 @@ const RepDashboard = () => {
     } catch (err) {
       console.error('Rep self check-in error:', err);
       toast.error(err.response?.data?.error || 'Failed to check in');
+    }
+  };
+
+  const [exportingCourseId, setExportingCourseId] = useState(null);
+  const handleExportExcel = async (course) => {
+    setExportingCourseId(course.id);
+    try {
+      await downloadAttendanceExcel({ courseId: course.id, fallbackName: `Attendance_${course.code}` });
+      toast.success(`Attendance register for ${course.code} downloaded.`, 'Excel Ready');
+    } catch (err) {
+      toast.error(await blobErrorMessage(err, 'Could not export attendance'), 'Export Failed');
+    } finally {
+      setExportingCourseId(null);
     }
   };
 
@@ -661,6 +674,13 @@ const RepDashboard = () => {
                           Analytics
                         </button>
                       </div>
+                      <button
+                        onClick={() => handleExportExcel(c)}
+                        disabled={exportingCourseId === c.id}
+                        className="mt-2 w-full rounded-xl border border-emerald-200 bg-emerald-50 py-2 text-[11px] font-bold uppercase tracking-wide text-emerald-700 hover:bg-emerald-100 disabled:opacity-50"
+                      >
+                        {exportingCourseId === c.id ? 'Preparing Excel…' : 'Download Excel Register'}
+                      </button>
                     </div>
                   ))}
                 </div>

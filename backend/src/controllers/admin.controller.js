@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const prisma = require('../lib/prisma');
 const { countPresentByStudent } = require('../lib/attendanceStats');
+const { saveFile } = require('../lib/fileStore');
 const xlsx = require('xlsx');
 const { PDFParse } = require('pdf-parse');
 const { normalizeProgrammeName, isValidProgramme, getSuggestions } = require('../lib/programmeMapper');
@@ -970,7 +971,8 @@ const createRepAccount = async (req, res) => {
         indexNumber,
         password: hashedPassword,
         role: 'REP',
-        isActive: true
+        isActive: true,
+        mustChangePassword: true // admin chose this password; the rep sets their own on first login
       }
     });
 
@@ -1057,7 +1059,7 @@ const resetRepPassword = async (req, res) => {
 
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword }
+      data: { password: hashedPassword, mustChangePassword: true }
     });
 
     res.json({ message: 'Password reset successfully' });
@@ -1365,7 +1367,8 @@ const bulkUploadReps = async (req, res) => {
             indexNumber: indexNumber,
             password: hashedPassword,
             role: 'REP',
-            isActive: true
+            isActive: true,
+            mustChangePassword: true // everyone gets the default "rep123" — force a personal password
           }
         });
 
@@ -1493,8 +1496,12 @@ const uploadLogo = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
-    // Return local access URL
-    const logoUrl = `/uploads/${req.file.filename}`;
+    // Stored in the database: the server disk is wiped on every restart/deploy
+    const { url: logoUrl } = await saveFile({
+      buffer: req.file.buffer,
+      filename: req.file.originalname,
+      mimeType: req.file.mimetype
+    });
     
     // Save to settings
     let settings = await prisma.systemSettings.findFirst();

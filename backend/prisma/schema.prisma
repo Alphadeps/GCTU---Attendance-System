@@ -43,6 +43,7 @@ model User {
   password         String
   role             UserRole
   isActive         Boolean             @default(true)
+  mustChangePassword Boolean           @default(false) // Set when an admin sets/resets the password
   createdSessions  AttendanceSession[] @relation("RepSessions")
   approvedSessions AttendanceSession[] @relation("LecturerApprovedSessions")
   notifications    Notification[]
@@ -312,4 +313,15 @@ model LecturerAssignment {
   @@index([courseId])
   @@index([lecturerId, classId])
   @@index([classId, courseId])
+}
+
+// Uploaded and generated files (logos, report templates, grievance evidence, reports).
+// Kept in the database because the hosting disk is wiped on every restart/deploy.
+model StoredFile {
+  id        String   @id @default(uuid())
+  filename  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
 }
