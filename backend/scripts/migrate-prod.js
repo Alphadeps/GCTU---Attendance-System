@@ -49,6 +49,19 @@ async function run() {
     await client.connect();
     console.log('✅ Connected to database for baseline check');
 
+    // Only baseline a database that was created outside of migrations (tables already exist).
+    // On a brand-new empty database (e.g. a fresh Neon project), baselining would mark the
+    // table-creating migrations as applied without running them, and later migrations fail
+    // with 'relation "Attendance" does not exist'. Let `migrate deploy` build it from scratch.
+    const { rows: [{ exists: hasSchema }] } = await client.query(
+      `SELECT to_regclass('public."User"') IS NOT NULL AS exists`
+    );
+    if (!hasSchema) {
+      console.log('🆕 Empty database detected — skipping baseline, all migrations will be applied');
+      await client.end();
+      return deploy();
+    }
+
     // 1. Create _prisma_migrations table if it doesn't exist
     await client.query(`
       CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
@@ -92,7 +105,11 @@ async function run() {
     process.exit(1);
   }
 
-  // 3. Now run prisma migrate deploy — only new migrations will be applied
+  deploy();
+}
+
+// 3. Run prisma migrate deploy — only migrations not yet recorded will be applied
+function deploy() {
   console.log('\n🚀 Running prisma migrate deploy...');
   try {
     execSync('npx prisma migrate deploy', { stdio: 'inherit' });
