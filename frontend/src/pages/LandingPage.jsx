@@ -133,7 +133,7 @@ const LandingPage = () => {
               Staff / Admin
             </div>
             <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.55)' }}>
-              Lecturers, reps &amp; administrators
+              Class reps &amp; administrators
             </div>
           </div>
           <svg style={{ marginLeft: 'auto', flexShrink: 0 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

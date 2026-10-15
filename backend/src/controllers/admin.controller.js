@@ -530,10 +530,11 @@ const addStudentsToClass = async (req, res) => {
 
           const studentEmail = email || `${indexNumber}@student.gctu.edu.gh`;
 
-          // Upsert student
+          // Upsert student. Reps only add students — they don't overwrite an existing
+          // student's details, which may have been set by the student or another class.
           const student = await prisma.student.upsert({
             where: { indexNumber },
-            update: { name, email: studentEmail },
+            update: req.user?.role === 'REP' ? {} : { name, email: studentEmail },
             create: { indexNumber, name, email: studentEmail }
           });
 

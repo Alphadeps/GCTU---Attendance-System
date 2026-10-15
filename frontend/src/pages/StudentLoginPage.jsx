@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -336,6 +336,9 @@ const StudentLoginPage = () => {
                   ) : 'Sign In'}
                 </button>
               </form>
+              <p style={{ fontSize: '12px', textAlign: 'center', color: 'var(--sip-text-footer)', margin: '1.25rem 0 0' }}>
+                Not registered yet? <Link to="/join" style={{ color: '#1a3c6d', fontWeight: 600 }}>Join your class with a code</Link>
+              </p>
             </>
           ) : (
             /* ── Password setup form ── */

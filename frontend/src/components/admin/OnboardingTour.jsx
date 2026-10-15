@@ -319,9 +319,9 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             <ol className="text-gray-700 text-sm space-y-2 ml-4">
               <li>1. <strong className="text-[#0c2340]">Rep</strong> logs in and creates an attendance session for a course</li>
               <li>2. <strong className="text-[#0c2340]">Students</strong> check in via GPS; manual code as fallback</li>
-              <li>3. <strong className="text-[#0c2340]">Rep</strong> closes session and generates attendance report</li>
-              <li>4. <strong className="text-[#0c2340]">Lecturer</strong> reviews and signs the report</li>
-              <li>5. <strong className="text-[#0c2340]">Admin</strong> views signed reports in Official Archives</li>
+              <li>3. <strong className="text-[#0c2340]">Rep</strong> closes the session; the <strong className="text-[#0c2340]">Lecturer</strong> signs on the rep&apos;s phone</li>
+              <li>4. <strong className="text-[#0c2340]">Rep</strong> generates the attendance report at the end of the course</li>
+              <li>5. <strong className="text-[#0c2340]">Admin</strong> views reports in Official Archives</li>
             </ol>
           </div>
           <div className="bg-[#0c2340]/5 border border-[#0c2340]/10 rounded-xl p-4 space-y-2">
@@ -331,7 +331,6 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             <ul className="text-gray-700 text-sm space-y-1 ml-4">
               <li>• <strong>Overview:</strong> See system statistics at a glance</li>
               <li>• <strong>Grievance Desk:</strong> Handle student complaints and issues</li>
-              <li>• <strong>Lecturer Allocations:</strong> Assign lecturers to courses</li>
               <li>• <strong>Official Archives:</strong> View all signed attendance reports</li>
               <li>• <strong>Notifications:</strong> Stay updated on system activities</li>
             </ul>
