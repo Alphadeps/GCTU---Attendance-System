@@ -31,6 +31,7 @@ import HelpGuidePage from '../../components/admin/HelpGuidePage';
 import SystemMonitoring from './SystemMonitoring';
 import SecurityLogs from './SecurityLogs';
 import PerformanceMetrics from './PerformanceMetrics';
+import PasswordInput from '../../components/PasswordInput';
 
 // Lecturer accounts are hidden for now: lecturers sign off each class on the rep's phone.
 // Set to true to bring back the Lecturer Allocations screen.
@@ -1125,19 +1126,19 @@ export default function SuperAdminDashboard() {
             <form onSubmit={handleForcePasswordChange} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Current Password</label>
-                <input type="password" required placeholder="Enter current password" value={pwdChangeForm.currentPassword}
+                <PasswordInput required placeholder="Enter current password" value={pwdChangeForm.currentPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, currentPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">New Password</label>
-                <input type="password" required placeholder="Minimum 6 characters" value={pwdChangeForm.newPassword}
+                <PasswordInput required placeholder="Minimum 6 characters" value={pwdChangeForm.newPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, newPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Confirm New Password</label>
-                <input type="password" required placeholder="Repeat new password" value={pwdChangeForm.confirmPassword}
+                <PasswordInput required placeholder="Repeat new password" value={pwdChangeForm.confirmPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, confirmPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
@@ -2595,8 +2596,7 @@ export default function SuperAdminDashboard() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Password</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   placeholder="Password"
                   value={newRep.password}
@@ -2607,8 +2607,7 @@ export default function SuperAdminDashboard() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Confirm Password</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   placeholder="Repeat password"
                   value={newRep.confirmPassword}
@@ -2729,8 +2728,7 @@ export default function SuperAdminDashboard() {
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">New Password</label>
-                <input
-                  type="password"
+                <PasswordInput
                   required
                   placeholder="Enter new password"
                   value={newPassword}

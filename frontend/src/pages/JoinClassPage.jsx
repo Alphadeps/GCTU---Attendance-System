@@ -4,6 +4,7 @@ import api from '../services/api';
 import HumanCheck from '../components/HumanCheck';
 import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 import InstallAppButton from '../components/InstallAppButton';
+import PasswordInput from '../components/PasswordInput';
 
 // Public page a student opens from the join link their class rep shares.
 const JoinClassPage = () => {
@@ -134,11 +135,11 @@ const JoinClassPage = () => {
               </div>
               <div>
                 <label className="sip-label" htmlFor="join-password">Create a password</label>
-                <input id="join-password" type="password" className="sip-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password" placeholder="At least 6 characters" />
+                <PasswordInput id="join-password" className="sip-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} autoComplete="new-password" placeholder="At least 6 characters" />
               </div>
               <div>
                 <label className="sip-label" htmlFor="join-confirm">Confirm password</label>
-                <input id="join-confirm" type="password" className="sip-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
+                <PasswordInput id="join-confirm" className="sip-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} autoComplete="new-password" />
               </div>
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}

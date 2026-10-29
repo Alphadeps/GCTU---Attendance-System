@@ -5,6 +5,7 @@ import HumanCheck from '../components/HumanCheck';
 import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
 import ClassPicker from '../components/rep/ClassPicker';
 import { EMPTY_CLASS } from '../components/rep/classDefaults';
+import PasswordInput from '../components/PasswordInput';
 
 // Public page: a class rep creates their own account and their class.
 // The account can't sign in until the administrator approves it.
@@ -78,11 +79,11 @@ const RepSignupPage = () => {
 
               <div>
                 <label className="sip-label" htmlFor="rs-password">Password</label>
-                <input id="rs-password" type="password" className="sip-input" value={form.password} onChange={set('password')} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
+                <PasswordInput id="rs-password" className="sip-input" value={form.password} onChange={set('password')} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
               </div>
               <div>
                 <label className="sip-label" htmlFor="rs-confirm">Confirm password</label>
-                <input id="rs-confirm" type="password" className="sip-input" value={form.confirmPassword} onChange={set('confirmPassword')} required minLength={8} autoComplete="new-password" />
+                <PasswordInput id="rs-confirm" className="sip-input" value={form.confirmPassword} onChange={set('confirmPassword')} required minLength={8} autoComplete="new-password" />
               </div>
 
               {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}

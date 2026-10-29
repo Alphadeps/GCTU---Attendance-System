@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import HumanCheck from '../components/HumanCheck';
 import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
+import PasswordInput from '../components/PasswordInput';
 
 /* ─── Icon helpers ────────────────────────────────────────────────────────── */
 const LockIcon = () => (
@@ -292,9 +293,8 @@ const LoginPage = () => {
               <label className="sip-label" htmlFor="lp-password">Password</label>
               <div className="sip-input-group">
                 <span className="sip-input-icon"><KeyIcon /></span>
-                <input
+                <PasswordInput
                   id="lp-password"
-                  type="password"
                   required
                   autoComplete="current-password"
                   value={password}
