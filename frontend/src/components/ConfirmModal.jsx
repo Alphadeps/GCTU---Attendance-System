@@ -12,7 +12,7 @@ const ConfirmModal = ({ message, confirmLabel = 'Confirm', onConfirm, onCancel }
         </div>
         <div className="text-center mb-6">
           <h3 className="text-base font-bold text-[#344767] mb-1.5">Confirm Action</h3>
-          <p className="text-sm text-[#8392ab] leading-relaxed">{message}</p>
+          <p className="text-sm text-[#67748e] leading-relaxed">{message}</p>
         </div>
         <div className="flex gap-3">
           <button

@@ -329,6 +329,10 @@ const LoginPage = () => {
             </button>
           </form>
 
+          <p style={{ fontSize: '12px', color: 'var(--sip-text-footer)', margin: '1rem 0 0', textAlign: 'center' }}>
+            Forgot your password? Ask the system admin to reset it. You will choose a new one when you next sign in.
+          </p>
+
           {/* Divider */}
           <hr className="divider" style={{ margin: '1.5rem 0' }} />
 
@@ -368,7 +372,6 @@ const LoginPage = () => {
             color: 'var(--sip-text-footer)',
             textAlign: 'center',
             marginTop: '2rem',
-            opacity: 0.7,
           }}>
             &copy; {new Date().getFullYear()} Software Unit | Msquare | GCTU
           </p>

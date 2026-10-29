@@ -72,7 +72,9 @@ const NotificationPanel = ({ studentIndex }) => {
       {/* Bell button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-9 h-9 flex items-center justify-center rounded-xl text-[#8392ab] hover:text-[#344767] hover:bg-[#f0f2f5] transition-all"
+        aria-label="Notifications"
+        aria-expanded={isOpen}
+        className="relative w-10 h-10 flex items-center justify-center rounded-xl text-[#67748e] hover:text-[#344767] hover:bg-[#f0f2f5] transition-all"
         title="Notifications"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -99,7 +101,7 @@ const NotificationPanel = ({ studentIndex }) => {
             {notifications.length > 0 && (
               <button
                 onClick={handleClearAll}
-                className="text-[10px] font-semibold text-[#8392ab] hover:text-rose-500 transition-colors"
+                className="text-[10px] font-semibold text-[#67748e] hover:text-rose-500 transition-colors"
               >
                 Clear all
               </button>
@@ -111,12 +113,12 @@ const NotificationPanel = ({ studentIndex }) => {
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
                 <div className="w-10 h-10 rounded-xl bg-[#f0f2f5] flex items-center justify-center mb-3">
-                  <svg className="w-5 h-5 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-[#67748e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                 </div>
                 <p className="text-xs font-semibold text-[#344767]">All caught up!</p>
-                <p className="text-[11px] text-[#8392ab] mt-0.5">No new notifications</p>
+                <p className="text-[11px] text-[#67748e] mt-0.5">No new notifications</p>
               </div>
             ) : (
               notifications.map((n) => {
@@ -140,8 +142,8 @@ const NotificationPanel = ({ studentIndex }) => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[12px] font-semibold text-[#344767] truncate">{n.title}</p>
-                      <p className="text-[11px] text-[#8392ab] mt-0.5 leading-snug line-clamp-2">{n.message}</p>
-                      <span className="text-[10px] text-[#8392ab] mt-1 block">{formatTime(n.createdAt)}</span>
+                      <p className="text-[11px] text-[#67748e] mt-0.5 leading-snug line-clamp-2">{n.message}</p>
+                      <span className="text-[10px] text-[#67748e] mt-1 block">{formatTime(n.createdAt)}</span>
                     </div>
                     {!n.isRead && (
                       <span className="w-2 h-2 bg-[#E5A93C] rounded-full shrink-0 mt-1" />

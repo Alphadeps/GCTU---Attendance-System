@@ -78,7 +78,8 @@ const TURNSTILE_ACTIONS = {
   studentLogin: 'student_login',
   repSignup: 'rep_signup',
   joinClass: 'join_class',
-  setPassword: 'set_password'
+  setPassword: 'set_password',
+  resetPassword: 'reset_password'
 };
 
 module.exports = { requireHuman, TURNSTILE_ACTIONS };

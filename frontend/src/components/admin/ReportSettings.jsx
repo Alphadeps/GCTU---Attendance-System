@@ -47,7 +47,7 @@ export default function ReportSettings() {
     <div className="space-y-6">
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
         <h2 className="text-xl font-bold text-[#0c2340] mb-2">Master Report Template</h2>
-        <p className="text-[#8392ab] text-sm mb-6">
+        <p className="text-[#67748e] text-sm mb-6">
           Upload a `.docx` file containing specific placeholders for the class attendance reports.
         </p>
 

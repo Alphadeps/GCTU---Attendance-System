@@ -27,7 +27,7 @@ const SetupClassCard = ({ onClassReady }) => {
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 shadow-[0_1px_3px_rgba(0,0,0,.08)] max-w-xl space-y-4">
       <div>
         <p className="text-[14px] font-bold text-[#344767]">Set up your class</p>
-        <p className="text-[12px] text-[#8392ab] mt-1">
+        <p className="text-[12px] text-[#67748e] mt-1">
           Your account isn&apos;t linked to a class yet. Choose your class below to start adding courses and classmates.
         </p>
       </div>

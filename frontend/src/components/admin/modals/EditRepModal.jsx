@@ -57,7 +57,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">
+            <label className="block text-xs font-semibold uppercase text-[#67748e] mb-1.5">
               Username
             </label>
             <input
@@ -71,7 +71,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">
+            <label className="block text-xs font-semibold uppercase text-[#67748e] mb-1.5">
               Index Number
             </label>
             <input
@@ -81,7 +81,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
               className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#0c2340] transition-colors"
               placeholder="e.g. 10912345"
             />
-            <p className="text-xs text-[#8392ab] mt-1.5">
+            <p className="text-xs text-[#67748e] mt-1.5">
               Required for rep to check in to their own sessions
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function EditRepModal({ rep, onClose, onSaved }) {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#8392ab] disabled:opacity-50 transition-colors"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#67748e] disabled:opacity-50 transition-colors"
             >
               Cancel
             </button>

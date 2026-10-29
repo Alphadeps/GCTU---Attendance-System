@@ -69,6 +69,9 @@ const StudentLoginPage = () => {
   const [captchaToken, setCaptchaToken] = useState('');
   const humanCheck = useRef(null);
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [lockoutSeconds, setLockoutSeconds] = useState(0);
   const navigate = useNavigate();
   const auth = useAuth();
@@ -77,6 +80,7 @@ const StudentLoginPage = () => {
     e.preventDefault();
     if (lockoutSeconds > 0) return;
     setErrorMsg('');
+    setSuccessMsg('');
     setLoading(true);
     try {
       const response = await api.post('/student-auth/login', { indexNumber, password, captchaToken });
@@ -131,17 +135,70 @@ const StudentLoginPage = () => {
     setLoading(true);
     try {
       await api.post('/student-auth/set-password', { indexNumber, code: joinCode, password: newPassword, confirmPassword, captchaToken });
-      alert('Password set successfully! Please login with your new password.');
-      setRequiresPasswordSetup(false);
-      setPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+      backToLogin('Password created. Sign in with it below.');
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Failed to set password');
       humanCheck.current?.reset();
     } finally {
       setLoading(false);
     }
+  };
+
+  // Leave the setup / forgot forms and show the sign-in form again, keeping the index number
+  const backToLogin = (message = '') => {
+    setRequiresPasswordSetup(false);
+    setForgotMode(false);
+    setPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setResetCode('');
+    setErrorMsg('');
+    setSuccessMsg(message);
+    humanCheck.current?.reset();
+  };
+
+  const openForgot = () => {
+    setForgotMode(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setResetCode('');
+  };
+
+  const handleResetWithCode = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (newPassword !== confirmPassword) { setErrorMsg('Passwords do not match'); return; }
+    if (newPassword.length < 6) { setErrorMsg('Password must be at least 6 characters long'); return; }
+    setLoading(true);
+    try {
+      await api.post('/student-auth/reset-password', { indexNumber, resetCode, password: newPassword, confirmPassword, captchaToken });
+      backToLogin('Password changed. Sign in with your new password.');
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error || 'Could not reset your password. Please try again.');
+      humanCheck.current?.reset();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const spinner = (
+    <span
+      style={{
+        width: 16, height: 16,
+        border: '2px solid rgba(255,255,255,0.4)',
+        borderTopColor: '#fff',
+        borderRadius: '50%',
+        display: 'inline-block',
+        animation: 'spinSlow 0.7s linear infinite',
+      }}
+    />
+  );
+
+  const linkButton = {
+    background: 'none', border: 'none', padding: 0,
+    color: '#1a3c6d', fontWeight: 600, fontSize: '12px', cursor: 'pointer',
   };
 
   return (
@@ -258,8 +315,127 @@ const StudentLoginPage = () => {
 
         <div className="login-right-inner animate-fade-in-up">
 
-          {/* ── Normal login form ── */}
-          {!requiresPasswordSetup ? (
+          {forgotMode ? (
+            /* ── Forgot password: reset with a code from the rep ── */
+            <>
+              <div style={{ marginBottom: '1.25rem' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sip-text-heading)', margin: '0 0 6px 0', letterSpacing: '-0.3px' }}>
+                  Forgot your password?
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--sip-text-footer)', margin: 0 }}>
+                  Your class rep can give you a reset code. It takes a minute.
+                </p>
+              </div>
+
+              <div className="sip-alert sip-alert-info animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+                <ShieldIcon />
+                <ol style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '13px', lineHeight: 1.6, listStyle: 'decimal' }}>
+                  <li>Ask your class rep to open <b>Students</b> and tap <b>Reset password</b> next to your name.</li>
+                  <li>They will give you a <b>6-digit code</b>. It works once, for 30 minutes.</li>
+                  <li>Enter it below and choose a new password.</li>
+                </ol>
+              </div>
+
+              {errorMsg && (
+                <div className="sip-alert sip-alert-error animate-fade-in" role="alert" style={{ marginBottom: '1.25rem' }}>
+                  <AlertIcon />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleResetWithCode} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+                <div>
+                  <label className="sip-label" htmlFor="slp-reset-index">Index Number</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><UserIcon /></span>
+                    <input
+                      id="slp-reset-index"
+                      type="text"
+                      required
+                      autoComplete="username"
+                      value={indexNumber}
+                      onChange={(e) => setIndexNumber(e.target.value)}
+                      placeholder="Your index number"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-reset-code">Reset Code</label>
+                  <input
+                    id="slp-reset-code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="6 digits"
+                    className="sip-input"
+                    style={{ fontFamily: 'monospace', letterSpacing: '0.35em', fontSize: '18px', textAlign: 'center' }}
+                  />
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-reset-pw">New Password</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><KeyIcon /></span>
+                    <input
+                      id="slp-reset-pw"
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min. 6 characters"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="sip-label" htmlFor="slp-reset-confirm">Confirm New Password</label>
+                  <div className="sip-input-group">
+                    <span className="sip-input-icon"><KeyIcon /></span>
+                    <input
+                      id="slp-reset-confirm"
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter your new password"
+                      className="sip-input"
+                    />
+                  </div>
+                </div>
+
+                <HumanCheck ref={humanCheck} onToken={setCaptchaToken} action="reset_password" />
+
+                <button
+                  type="submit"
+                  disabled={loading || resetCode.length !== 6 || (HUMAN_CHECK_ENABLED && !captchaToken)}
+                  className="sip-btn-dark"
+                  style={{ marginTop: '0.4rem' }}
+                >
+                  {loading ? spinner : 'Change Password'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => backToLogin()}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    background: 'none', border: 'none', padding: '4px 0',
+                    color: 'var(--sip-text-footer)', fontSize: '13px', cursor: 'pointer', width: '100%',
+                  }}
+                >
+                  <ArrowLeftIcon /> Back to Sign In
+                </button>
+              </form>
+            </>
+          ) : !requiresPasswordSetup ? (
             <>
               {/* Heading */}
               <div style={{ marginBottom: '2rem' }}>
@@ -277,9 +453,16 @@ const StudentLoginPage = () => {
                 </p>
               </div>
 
+              {successMsg && (
+                <div className="sip-alert sip-alert-success animate-fade-in" role="status" style={{ marginBottom: '1.25rem' }}>
+                  <ShieldIcon />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
               {/* Error alert */}
               {errorMsg && (
-                <div className="sip-alert sip-alert-error animate-fade-in" style={{ marginBottom: '1.25rem' }}>
+                <div className="sip-alert sip-alert-error animate-fade-in" role="alert" style={{ marginBottom: '1.25rem' }}>
                   <AlertIcon />
                   <span>{errorMsg}</span>
                 </div>
@@ -319,6 +502,11 @@ const StudentLoginPage = () => {
                       placeholder="Enter your password"
                       className="sip-input"
                     />
+                  </div>
+                  <div style={{ textAlign: 'right', marginTop: '6px' }}>
+                    <button type="button" onClick={openForgot} style={linkButton}>
+                      Forgot password?
+                    </button>
                   </div>
                 </div>
 
@@ -481,12 +669,7 @@ const StudentLoginPage = () => {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setRequiresPasswordSetup(false);
-                    setNewPassword('');
-                    setConfirmPassword('');
-                    setErrorMsg('');
-                  }}
+                  onClick={() => backToLogin()}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
                     background: 'none', border: 'none', padding: '4px 0',
@@ -531,7 +714,6 @@ const StudentLoginPage = () => {
             color: 'var(--sip-text-footer)',
             textAlign: 'center',
             marginTop: '2rem',
-            opacity: 0.7,
           }}>
             &copy; {new Date().getFullYear()} Software Unit | Msquare | GCTU
           </p>

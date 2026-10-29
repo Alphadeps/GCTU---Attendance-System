@@ -69,6 +69,10 @@ model Student {
   email             String         @unique
   password          String?
   isFirstLogin      Boolean        @default(true)
+  // One-time code a rep or admin gives a student who forgot their password
+  resetCodeHash     String?
+  resetCodeExpires  DateTime?
+  resetCodeTries    Int            @default(0)
   attendances       Attendance[]
   classes           ClassStudent[]
   createdAt         DateTime       @default(now())

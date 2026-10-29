@@ -212,7 +212,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
         {/* Header */}
         <div className="text-center px-6 pb-4">
           <h3 className="font-extrabold text-[#344767] text-base leading-snug">{session.courseName}</h3>
-          <p className="text-xs text-[#8392ab] mt-1 uppercase font-semibold tracking-wider">
+          <p className="text-xs text-[#67748e] mt-1 uppercase font-semibold tracking-wider">
             {session.sessionType} Session
           </p>
         </div>
@@ -225,13 +225,13 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
             <div className="flex bg-gray-100 rounded-xl p-1 gap-1">
               <button
                 onClick={() => { setMode('self'); setInputMode('gps'); clearSelection(); setSearchQuery(''); setSearchResults([]); }}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'self' ? 'bg-white shadow text-[#344767]' : 'text-[#8392ab]'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'self' ? 'bg-white shadow text-[#344767]' : 'text-[#67748e]'}`}
               >
                 My Attendance
               </button>
               <button
                 onClick={() => setMode('proxy')}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'proxy' ? 'bg-white shadow text-[#344767]' : 'text-[#8392ab]'}`}
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'proxy' ? 'bg-white shadow text-[#344767]' : 'text-[#67748e]'}`}
               >
                 For Classmate
               </button>
@@ -251,7 +251,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                     </button>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-px bg-gray-200" />
-                      <span className="text-[10px] text-[#8392ab] font-bold uppercase">or</span>
+                      <span className="text-[10px] text-[#67748e] font-bold uppercase">or</span>
                       <div className="flex-1 h-px bg-gray-200" />
                     </div>
                     <button
@@ -259,7 +259,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                       className="w-full border border-gray-200 bg-gray-50 hover:bg-gray-100 text-[#344767] font-bold py-3 rounded-xl text-xs transition-colors"
                     >
                       Use Code Instead
-                      <span className="block text-[10px] font-normal text-[#8392ab] mt-0.5">GPS not working? Enter the 6-digit code from your rep</span>
+                      <span className="block text-[10px] font-normal text-[#67748e] mt-0.5">GPS not working? Enter the 6-digit code from your rep</span>
                     </button>
                   </>
                 )}
@@ -267,7 +267,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                 {inputMode === 'code' && (
                   <form onSubmit={handleManualSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-[#8392ab] text-xs font-semibold mb-1.5">6-Digit Code</label>
+                      <label className="block text-[#67748e] text-xs font-semibold mb-1.5">6-Digit Code</label>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -284,7 +284,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                     <button type="submit" className="w-full bg-gradient-to-br from-[#14172B] to-[#3A416F] text-white font-extrabold py-3.5 rounded-xl text-xs hover:opacity-90">
                       Verify
                     </button>
-                    <button type="button" onClick={() => setInputMode('gps')} className="w-full text-xs text-[#8392ab] hover:text-[#344767] font-semibold py-1">
+                    <button type="button" onClick={() => setInputMode('gps')} className="w-full text-xs text-[#67748e] hover:text-[#344767] font-semibold py-1">
                       Back
                     </button>
                   </form>
@@ -297,7 +297,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
               <div className="space-y-3">
                 {/* Search input */}
                 <div className="relative">
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8392ab]">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[#67748e]">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
                     </svg>
@@ -329,9 +329,9 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                         <Avatar name={student.name} />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold text-[#344767] truncate">{student.name}</p>
-                          <p className="text-xs text-[#8392ab] font-mono">{student.indexNumber}</p>
+                          <p className="text-xs text-[#67748e] font-mono">{student.indexNumber}</p>
                         </div>
-                        <svg className="w-4 h-4 text-[#8392ab] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 text-[#67748e] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
@@ -341,12 +341,12 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
 
                 {/* No results state */}
                 {!searching && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-                  <p className="text-xs text-[#8392ab] text-center py-4">No classmates found for "{searchQuery}"</p>
+                  <p className="text-xs text-[#67748e] text-center py-4">No classmates found for "{searchQuery}"</p>
                 )}
 
                 {/* Hint */}
                 {searchQuery.trim().length < 2 && (
-                  <p className="text-xs text-[#8392ab] text-center py-2">Type at least 2 letters to search</p>
+                  <p className="text-xs text-[#67748e] text-center py-2">Type at least 2 letters to search</p>
                 )}
               </div>
             )}
@@ -389,13 +389,13 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
             </div>
             <div>
               <h3 className="text-xl font-black text-[#344767]">Marked!</h3>
-              <p className="text-xs text-[#8392ab] mt-1">
+              <p className="text-xs text-[#67748e] mt-1">
                 {successDetails.markedFor ? `${successDetails.markedFor} · ` : ''}{successDetails.courseName}
               </p>
             </div>
             <div className="bg-gray-50 p-4 border border-gray-200 rounded-2xl flex justify-between items-center text-xs">
               <div className="text-left space-y-1">
-                <span className="block text-[10px] text-[#8392ab] font-bold uppercase">Time</span>
+                <span className="block text-[10px] text-[#67748e] font-bold uppercase">Time</span>
                 <span className="text-[#344767] font-bold font-mono">{successDetails.time}</span>
               </div>
               <span className={`px-3 py-1 text-xs font-black rounded-full border ${
@@ -451,7 +451,7 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
               {/* Back */}
               <button
                 onClick={clearSelection}
-                className="flex items-center gap-1.5 text-xs text-[#8392ab] hover:text-[#344767] font-semibold self-start"
+                className="flex items-center gap-1.5 text-xs text-[#67748e] hover:text-[#344767] font-semibold self-start"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -466,8 +466,8 @@ const CheckInSheet = ({ session, indexNumber, fullName, onClose, onSuccess }) =>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-extrabold text-[#344767] text-base leading-tight truncate">{selectedClassmate.name}</p>
-                  <p className="text-xs text-[#8392ab] font-mono mt-0.5">{selectedClassmate.indexNumber}</p>
-                  <p className="text-xs text-[#8392ab] mt-1">{session.courseName}</p>
+                  <p className="text-xs text-[#67748e] font-mono mt-0.5">{selectedClassmate.indexNumber}</p>
+                  <p className="text-xs text-[#67748e] mt-1">{session.courseName}</p>
                 </div>
               </div>
 

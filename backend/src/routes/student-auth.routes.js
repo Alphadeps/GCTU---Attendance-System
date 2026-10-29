@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, authorizeRoles } = require('../middleware/auth');
 const { studentAuthLimiter } = require('../middleware/rateLimiter');
 const {
   studentLogin,
   studentSetPassword,
-  repResetStudentPassword
+  issueResetCode,
+  resetWithCode
 } = require('../controllers/student-auth.controller');
 const { lookupJoinCode, joinClass } = require('../controllers/classJoin.controller');
 const { requireHuman, TURNSTILE_ACTIONS } = require('../middleware/turnstile');
@@ -18,7 +19,8 @@ router.post('/set-password', studentAuthLimiter, requireHuman(TURNSTILE_ACTIONS.
 router.get('/join/:code', lookupJoinCode);
 router.post('/join', studentAuthLimiter, requireHuman(TURNSTILE_ACTIONS.joinClass), joinClass);
 
-// Rep can reset student password (protected route)
-router.post('/reset-password', protect, repResetStudentPassword);
+// Forgot password: the rep (or an admin) gets a one-time code, the student uses it to pick a new password
+router.post('/reset-code', protect, authorizeRoles('REP', 'ADMIN', 'SUPERADMIN'), issueResetCode);
+router.post('/reset-password', studentAuthLimiter, requireHuman(TURNSTILE_ACTIONS.resetPassword), resetWithCode);
 
 module.exports = router;

@@ -201,7 +201,7 @@ const HelpGuidePage = () => {
     amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     teal: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
-    slate: 'bg-slate-500/10 text-[#8392ab] border-slate-500/20',
+    slate: 'bg-slate-500/10 text-[#67748e] border-slate-500/20',
     green: 'bg-green-500/10 text-green-400 border-green-500/20'
   };
 
@@ -274,7 +274,7 @@ const HelpGuidePage = () => {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-[#0c2340] mb-2 group-hover:text-[#E5A93C] transition-colors">{guide.title}</h3>
-            <p className="text-[#8392ab] text-sm">{guide.description}</p>
+            <p className="text-[#67748e] text-sm">{guide.description}</p>
             <div className="mt-4 flex items-center text-[#E5A93C] text-sm font-semibold">
               <span>View Guide</span>
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -300,12 +300,12 @@ const HelpGuidePage = () => {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-[#0c2340]">{selectedGuide.title}</h2>
-                    <p className="text-[#8392ab] text-sm mt-1">{selectedGuide.description}</p>
+                    <p className="text-[#67748e] text-sm mt-1">{selectedGuide.description}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedGuide(null)}
-                  className="text-[#8392ab] hover:text-[#0c2340] transition-colors p-2"
+                  className="text-[#67748e] hover:text-[#0c2340] transition-colors p-2"
                 >
                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

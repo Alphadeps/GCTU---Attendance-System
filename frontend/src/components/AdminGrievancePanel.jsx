@@ -72,13 +72,13 @@ const AdminGrievancePanel = () => {
       <div className="bg-white border border-gray-200 p-5 rounded-2xl shadow-xl flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h2 className="text-lg font-black text-[#344767]">Student Support & Grievance Desk</h2>
-          <p className="text-xs text-[#8392ab] mt-1">Review sickness excuses, track classroom integrity reports, and resolve system anomalies.</p>
+          <p className="text-xs text-[#67748e] mt-1">Review sickness excuses, track classroom integrity reports, and resolve system anomalies.</p>
         </div>
 
         <div className="flex flex-wrap gap-2.5">
           {/* Status Filter */}
           <div className="space-y-1">
-            <span className="block text-[9px] font-bold text-[#8392ab] uppercase tracking-wide">Status</span>
+            <span className="block text-[9px] font-bold text-[#67748e] uppercase tracking-wide">Status</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -93,7 +93,7 @@ const AdminGrievancePanel = () => {
 
           {/* Type Filter */}
           <div className="space-y-1">
-            <span className="block text-[9px] font-bold text-[#8392ab] uppercase tracking-wide">Category</span>
+            <span className="block text-[9px] font-bold text-[#67748e] uppercase tracking-wide">Category</span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -120,7 +120,7 @@ const AdminGrievancePanel = () => {
               ))}
             </div>
           ) : grievances.length === 0 ? (
-            <div className="bg-white border border-dashed border-gray-200 p-12 text-center rounded-2xl text-[#8392ab] text-xs">
+            <div className="bg-white border border-dashed border-gray-200 p-12 text-center rounded-2xl text-[#67748e] text-xs">
               No matching tickets found. Good job!
             </div>
           ) : (
@@ -142,18 +142,18 @@ const AdminGrievancePanel = () => {
                         g.type === 'ABSENCE_EXCUSE' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
                         g.type === 'SYSTEM_ISSUE' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                         g.type === 'INTEGRITY_REPORT' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                        'bg-slate-500/10 text-[#8392ab] border-slate-500/20'
+                        'bg-slate-500/10 text-[#67748e] border-slate-500/20'
                       }`}>
                         {g.type.replace('_', ' ')}
                       </span>
                       <h3 className="font-extrabold text-sm text-[#344767] leading-snug pt-1">{g.subject}</h3>
-                      <div className="text-[10px] text-[#8392ab] flex items-center gap-1.5 pt-0.5">
+                      <div className="text-[10px] text-[#67748e] flex items-center gap-1.5 pt-0.5">
                         <span className="font-semibold">
                           {g.anonymous ? '🤫 Anonymous' : `${g.studentName} (${g.studentIndex})`}
                         </span>
                         {g.courseCode && (
                           <>
-                            <span className="text-[#8392ab]">•</span>
+                            <span className="text-[#67748e]">•</span>
                             <span className="text-[#344767] font-mono">{g.courseCode}</span>
                           </>
                         )}
@@ -168,7 +168,7 @@ const AdminGrievancePanel = () => {
                       }`}>
                         {g.status}
                       </span>
-                      <span className="text-[9px] text-[#8392ab] font-mono">
+                      <span className="text-[9px] text-[#67748e] font-mono">
                         {new Date(g.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -185,12 +185,12 @@ const AdminGrievancePanel = () => {
             <div className="bg-white border border-gray-200 rounded-2xl p-5 space-y-5 shadow-xl animate-[fadeIn_0.2s_ease-out]">
               <div className="flex justify-between items-start pb-3 border-b border-gray-200/40">
                 <div>
-                  <span className="text-[9px] font-bold text-[#8392ab] uppercase tracking-wider block">Inspecting Ticket</span>
+                  <span className="text-[9px] font-bold text-[#67748e] uppercase tracking-wider block">Inspecting Ticket</span>
                   <h4 className="font-extrabold text-sm text-[#344767]">{selectedGrievance.subject}</h4>
                 </div>
                 <button
                   onClick={() => setSelectedGrievance(null)}
-                  className="p-1 rounded-lg bg-gray-200/40 hover:bg-gray-200 text-[#8392ab] hover:text-[#344767]"
+                  className="p-1 rounded-lg bg-gray-200/40 hover:bg-gray-200 text-[#67748e] hover:text-[#344767]"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -201,20 +201,20 @@ const AdminGrievancePanel = () => {
               {/* Sender Details */}
               <div className="bg-gray-50 p-3 rounded-xl border border-gray-200/50 text-xs space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-[#8392ab]">Sender:</span>
+                  <span className="text-[#67748e]">Sender:</span>
                   <span className="font-bold text-[#344767]">
                     {selectedGrievance.anonymous ? '🤫 Anonymous Student' : selectedGrievance.studentName}
                   </span>
                 </div>
                 {!selectedGrievance.anonymous && (
                   <div className="flex justify-between">
-                    <span className="text-[#8392ab]">Index Number:</span>
+                    <span className="text-[#67748e]">Index Number:</span>
                     <span className="font-mono text-[#344767]">{selectedGrievance.studentIndex}</span>
                   </div>
                 )}
                 {selectedGrievance.courseCode && (
                   <div className="flex justify-between">
-                    <span className="text-[#8392ab]">Course:</span>
+                    <span className="text-[#67748e]">Course:</span>
                     <span className="font-semibold text-[#344767]">{selectedGrievance.courseCode}</span>
                   </div>
                 )}
@@ -222,7 +222,7 @@ const AdminGrievancePanel = () => {
 
               {/* Message content */}
               <div className="space-y-1.5">
-                <span className="block text-[9px] font-bold text-[#8392ab] uppercase tracking-wider">Report Description</span>
+                <span className="block text-[9px] font-bold text-[#67748e] uppercase tracking-wider">Report Description</span>
                 <p className="text-xs text-[#344767] bg-gray-50 p-3.5 border border-gray-200/40 rounded-xl leading-relaxed whitespace-pre-wrap">
                   {selectedGrievance.message}
                 </p>
@@ -231,9 +231,9 @@ const AdminGrievancePanel = () => {
               {/* Attachment Preview */}
               {selectedGrievance.evidenceUrl && (
                 <div className="space-y-1.5">
-                  <span className="block text-[9px] font-bold text-[#8392ab] uppercase tracking-wider">Evidence Attachment</span>
+                  <span className="block text-[9px] font-bold text-[#67748e] uppercase tracking-wider">Evidence Attachment</span>
                   <div className="bg-gray-50 p-3 border border-gray-200/40 rounded-xl flex items-center justify-between text-xs">
-                    <span className="truncate text-[#8392ab] font-mono pr-4 text-[10px]">
+                    <span className="truncate text-[#67748e] font-mono pr-4 text-[10px]">
                       {selectedGrievance.evidenceUrl.split('/').pop()}
                     </span>
                     <a
@@ -251,7 +251,7 @@ const AdminGrievancePanel = () => {
               {selectedGrievance.status === 'PENDING' ? (
                 <div className="space-y-4 pt-2 border-t border-gray-200/40">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-[#8392ab] uppercase tracking-wider block">Official Response / Comments</label>
+                    <label className="text-[9px] font-bold text-[#67748e] uppercase tracking-wider block">Official Response / Comments</label>
                     <textarea
                       rows={3}
                       required
@@ -283,7 +283,7 @@ const AdminGrievancePanel = () => {
                 <div className="bg-gray-50 p-4 border border-gray-200/80 rounded-xl space-y-2">
                   <div className="flex justify-between items-center text-[9px] font-bold text-[#344767] uppercase tracking-wider">
                     <span>Official Response Log</span>
-                    <span className="text-[8px] text-[#8392ab]">
+                    <span className="text-[8px] text-[#67748e]">
                       by: {selectedGrievance.resolvedBy?.username} ({selectedGrievance.resolvedBy?.role})
                     </span>
                   </div>
@@ -294,7 +294,7 @@ const AdminGrievancePanel = () => {
               )}
             </div>
           ) : (
-            <div className="hidden lg:block bg-white border border-dashed border-gray-200 p-12 text-center rounded-2xl text-[#8392ab] text-xs">
+            <div className="hidden lg:block bg-white border border-dashed border-gray-200 p-12 text-center rounded-2xl text-[#67748e] text-xs">
               Select a support ticket from the list to view files and resolve.
             </div>
           )}

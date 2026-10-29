@@ -102,20 +102,20 @@ const AddClassmatesCard = ({ onStudentsChanged, onConfirm }) => {
       {/* Join code */}
       <div className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
         <p className="text-[13px] font-bold text-[#344767]">Invite classmates</p>
-        <p className="text-[11px] text-[#8392ab] mb-4">Share this link in your class group. Classmates open it and register with their index number.</p>
+        <p className="text-[11px] text-[#67748e] mb-4">Share this link in your class group. Classmates open it and register with their index number.</p>
         {codeLoading ? (
           <div className="skeleton h-12 rounded-xl" />
         ) : joinCode ? (
           <>
             <div className="flex items-center justify-between bg-[#f8f9fa] border border-gray-100 rounded-xl px-4 py-3 mb-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#8392ab]">Join code</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#67748e]">Join code</span>
               <span className="font-mono text-xl font-black tracking-[0.3em] text-[#344767]">{joinCode}</span>
             </div>
-            <p className="text-[11px] text-[#8392ab] break-all mb-3">{joinLink}</p>
+            <p className="text-[11px] text-[#67748e] break-all mb-3">{joinLink}</p>
             <div className="flex flex-wrap gap-2">
               <button type="button" onClick={shareOnWhatsApp} className="sip-btn-primary" style={COMPACT_BTN}>Share on WhatsApp</button>
               <button type="button" onClick={copyLink} className="sip-btn-dark" style={COMPACT_BTN}>Copy link</button>
-              <button type="button" onClick={regenerate} disabled={regenerating} className="px-3 py-2 text-[12px] font-semibold text-[#8392ab] hover:text-[#344767]">
+              <button type="button" onClick={regenerate} disabled={regenerating} className="px-3 py-2 text-[12px] font-semibold text-[#67748e] hover:text-[#344767]">
                 {regenerating ? 'Creating…' : 'Generate new link'}
               </button>
             </div>
@@ -128,7 +128,7 @@ const AddClassmatesCard = ({ onStudentsChanged, onConfirm }) => {
       {/* Class list upload */}
       <div className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
         <p className="text-[13px] font-bold text-[#344767]">Upload class list</p>
-        <p className="text-[11px] text-[#8392ab] mb-4">Have the list from the department? Upload an Excel, CSV or PDF file with index numbers and names.</p>
+        <p className="text-[11px] text-[#67748e] mb-4">Have the list from the department? Upload an Excel, CSV or PDF file with index numbers and names.</p>
         <label
           htmlFor="rep-class-list"
           className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl px-4 py-5 cursor-pointer transition-colors ${
@@ -145,13 +145,13 @@ const AddClassmatesCard = ({ onStudentsChanged, onConfirm }) => {
           <span className="text-[12px] font-semibold text-[#344767] break-all text-center">
             {parsing ? 'Reading file…' : file ? file.name : 'Tap to choose a file'}
           </span>
-          <span className="text-[10px] text-[#8392ab] mt-1">.xlsx, .xls, .csv or .pdf · max 5 MB</span>
+          <span className="text-[10px] text-[#67748e] mt-1">.xlsx, .xls, .csv or .pdf · max 5 MB</span>
         </label>
         {preview.length > 0 && (
           <div className="mt-3 flex items-center justify-between gap-2">
             <span className="text-[12px] text-[#344767]"><strong>{preview.length}</strong> students found</span>
             <div className="flex gap-2">
-              <button type="button" onClick={() => { setPreview([]); setFile(null); }} className="px-3 py-2 text-[12px] font-semibold text-[#8392ab] hover:text-[#344767]">Cancel</button>
+              <button type="button" onClick={() => { setPreview([]); setFile(null); }} className="px-3 py-2 text-[12px] font-semibold text-[#67748e] hover:text-[#344767]">Cancel</button>
               <button type="button" onClick={importStudents} disabled={importing} className="sip-btn-dark" style={COMPACT_BTN}>
                 {importing ? 'Adding…' : `Add ${preview.length} students`}
               </button>

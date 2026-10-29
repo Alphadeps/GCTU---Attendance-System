@@ -67,7 +67,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
               <li>• Configuring system settings</li>
             </ul>
           </div>
-          <p className="text-[#8392ab] text-xs italic">
+          <p className="text-[#67748e] text-xs italic">
             This tour takes about 5 minutes. You can skip it and access help anytime from the dashboard.
           </p>
         </div>
@@ -285,11 +285,11 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
             <div className="text-gray-700 text-sm space-y-3 ml-4">
               <div>
                 <p className="font-bold text-[#0c2340]">Late Grace Period</p>
-                <p className="text-xs text-[#8392ab]">How many minutes after session start before marking as "LATE" (default: 15 mins)</p>
+                <p className="text-xs text-[#67748e]">How many minutes after session start before marking as "LATE" (default: 15 mins)</p>
               </div>
               <div>
                 <p className="font-bold text-[#0c2340]">Geofence Radius</p>
-                <p className="text-xs text-[#8392ab]">Maximum distance from class location for check-in (default: 100 meters)</p>
+                <p className="text-xs text-[#67748e]">Maximum distance from class location for check-in (default: 100 meters)</p>
               </div>
             </div>
           </div>
@@ -419,7 +419,7 @@ const OnboardingTour = ({ onComplete, onSkip }) => {
           <button
             onClick={handlePrevious}
             disabled={isFirstStep}
-            className="px-4 py-2 text-[#8392ab] hover:text-[#0c2340] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 font-bold"
+            className="px-4 py-2 text-[#67748e] hover:text-[#0c2340] disabled:opacity-30 disabled:cursor-not-allowed transition-colors flex items-center space-x-2 font-bold"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

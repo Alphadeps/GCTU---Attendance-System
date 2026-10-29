@@ -8,7 +8,7 @@
   /* ── Brand colours ─────────────────────────────────────────────────────── */
   --sip-primary:    #E5A93C; /* GCTU Gold */
   --sip-dark:       #0c2340; /* GCTU Dark Blue */
-  --sip-secondary:  #8392ab;
+  --sip-secondary:  #67748e;
   --sip-success:    #82d616;
   --sip-info:       #1a3c6d; /* GCTU Medium/Dark Blue */
   --sip-warning:    #f3c63f; /* GCTU Lighter Gold */
@@ -20,7 +20,7 @@
   /* ── Text ──────────────────────────────────────────────────────────────── */
   --sip-text-body:    rgb(103, 116, 142);
   --sip-text-heading: #0c2340; /* GCTU Dark Blue */
-  --sip-text-footer:  rgb(131, 146, 171);
+  --sip-text-footer:  rgb(103, 116, 142);
 
   /* ── Gradients ─────────────────────────────────────────────────────────── */
   --sip-grad-dark:     linear-gradient(310deg, #060c1d, #0c2340);
@@ -348,7 +348,7 @@ body {
 }
 .sip-input:hover:not(:focus) { border-color: #c8cfd8; }
 .sip-input::placeholder { color: #b0bac8; font-size: 13px; }
-.sip-input:disabled { background: #f8f9fa; color: #8392ab; cursor: not-allowed; }
+.sip-input:disabled { background: #f8f9fa; color: #67748e; cursor: not-allowed; }
 
 /* ── Input with icon wrapper ─────────────────────────────────────────────── */
 .sip-input-group {
@@ -621,7 +621,7 @@ body {
 /* Form label */
 .sip-label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: .4px;
   text-transform: uppercase;
@@ -642,6 +642,7 @@ body {
 .sip-alert-error   { background: rgba(234,6,6,.07);   border: 1px solid rgba(234,6,6,.2);   color: #c00; }
 .sip-alert-warning { background: rgba(229,169,60,.1);  border: 1px solid rgba(229,169,60,.3); color: #b5821c; }
 .sip-alert-info    { background: rgba(26,60,109,.08); border: 1px solid rgba(26,60,109,.25); color: #1a3c6d; }
+.sip-alert-success { background: rgba(23,173,55,.08); border: 1px solid rgba(23,173,55,.3); color: #127a2a; }
 
 /* Mobile compact header (shown on small screens instead of left panel) */
 .login-mobile-header {
@@ -652,7 +653,7 @@ body {
 }
 .login-mobile-header img { width: 40px; height: 40px; object-fit: contain; }
 .login-mobile-header h2 { font-size: 16px; font-weight: 700; color: var(--sip-text-heading); margin: 0; }
-.login-mobile-header p  { font-size: 11px; color: var(--sip-text-footer); margin: 0; }
+.login-mobile-header p  { font-size: 12px; color: var(--sip-text-footer); margin: 0; }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
