@@ -262,11 +262,11 @@ const LecturerPortal = () => {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-bold text-[#344767] truncate leading-tight">{displayDeptName}</p>
-            <p className="text-[10px] text-[#8392ab] font-medium uppercase tracking-wider">Lecturer Portal</p>
+            <p className="text-[10px] text-[#67748e] font-medium uppercase tracking-wider">Lecturer Portal</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden p-1 rounded-lg text-[#8392ab] hover:text-[#344767] hover:bg-gray-100"
+            className="md:hidden p-1 rounded-lg text-[#67748e] hover:text-[#344767] hover:bg-gray-100"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -300,12 +300,12 @@ const LecturerPortal = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[12px] font-bold text-[#344767] truncate">{displayUsername}</p>
-              <p className="text-[10px] text-[#8392ab] uppercase tracking-wider">Lecturer</p>
+              <p className="text-[10px] text-[#67748e] uppercase tracking-wider">Lecturer</p>
             </div>
             <button
               onClick={handleLogout}
               title="Sign Out"
-              className="p-1.5 rounded-lg text-[#8392ab] hover:text-rose-500 hover:bg-rose-50 transition-all"
+              className="p-1.5 rounded-lg text-[#67748e] hover:text-rose-500 hover:bg-rose-50 transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -323,7 +323,7 @@ const LecturerPortal = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 -ml-1 rounded-lg text-[#8392ab] hover:text-[#344767]"
+              className="md:hidden p-2 -ml-1 rounded-lg text-[#67748e] hover:text-[#344767]"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -331,7 +331,7 @@ const LecturerPortal = () => {
             </button>
             {/* Breadcrumb */}
             <div className="flex items-center gap-1.5 text-[12px]">
-              <span className="text-[#8392ab]">Lecturer</span>
+              <span className="text-[#67748e]">Lecturer</span>
               <svg className="w-3.5 h-3.5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -354,7 +354,7 @@ const LecturerPortal = () => {
           </div>
           <div className="flex items-center gap-3">
             <NotificationPanel />
-            <span className="hidden sm:block text-[11px] text-[#8392ab]">
+            <span className="hidden sm:block text-[11px] text-[#67748e]">
               Logged in as <span className="font-bold text-[#344767]">{displayUsername}</span>
             </span>
           </div>
@@ -378,7 +378,7 @@ const LecturerPortal = () => {
 
                 {/* Class filter chips */}
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
-                  <p className="text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-3">
+                  <p className="text-[11px] font-bold text-[#67748e] uppercase tracking-wider mb-3">
                     Filter by Class
                   </p>
                   {loadingClasses ? (
@@ -387,7 +387,7 @@ const LecturerPortal = () => {
                       <div className="skeleton h-8 w-28 rounded-xl" />
                     </div>
                   ) : assignedClasses.length === 0 ? (
-                    <p className="text-[11px] text-[#8392ab]">No classes assigned. Contact the administrator.</p>
+                    <p className="text-[11px] text-[#67748e]">No classes assigned. Contact the administrator.</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -411,7 +411,7 @@ const LecturerPortal = () => {
                             }`}
                         >
                           <span className="font-bold block">{ac.courseCode}</span>
-                          <span className={`text-[9px] ${selectedClass?.assignmentId === ac.assignmentId ? 'text-blue-200' : 'text-[#8392ab]'}`}>
+                          <span className={`text-[9px] ${selectedClass?.assignmentId === ac.assignmentId ? 'text-blue-200' : 'text-[#67748e]'}`}>
                             {ac.classDisplayName}
                           </span>
                         </button>
@@ -423,7 +423,7 @@ const LecturerPortal = () => {
                 {/* Pending items list */}
                 <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden">
                   <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
-                    <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider">
+                    <p className="text-[12px] font-bold text-[#67748e] uppercase tracking-wider">
                       Pending Approvals
                     </p>
                     <span className="badge badge-warning">
@@ -442,8 +442,8 @@ const LecturerPortal = () => {
                           <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                           </svg>
-                          <p className="text-[12px] font-semibold text-[#8392ab]">No pending sessions</p>
-                          <p className="text-[11px] text-[#8392ab] mt-1">All sessions have been reviewed.</p>
+                          <p className="text-[12px] font-semibold text-[#67748e]">No pending sessions</p>
+                          <p className="text-[11px] text-[#67748e] mt-1">All sessions have been reviewed.</p>
                         </div>
                       )}
                       {activeTab === 'reports' && getFilteredReports().length === 0 && (
@@ -451,8 +451,8 @@ const LecturerPortal = () => {
                           <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
-                          <p className="text-[12px] font-semibold text-[#8392ab]">No pending reports</p>
-                          <p className="text-[11px] text-[#8392ab] mt-1">All reports have been signed.</p>
+                          <p className="text-[12px] font-semibold text-[#67748e]">No pending reports</p>
+                          <p className="text-[11px] text-[#67748e] mt-1">All reports have been signed.</p>
                         </div>
                       )}
 
@@ -474,7 +474,7 @@ const LecturerPortal = () => {
                           {s.classDisplayName && (
                             <p className="text-[11px] text-[#b5821c] font-semibold mt-1">{s.classDisplayName}</p>
                           )}
-                          <p className="text-[11px] text-[#8392ab] mt-2 flex items-center gap-1">
+                          <p className="text-[11px] text-[#67748e] mt-2 flex items-center gap-1">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -498,7 +498,7 @@ const LecturerPortal = () => {
                         >
                           <p className="text-[13px] font-bold text-[#344767]">{r.course.name}</p>
                           <p className="text-[11px] text-[#b5821c] font-semibold mt-1">{r.class.displayName}</p>
-                          <p className="text-[10px] text-[#8392ab] mt-1.5">
+                          <p className="text-[10px] text-[#67748e] mt-1.5">
                             Generated by: {r.generatedBy?.username}
                           </p>
                         </div>
@@ -518,7 +518,7 @@ const LecturerPortal = () => {
                       </svg>
                     </div>
                     <p className="text-[15px] font-bold text-[#344767]">No Item Selected</p>
-                    <p className="text-[12px] text-[#8392ab] mt-1.5 max-w-xs">Select a pending item from the left list to review and sign off.</p>
+                    <p className="text-[12px] text-[#67748e] mt-1.5 max-w-xs">Select a pending item from the left list to review and sign off.</p>
                   </div>
                 ) : (
                   <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden animate-scale-in">
@@ -528,7 +528,7 @@ const LecturerPortal = () => {
                         <p className="text-[15px] font-bold text-[#344767]">
                           {activeTab === 'sessions' ? selectedSession?.courseName : selectedReport?.course?.name}
                         </p>
-                        <p className="text-[11px] text-[#8392ab] mt-0.5">
+                        <p className="text-[11px] text-[#67748e] mt-0.5">
                           {activeTab === 'sessions'
                             ? `Session ID: ${selectedSession?.id}`
                             : `Report ID: ${selectedReport?.id}`}
@@ -544,21 +544,21 @@ const LecturerPortal = () => {
                           {loadingDetails ? (
                             <div className="flex flex-col items-center py-14 gap-3">
                               <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
-                              <span className="text-[12px] text-[#8392ab]">Loading attendance records…</span>
+                              <span className="text-[12px] text-[#67748e]">Loading attendance records…</span>
                             </div>
                           ) : (
                             <div className="space-y-6">
                               <div>
-                                <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider mb-3">Attendance Summary</p>
+                                <p className="text-[12px] font-bold text-[#67748e] uppercase tracking-wider mb-3">Attendance Summary</p>
                                 <AttendanceTable attendances={attendances} />
                               </div>
 
                               <div className="border-t border-gray-100 pt-5">
-                                <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider mb-3">Lecturer Signature</p>
+                                <p className="text-[12px] font-bold text-[#67748e] uppercase tracking-wider mb-3">Lecturer Signature</p>
                                 <div className="bg-[#f8f9fa] rounded-xl border border-gray-200 p-4">
                                   <SignatureCanvas onSave={setSignature} label="Lecturer Signature" />
                                 </div>
-                                <p className="text-[11px] text-[#8392ab] mt-2">Draw your signature above to enable the approve button.</p>
+                                <p className="text-[11px] text-[#67748e] mt-2">Draw your signature above to enable the approve button.</p>
                               </div>
 
                               <div className="flex gap-3">
@@ -591,7 +591,7 @@ const LecturerPortal = () => {
                           <div className="flex items-center justify-between p-4 bg-[#f8f9fa] rounded-xl border border-gray-200">
                             <div>
                               <p className="text-[13px] font-bold text-[#344767]">Generated Document Ready</p>
-                              <p className="text-[11px] text-[#8392ab] mt-0.5">Please review the document before signing.</p>
+                              <p className="text-[11px] text-[#67748e] mt-0.5">Please review the document before signing.</p>
                             </div>
                             <button
                               onClick={() => {
@@ -606,7 +606,7 @@ const LecturerPortal = () => {
                           </div>
 
                           <div className="border-t border-gray-100 pt-5">
-                            <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider mb-1">Lecturer Signature</p>
+                            <p className="text-[12px] font-bold text-[#67748e] uppercase tracking-wider mb-1">Lecturer Signature</p>
                             <p className="text-[11px] text-amber-500 font-medium mb-3">Sign below to authorize archiving of this official report.</p>
                             <div className="bg-[#f8f9fa] rounded-xl border border-gray-200 p-4">
                               <SignatureCanvas onSave={setSignature} label="Lecturer Signature" />
@@ -658,8 +658,8 @@ const LecturerPortal = () => {
                   <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13" />
                   </svg>
-                  <p className="text-[13px] font-semibold text-[#8392ab]">No classes assigned</p>
-                  <p className="text-[11px] text-[#8392ab] mt-1">Contact your administrator to upload the class distribution.</p>
+                  <p className="text-[13px] font-semibold text-[#67748e]">No classes assigned</p>
+                  <p className="text-[11px] text-[#67748e] mt-1">Contact your administrator to upload the class distribution.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -673,7 +673,7 @@ const LecturerPortal = () => {
                         <span className="badge badge-info font-mono">{ac.courseCode}</span>
                       </div>
                       <p className="text-[14px] font-bold text-[#344767]">{ac.courseName}</p>
-                      <p className="text-[12px] text-[#8392ab] mt-1">{ac.classDisplayName}</p>
+                      <p className="text-[12px] text-[#67748e] mt-1">{ac.classDisplayName}</p>
                       <div className="mt-4 pt-3 border-t border-gray-100 flex gap-2">
                         <button
                           onClick={() => { setActiveTab('sessions'); setSelectedClass(ac); }}
@@ -704,7 +704,7 @@ const LecturerPortal = () => {
             key={item.id}
             onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors
-              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             {item.icon}
             {item.label}

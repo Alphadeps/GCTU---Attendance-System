@@ -120,7 +120,7 @@ const Toast = ({ toast, onDismiss }) => {
         </div>
         <button
           onClick={handleClose}
-          className="flex-shrink-0 text-[#8392ab] hover:text-[#344767] transition-colors mt-0.5"
+          className="flex-shrink-0 text-[#67748e] hover:text-[#344767] transition-colors mt-0.5"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

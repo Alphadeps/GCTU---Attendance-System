@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
@@ -22,10 +23,22 @@ const studentSetPasswordSchema = z.object({
   path: ["confirmPassword"]
 });
 
-const repResetStudentPasswordSchema = z.object({
-  studentIndexNumber: z.string().min(1, 'Student index number is required'),
-  newPassword: z.string().min(6, 'Password must be at least 6 characters long')
+const issueResetCodeSchema = z.object({
+  indexNumber: z.string().trim().min(1, 'Student index number is required')
 });
+
+const resetWithCodeSchema = z.object({
+  indexNumber: z.string().trim().min(1, 'Index number is required'),
+  resetCode: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit reset code from your class rep'),
+  password: z.string().min(6, 'Password must be at least 6 characters long'),
+  confirmPassword: z.string().min(1, 'Please confirm your password')
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword']
+});
+
+const RESET_CODE_MINUTES = 30;
+const RESET_CODE_MAX_TRIES = 5;
 
 /**
  * Student Login
@@ -182,77 +195,104 @@ const studentSetPassword = async (req, res) => {
 };
 
 /**
- * Rep Reset Student Password
+ * Forgot password, step 1: a rep (for their own class) or an admin gets a one-time 6-digit
+ * code for the student. The rep never learns the new password; the student picks it.
  */
-const repResetStudentPassword = async (req, res) => {
+const issueResetCode = async (req, res) => {
   try {
-    // Verify rep is authenticated
-    if (!req.user || req.user.role !== 'REP') {
-      return res.status(403).json({ error: 'Only class reps can reset student passwords' });
-    }
-
-    const validation = repResetStudentPasswordSchema.safeParse(req.body);
+    const validation = issueResetCodeSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMsg = validation.error.issues.map(err => err.message).join(', ');
-      return res.status(400).json({ error: errorMsg });
+      return res.status(400).json({ error: validation.error.issues.map(e => e.message).join(', ') });
     }
+    const { indexNumber } = validation.data;
 
-    const { studentIndexNumber, newPassword } = validation.data;
-
-    // Get rep's assigned class
-    const repClass = await prisma.class.findFirst({
-      where: { repId: req.user.id },
-      include: {
-        students: {
-          include: {
-            student: true
-          }
-        }
-      }
+    const student = await prisma.student.findUnique({
+      where: { indexNumber },
+      select: { id: true, name: true, classes: { select: { class: { select: { repId: true } } } } }
     });
+    if (!student) return res.status(404).json({ error: 'No student with that index number' });
 
-    if (!repClass) {
-      return res.status(403).json({ error: 'You are not assigned to any class' });
+    if (req.user.role === 'REP' && !student.classes.some(cs => cs.class.repId === req.user.id)) {
+      return res.status(403).json({ error: 'You can only reset passwords for students in your class' });
     }
 
-    // Check if student is in rep's class
-    const studentInClass = repClass.students.find(
-      cs => cs.student.indexNumber === studentIndexNumber
-    );
-
-    if (!studentInClass) {
-      return res.status(403).json({ 
-        error: 'You can only reset passwords for students in your class' 
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Update student password
+    const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+    const expiresAt = new Date(Date.now() + RESET_CODE_MINUTES * 60 * 1000);
     await prisma.student.update({
-      where: { indexNumber: studentIndexNumber },
-      data: {
-        password: hashedPassword,
-        isFirstLogin: false
-      }
+      where: { id: student.id },
+      data: { resetCodeHash: await bcrypt.hash(code, 10), resetCodeExpires: expiresAt, resetCodeTries: 0 }
+    });
+    logAuthEvent('STUDENT_RESET_CODE_ISSUED', { indexNumber, byUserId: req.user.id, byRole: req.user.role, ip: req.ip });
+
+    res.json({ code, expiresAt, minutes: RESET_CODE_MINUTES, name: student.name, indexNumber });
+  } catch (err) {
+    console.error('Issue reset code error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+/**
+ * Forgot password, step 2: the student enters the code and chooses a new password.
+ */
+const resetWithCode = async (req, res) => {
+  try {
+    const validation = resetWithCodeSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.issues.map(e => e.message).join(', ') });
+    }
+    const { indexNumber, resetCode, password } = validation.data;
+
+    const student = await prisma.student.findUnique({
+      where: { indexNumber },
+      select: { id: true, resetCodeHash: true, resetCodeExpires: true, resetCodeTries: true }
     });
 
-    // Create notification for student
+    // Same answer for an unknown index, no code, a used code or a wrong code
+    const refuse = (message = 'That reset code is not correct. Check it, or ask your class rep for a new one.') =>
+      res.status(400).json({ error: message });
+    if (!student || !student.resetCodeHash) return refuse();
+
+    if (!student.resetCodeExpires || student.resetCodeExpires < new Date()) {
+      await prisma.student.update({ where: { id: student.id }, data: { resetCodeHash: null, resetCodeExpires: null, resetCodeTries: 0 } });
+      return refuse('That reset code has expired. Ask your class rep for a new one.');
+    }
+
+    if (!(await bcrypt.compare(resetCode, student.resetCodeHash))) {
+      const tries = student.resetCodeTries + 1;
+      const usedUp = tries >= RESET_CODE_MAX_TRIES;
+      await prisma.student.update({
+        where: { id: student.id },
+        data: usedUp ? { resetCodeHash: null, resetCodeExpires: null, resetCodeTries: 0 } : { resetCodeTries: tries }
+      });
+      logAuthEvent('STUDENT_RESET_CODE_FAILED', { indexNumber, tries, ip: req.ip });
+      return refuse(usedUp
+        ? 'Too many wrong codes, so this code has been cancelled. Ask your class rep for a new one.'
+        : undefined);
+    }
+
+    await prisma.student.update({
+      where: { id: student.id },
+      data: {
+        password: await bcrypt.hash(password, 10),
+        isFirstLogin: false,
+        resetCodeHash: null,
+        resetCodeExpires: null,
+        resetCodeTries: 0
+      }
+    });
     await prisma.notification.create({
       data: {
-        studentIndex: studentIndexNumber,
-        title: 'Password Reset',
-        message: `Your password has been reset by your class rep. Please login with your new password.`,
+        studentIndex: indexNumber,
+        title: 'Password changed',
+        message: 'Your password was reset with a code from your class rep. If this was not you, tell your rep straight away.',
         type: 'INFO'
       }
     });
+    logAuthEvent('STUDENT_PASSWORD_RESET', { indexNumber, ip: req.ip });
 
-    res.json({ 
-      message: `Password reset successfully for ${studentInClass.student.name}` 
-    });
+    res.json({ message: 'Password changed. You can now sign in with your new password.' });
   } catch (err) {
-    console.error('Rep reset student password error:', err);
+    console.error('Reset with code error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -260,5 +300,6 @@ const repResetStudentPassword = async (req, res) => {
 module.exports = {
   studentLogin,
   studentSetPassword,
-  repResetStudentPassword
+  issueResetCode,
+  resetWithCode
 };

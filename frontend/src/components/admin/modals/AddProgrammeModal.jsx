@@ -34,7 +34,7 @@ const AddProgrammeModal = ({ onClose, onSaved }) => {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Programme Name</label>
+            <label className="block text-xs font-semibold uppercase text-[#67748e] mb-1.5">Programme Name</label>
             <input
               type="text"
               required
@@ -49,7 +49,7 @@ const AddProgrammeModal = ({ onClose, onSaved }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#8392ab] disabled:opacity-50 transition-colors"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#67748e] disabled:opacity-50 transition-colors"
             >
               Cancel
             </button>

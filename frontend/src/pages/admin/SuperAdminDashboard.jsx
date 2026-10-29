@@ -1118,25 +1118,25 @@ export default function SuperAdminDashboard() {
                 </svg>
               </div>
               <h2 className="text-xl font-bold text-[#344767] mb-2">Change Default Password</h2>
-              <p className="text-[#8392ab] text-sm leading-relaxed">
+              <p className="text-[#67748e] text-sm leading-relaxed">
                 For security, you must change the default password (<code className="bg-[#f8f9fa] px-1.5 py-0.5 rounded text-red-500 font-mono text-xs">admin123</code>) before continuing.
               </p>
             </div>
             <form onSubmit={handleForcePasswordChange} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Current Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Current Password</label>
                 <input type="password" required placeholder="Enter current password" value={pwdChangeForm.currentPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, currentPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">New Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">New Password</label>
                 <input type="password" required placeholder="Minimum 6 characters" value={pwdChangeForm.newPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, newPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Confirm New Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Confirm New Password</label>
                 <input type="password" required placeholder="Repeat new password" value={pwdChangeForm.confirmPassword}
                   onChange={(e) => setPwdChangeForm(p => ({ ...p, confirmPassword: e.target.value }))}
                   className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
@@ -1233,7 +1233,7 @@ export default function SuperAdminDashboard() {
           </div>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[#8392ab] hover:text-rose-600 hover:bg-rose-50 transition-all text-xs font-semibold"
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[#67748e] hover:text-rose-600 hover:bg-rose-50 transition-all text-xs font-semibold"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -1252,7 +1252,7 @@ export default function SuperAdminDashboard() {
           <div className="flex items-center gap-3">
             {/* Hamburger - mobile only */}
             <button
-              className="lg:hidden p-2 rounded-lg text-[#8392ab] hover:bg-[#f8f9fa] transition-colors"
+              className="lg:hidden p-2 rounded-lg text-[#67748e] hover:bg-[#f8f9fa] transition-colors"
               onClick={() => setMobileSidebarOpen(true)}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1283,7 +1283,7 @@ export default function SuperAdminDashboard() {
             {/* Help button */}
             <button
               onClick={() => setShowOnboarding(true)}
-              className="p-2 rounded-xl text-[#8392ab] hover:bg-[#f8f9fa] hover:text-[#344767] transition-colors border border-transparent hover:border-[#e9ecef]"
+              className="p-2 rounded-xl text-[#67748e] hover:bg-[#f8f9fa] hover:text-[#344767] transition-colors border border-transparent hover:border-[#e9ecef]"
               title="Show setup guide"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1338,7 +1338,7 @@ export default function SuperAdminDashboard() {
                   </div>
                   <p className="text-4xl font-black text-[#344767] animate-number-pop delay-100">{stats.classesCount}</p>
                   <p className="text-sm font-semibold text-[#344767] mt-1">Active Classes</p>
-                  <p className="text-xs text-[#8392ab] mt-0.5">{stats.programmesCount} programme{stats.programmesCount !== 1 ? 's' : ''}</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">{stats.programmesCount} programme{stats.programmesCount !== 1 ? 's' : ''}</p>
                 </div>
 
                 {/* Card 3 - white, green accent */}
@@ -1352,7 +1352,7 @@ export default function SuperAdminDashboard() {
                   </div>
                   <p className="text-4xl font-black text-[#344767] animate-number-pop delay-200">{stats.repsCount}</p>
                   <p className="text-sm font-semibold text-[#344767] mt-1">Class Reps</p>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Managing attendance</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Managing attendance</p>
                 </div>
 
                 {/* Card 4 - white, amber accent + pulse if active */}
@@ -1372,7 +1372,7 @@ export default function SuperAdminDashboard() {
                   </div>
                   <p className="text-4xl font-black text-[#344767] animate-number-pop delay-300">{stats.activeSessionsCount}</p>
                   <p className="text-sm font-semibold text-[#344767] mt-1">Live Sessions</p>
-                  <p className="text-xs text-[#8392ab] mt-0.5">{stats.activeSessionsCount > 0 ? 'Sessions in progress' : 'No active sessions'}</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">{stats.activeSessionsCount > 0 ? 'Sessions in progress' : 'No active sessions'}</p>
                 </div>
               </div>
 
@@ -1384,7 +1384,7 @@ export default function SuperAdminDashboard() {
                   <div className="flex items-center justify-between mb-5">
                     <div>
                       <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Attendance Performance</h3>
-                      <p className="text-xs text-[#8392ab] mt-0.5">Rate by level grouping</p>
+                      <p className="text-xs text-[#67748e] mt-0.5">Rate by level grouping</p>
                     </div>
                     <span className="badge badge-info">This Semester</span>
                   </div>
@@ -1402,7 +1402,7 @@ export default function SuperAdminDashboard() {
                             animation: `growBar 0.8s calc(${i}*0.1s) ease both`,
                             '--bar-h': `${Math.round((val / maxBar) * 100)}%`,
                           }} />
-                        <span className="text-[9px] text-[#8392ab] font-medium text-center whitespace-nowrap">{attendanceChartLabels[i]}</span>
+                        <span className="text-[9px] text-[#67748e] font-medium text-center whitespace-nowrap">{attendanceChartLabels[i]}</span>
                       </div>
                     ))}
                   </div>
@@ -1447,7 +1447,7 @@ export default function SuperAdminDashboard() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-[#344767]">{item.label}</p>
-                          <p className="text-[10px] text-[#8392ab]">{item.sub}</p>
+                          <p className="text-[10px] text-[#67748e]">{item.sub}</p>
                         </div>
                         <svg className="w-4 h-4 text-[#adb5bd] group-hover:text-[#344767] transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1473,7 +1473,7 @@ export default function SuperAdminDashboard() {
                     {label:'Minimum Attendance', val:`${settings.minAttendancePercent ?? 75}%`, color:'#ea0606'},
                   ].map((t,i) => (
                     <div key={i} className="bg-[#f8f9fa] rounded-xl p-3.5">
-                      <p className="text-[10px] text-[#8392ab] font-medium mb-1">{t.label}</p>
+                      <p className="text-[10px] text-[#67748e] font-medium mb-1">{t.label}</p>
                       <p className="text-lg font-black" style={{color:t.color}}>{t.val}</p>
                     </div>
                   ))}
@@ -1488,7 +1488,7 @@ export default function SuperAdminDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Academic Programmes</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Manage course pipelines that drive student enrollment</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Manage course pipelines that drive student enrollment</p>
                 </div>
                 <div className="flex gap-2">
                   {programmes.length > 3 && (
@@ -1516,7 +1516,7 @@ export default function SuperAdminDashboard() {
                   <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                   </svg>
-                  <p className="text-sm font-semibold text-[#8392ab]">No programmes yet</p>
+                  <p className="text-sm font-semibold text-[#67748e]">No programmes yet</p>
                   <p className="text-xs text-[#adb5bd] mt-1">Click Add Programme to get started</p>
                 </div>
               ) : (
@@ -1610,7 +1610,7 @@ export default function SuperAdminDashboard() {
                   <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  <p className="text-sm font-semibold text-[#8392ab]">No classes yet</p>
+                  <p className="text-sm font-semibold text-[#67748e]">No classes yet</p>
                   <p className="text-xs text-[#adb5bd] mt-1">Click Create Classes to initialize groups</p>
                 </div>
               ) : (
@@ -1661,15 +1661,15 @@ export default function SuperAdminDashboard() {
                               <div className="px-4 pb-3 flex gap-4">
                                 <div className="flex items-center gap-1.5">
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasRep ? 'bg-emerald-500' : 'bg-[#e9ecef]'}`}></span>
-                                  <span className="text-[10px] text-[#8392ab]">{hasRep ? cls.rep.username : 'No rep'}</span>
+                                  <span className="text-[10px] text-[#67748e]">{hasRep ? cls.rep.username : 'No rep'}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasCourses ? 'bg-blue-400' : 'bg-[#e9ecef]'}`}></span>
-                                  <span className="text-[10px] text-[#8392ab]">{hasCourses ? `${cls._count.courses} course${cls._count.courses!==1?'s':''}` : 'No courses'}</span>
+                                  <span className="text-[10px] text-[#67748e]">{hasCourses ? `${cls._count.courses} course${cls._count.courses!==1?'s':''}` : 'No courses'}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
                                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasStudents ? 'bg-purple-400' : 'bg-[#e9ecef]'}`}></span>
-                                  <span className="text-[10px] text-[#8392ab]">{hasStudents ? `${cls._count.students} student${cls._count.students!==1?'s':''}` : 'No students'}</span>
+                                  <span className="text-[10px] text-[#67748e]">{hasStudents ? `${cls._count.students} student${cls._count.students!==1?'s':''}` : 'No students'}</span>
                                 </div>
                               </div>
 
@@ -1686,7 +1686,7 @@ export default function SuperAdminDashboard() {
                                 <button onClick={() => handleOpenStudentsModal(cls)}
                                   className="text-[11px] font-semibold text-[#344767] hover:underline">Students</button>
                                 <button onClick={() => handleOpenCoursesModal(cls)}
-                                  className="text-[11px] font-semibold text-[#8392ab] hover:text-[#344767] hover:underline">Courses</button>
+                                  className="text-[11px] font-semibold text-[#67748e] hover:text-[#344767] hover:underline">Courses</button>
                                 <button onClick={() => {
                                   setConfirmState({
                                     open: true,
@@ -1722,7 +1722,7 @@ export default function SuperAdminDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Class Representatives</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Provision and manage rep login credentials</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Provision and manage rep login credentials</p>
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => setShowBulkUploadModal(true)}
@@ -1747,7 +1747,7 @@ export default function SuperAdminDashboard() {
                     <div key={rep.id} className="flex flex-wrap items-center justify-between gap-3 bg-white rounded-lg border border-amber-100 px-3 py-2.5">
                       <div>
                         <p className="text-sm font-semibold text-[#344767]">{rep.fullName || rep.username}</p>
-                        <p className="text-[11px] text-[#8392ab]">
+                        <p className="text-[11px] text-[#67748e]">
                           Index {rep.username} · {rep.assignedClass?.displayName || 'No class'} · {new Date(rep.createdAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -1777,7 +1777,7 @@ export default function SuperAdminDashboard() {
                   <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <p className="text-sm font-semibold text-[#8392ab]">No rep accounts yet</p>
+                  <p className="text-sm font-semibold text-[#67748e]">No rep accounts yet</p>
                   <p className="text-xs text-[#adb5bd] mt-1">Click Create Rep to provision credentials</p>
                 </div>
               ) : (
@@ -1804,7 +1804,7 @@ export default function SuperAdminDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-sm font-semibold text-[#344767]">{rep.username}</p>
-                                  {rep.fullName && <p className="text-[10px] text-[#8392ab]">{rep.fullName}</p>}
+                                  {rep.fullName && <p className="text-[10px] text-[#67748e]">{rep.fullName}</p>}
                                 </div>
                               </div>
                             </td>
@@ -1822,7 +1822,7 @@ export default function SuperAdminDashboard() {
                               <button onClick={() => { setEditingRep(rep); setShowEditRepModal(true); }}
                                 className="text-xs text-[#E5A93C] font-semibold hover:underline px-2 py-1">Edit</button>
                               <button onClick={() => { setResetPwdRepId(rep.id); setShowResetPwdModal(true); }}
-                                className="text-xs text-[#8392ab] font-semibold hover:underline px-2 py-1">Reset Pwd</button>
+                                className="text-xs text-[#67748e] font-semibold hover:underline px-2 py-1">Reset Pwd</button>
                               <button onClick={() => handleToggleRepStatus(rep.id, rep.isActive)}
                                 className={`text-xs font-semibold hover:underline px-2 py-1 ${rep.isActive ? 'text-amber-500' : 'text-emerald-500'}`}>
                                 {rep.isActive ? 'Deactivate' : 'Activate'}
@@ -1846,7 +1846,7 @@ export default function SuperAdminDashboard() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Lecturer Course &amp; Class Allocations</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Map lecturers to their course-class assignments via Excel sheets</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Map lecturers to their course-class assignments via Excel sheets</p>
                 </div>
                 <button
                   onClick={() => {
@@ -1864,7 +1864,7 @@ export default function SuperAdminDashboard() {
                   }}
                   className="flex items-center gap-2 border border-[#e9ecef] bg-[#f8f9fa] text-[#344767] text-xs font-semibold px-4 py-2 rounded-xl hover:bg-white transition active:scale-95"
                 >
-                  <svg className="w-4 h-4 text-[#8392ab]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 text-[#67748e]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Download Template
@@ -1904,7 +1904,7 @@ export default function SuperAdminDashboard() {
                           {lecturerFile ? (
                             <div>
                               <p className="text-xs font-bold text-emerald-600 break-all">{lecturerFile.name}</p>
-                              <p className="text-[10px] text-[#8392ab] mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
+                              <p className="text-[10px] text-[#67748e] mt-1 font-mono">{(lecturerFile.size / 1024).toFixed(1)} KB</p>
                             </div>
                           ) : (
                             <div>
@@ -1940,7 +1940,7 @@ export default function SuperAdminDashboard() {
                       </svg>
                       Mapping Guide
                     </h5>
-                    <ul className="text-[10px] space-y-1.5 text-[#8392ab] list-disc list-inside leading-relaxed">
+                    <ul className="text-[10px] space-y-1.5 text-[#67748e] list-disc list-inside leading-relaxed">
                       <li>Auto-matches <span className="font-semibold text-[#344767]">Courses</span> &amp; <span className="font-semibold text-[#344767]">Programmes</span></li>
                       <li>Creates missing <span className="font-semibold text-[#344767]">Classes</span> automatically</li>
                       <li>Registers <span className="font-semibold text-[#344767]">Lecturer Accounts</span> (role: <code className="text-[#E5A93C]">LECTURER</code>)</li>
@@ -1957,17 +1957,17 @@ export default function SuperAdminDashboard() {
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div className="bg-emerald-50 rounded-xl p-3">
-                          <p className="text-[9px] text-[#8392ab] font-bold uppercase">Linked</p>
+                          <p className="text-[9px] text-[#67748e] font-bold uppercase">Linked</p>
                           <p className="text-2xl font-black text-emerald-600">{lecturerUploadResults.successCount}</p>
                         </div>
                         <div className="bg-red-50 rounded-xl p-3">
-                          <p className="text-[9px] text-[#8392ab] font-bold uppercase">Skipped</p>
+                          <p className="text-[9px] text-[#67748e] font-bold uppercase">Skipped</p>
                           <p className="text-2xl font-black text-red-500">{lecturerUploadResults.failedCount}</p>
                         </div>
                       </div>
                       {lecturerUploadResults.createdLecturers?.length > 0 && (
                         <div>
-                          <p className="text-[9px] font-bold uppercase text-[#8392ab] mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
+                          <p className="text-[9px] font-bold uppercase text-[#67748e] mb-1.5">Registered Lecturers ({lecturerUploadResults.createdLecturers.length})</p>
                           <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto bg-[#f8f9fa] p-2 rounded-lg">
                             {lecturerUploadResults.createdLecturers.map((name, i) => (
                               <span key={i} className="badge badge-info text-[9px]">{name}</span>
@@ -1993,7 +1993,7 @@ export default function SuperAdminDashboard() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <h4 className="font-bold text-sm text-[#344767]">Active Allocation Registry</h4>
-                        <p className="text-xs text-[#8392ab] mt-0.5">Search and manage lecturer assignments</p>
+                        <p className="text-xs text-[#67748e] mt-0.5">Search and manage lecturer assignments</p>
                       </div>
                       <div className="relative w-full sm:w-56">
                         <input type="text" placeholder="Search lecturer or course..." value={lecturerSearchQuery}
@@ -2019,7 +2019,7 @@ export default function SuperAdminDashboard() {
                       if (filtered.length === 0) {
                         return (
                           <div className="text-center py-12 border-2 border-dashed border-[#e9ecef] rounded-xl">
-                            <p className="text-sm font-semibold text-[#8392ab]">{lecturerSearchQuery ? 'No matching allocations' : 'No allocations yet'}</p>
+                            <p className="text-sm font-semibold text-[#67748e]">{lecturerSearchQuery ? 'No matching allocations' : 'No allocations yet'}</p>
                             <p className="text-xs text-[#adb5bd] mt-1">{lecturerSearchQuery ? 'Try a different search term' : 'Upload a spreadsheet to populate this registry'}</p>
                           </div>
                         );
@@ -2052,7 +2052,7 @@ export default function SuperAdminDashboard() {
                                     <span className="font-medium text-[#344767] block">{assignment.courseName}</span>
                                     <span className="text-[10px] text-[#adb5bd] font-mono">{assignment.courseCode}</span>
                                   </td>
-                                  <td className="text-[#8392ab] font-medium">{assignment.classDisplayName}</td>
+                                  <td className="text-[#67748e] font-medium">{assignment.classDisplayName}</td>
                                   <td className="text-right">
                                     <button onClick={() => handleDeleteAssignment(assignment.id)}
                                       className="text-xs text-red-400 font-semibold hover:underline px-2 py-1">Remove</button>
@@ -2076,7 +2076,7 @@ export default function SuperAdminDashboard() {
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Global Courses Database</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Configure courses that can be linked to class sessions</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Configure courses that can be linked to class sessions</p>
                 </div>
                 <button onClick={() => setShowCourseModal(true)} className="sip-btn-dark !w-auto px-4 py-2 text-xs">
                   + Add Course
@@ -2087,7 +2087,7 @@ export default function SuperAdminDashboard() {
                   <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
-                  <p className="text-sm font-semibold text-[#8392ab]">No courses yet</p>
+                  <p className="text-sm font-semibold text-[#67748e]">No courses yet</p>
                   <p className="text-xs text-[#adb5bd] mt-1">Click Add Course to register one</p>
                 </div>
               ) : (
@@ -2127,11 +2127,11 @@ export default function SuperAdminDashboard() {
               <div className="sip-card p-6 space-y-5">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>Department Branding</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Customize department name and logo</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Customize department name and logo</p>
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-2">Logo</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-2">Logo</label>
                     <div className="flex items-center gap-4">
                       <div className="h-20 w-20 bg-[#f8f9fa] rounded-xl border border-[#e9ecef] flex items-center justify-center overflow-hidden flex-shrink-0">
                         {logoPreview
@@ -2154,7 +2154,7 @@ export default function SuperAdminDashboard() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Department Name</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Department Name</label>
                     <input type="text" value={settings.deptName}
                       onChange={(e) => setSettings(prev => ({ ...prev, deptName: e.target.value }))}
                       className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
@@ -2174,7 +2174,7 @@ export default function SuperAdminDashboard() {
               <div className="sip-card p-6 space-y-5">
                 <div>
                   <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Thresholds</h3>
-                  <p className="text-xs text-[#8392ab] mt-0.5">Late check-in window, geofence radius, and the minimum attendance students must keep</p>
+                  <p className="text-xs text-[#67748e] mt-0.5">Late check-in window, geofence radius, and the minimum attendance students must keep</p>
                 </div>
                 <form onSubmit={handleSettingsSubmit} className="space-y-4">
                   {[
@@ -2183,7 +2183,7 @@ export default function SuperAdminDashboard() {
                     {label:'Minimum Attendance (%)', field:'minAttendancePercent', val:settings.minAttendancePercent ?? 75, min:1, max:100},
                   ].map(t => (
                     <div key={t.field}>
-                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">{t.label}</label>
+                      <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">{t.label}</label>
                       <input type="number" required value={t.val} min={t.min} max={t.max}
                         onChange={(e) => setSettings(prev => ({ ...prev, [t.field]: parseInt(e.target.value) || 0 }))}
                         className="w-full bg-[#f8f9fa] border border-[#e9ecef] rounded-xl px-4 py-3 text-sm text-[#344767] focus:outline-none focus:border-[#344767] transition-colors" />
@@ -2251,7 +2251,7 @@ export default function SuperAdminDashboard() {
                 <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
                   <div>
                     <h3 className="font-bold text-[#344767]" style={{fontSize:14}}>System Notifications</h3>
-                    <p className="text-xs text-[#8392ab] mt-0.5">
+                    <p className="text-xs text-[#67748e] mt-0.5">
                       {notifications.filter(n => !n.isRead).length} unread &bull; {notifications.length} total
                     </p>
                   </div>
@@ -2286,7 +2286,7 @@ export default function SuperAdminDashboard() {
                     <svg className="w-10 h-10 text-[#adb5bd] mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
-                    <p className="text-sm font-semibold text-[#8392ab]">All caught up!</p>
+                    <p className="text-sm font-semibold text-[#67748e]">All caught up!</p>
                     <p className="text-xs text-[#adb5bd] mt-1">No notifications to display</p>
                   </div>
                 ) : (
@@ -2325,7 +2325,7 @@ export default function SuperAdminDashboard() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-[#344767] mb-0.5">{notification.title}</p>
-                            <p className="text-xs text-[#8392ab] leading-relaxed">{notification.message}</p>
+                            <p className="text-xs text-[#67748e] leading-relaxed">{notification.message}</p>
                             <span className="text-[10px] text-[#adb5bd] font-medium mt-1 block">{formatTime(notification.createdAt)}</span>
                           </div>
                         </div>
@@ -2367,7 +2367,7 @@ export default function SuperAdminDashboard() {
           <div className="sip-card p-6 max-w-md w-full animate-scale-up">
             {/* Steps indicator */}
             <div className="flex justify-between items-center mb-6">
-              <span className="text-xs font-bold text-[#8392ab]">Step {classStep} of 3</span>
+              <span className="text-xs font-bold text-[#67748e]">Step {classStep} of 3</span>
               <div className="flex space-x-1.5">
                 {[1, 2, 3].map(s => (
                   <span key={s} className={`h-1.5 w-1.5 rounded-full ${classStep >= s ? 'bg-[#0c2340]' : 'bg-gray-200'}`}></span>
@@ -2380,7 +2380,7 @@ export default function SuperAdminDashboard() {
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-[#344767]">Create Class Groups</h3>
                 <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Academic Programme</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Academic Programme</label>
                   <select
                     value={newClass.programmeId}
                     onChange={(e) => setNewClass(prev => ({ ...prev, programmeId: e.target.value }))}
@@ -2393,7 +2393,7 @@ export default function SuperAdminDashboard() {
 
                 <div className="grid grid-cols-3 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Level</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Level</label>
                     <select
                       value={newClass.level}
                       onChange={(e) => setNewClass(prev => ({ ...prev, level: e.target.value }))}
@@ -2407,7 +2407,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Type</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Type</label>
                     <select
                       value={newClass.type}
                       onChange={(e) => setNewClass(prev => ({ ...prev, type: e.target.value }))}
@@ -2419,7 +2419,7 @@ export default function SuperAdminDashboard() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Session</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Session</label>
                     <select
                       value={newClass.session}
                       onChange={(e) => setNewClass(prev => ({ ...prev, session: e.target.value }))}
@@ -2459,7 +2459,7 @@ export default function SuperAdminDashboard() {
             {classStep === 2 && (
               <div className="space-y-4">
                 <h3 className="text-lg font-bold text-[#344767]">Select Class Groups</h3>
-                <p className="text-xs text-[#8392ab]">Click to toggle groups you want to create simultaneously</p>
+                <p className="text-xs text-[#67748e]">Click to toggle groups you want to create simultaneously</p>
 
                 {/* A-K Grid */}
                 <div className="grid grid-cols-4 gap-2">
@@ -2472,7 +2472,7 @@ export default function SuperAdminDashboard() {
                         className={`h-11 rounded-xl text-xs font-black border transition-all ${
                           isSelected
                             ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-md scale-95'
-                            : 'bg-[#f0f2f5] text-[#8392ab] border-gray-200 hover:bg-gray-200/40'
+                            : 'bg-[#f0f2f5] text-[#67748e] border-gray-200 hover:bg-gray-200/40'
                         }`}
                       >
                         Group {letter}
@@ -2483,9 +2483,9 @@ export default function SuperAdminDashboard() {
 
                 {/* Preview text */}
                 <div className="bg-[#f0f2f5] rounded-xl p-4 border border-gray-200">
-                  <span className="text-[10px] text-[#8392ab] font-bold block mb-1">Creation Summary</span>
+                  <span className="text-[10px] text-[#67748e] font-bold block mb-1">Creation Summary</span>
                   {newClass.groups.length === 0 ? (
-                    <span className="text-[#8392ab] italic text-xs">No groups selected yet</span>
+                    <span className="text-[#67748e] italic text-xs">No groups selected yet</span>
                   ) : (
                     <p className="text-xs font-semibold text-[#344767]">
                       You are about to create: <br />
@@ -2526,7 +2526,7 @@ export default function SuperAdminDashboard() {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-[#344767]">Classes Spawned Successfully</h3>
-                  <p className="text-xs text-[#8392ab] mt-1">Associated group cards are now live on your classes deck.</p>
+                  <p className="text-xs text-[#67748e] mt-1">Associated group cards are now live on your classes deck.</p>
                 </div>
                 <div className="flex flex-col space-y-2 w-full pt-4">
                   <button
@@ -2558,7 +2558,7 @@ export default function SuperAdminDashboard() {
             <h3 className="text-lg font-bold text-[#344767] mb-4">Create Class Rep</h3>
             <form onSubmit={handleCreateRep} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Full Name</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Full Name</label>
                 <input
                   type="text"
                   required
@@ -2570,7 +2570,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Index Number</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Index Number</label>
                 <input
                   type="text"
                   required
@@ -2582,7 +2582,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Username (Login ID)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Username (Login ID)</label>
                 <input
                   type="text"
                   required
@@ -2594,7 +2594,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Password</label>
                 <input
                   type="password"
                   required
@@ -2606,7 +2606,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">Confirm Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">Confirm Password</label>
                 <input
                   type="password"
                   required
@@ -2645,14 +2645,14 @@ export default function SuperAdminDashboard() {
             
             <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
               <p className="text-xs text-blue-400 font-semibold mb-2">📋 Excel/CSV Format Required:</p>
-              <p className="text-xs text-[#8392ab] mb-2">Columns: <span className="font-mono text-blue-400">indexNumber, name, email, programme, level, type, group, session</span></p>
-              <p className="text-xs text-[#8392ab]">Example: <span className="font-mono text-[#344767]">10912345, John Doe, john@gctu.edu.gh, BIT, 300, TOP-UP, B, EVENING</span></p>
+              <p className="text-xs text-[#67748e] mb-2">Columns: <span className="font-mono text-blue-400">indexNumber, name, email, programme, level, type, group, session</span></p>
+              <p className="text-xs text-[#67748e]">Example: <span className="font-mono text-[#344767]">10912345, John Doe, john@gctu.edu.gh, BIT, 300, TOP-UP, B, EVENING</span></p>
               <p className="text-xs text-amber-400 mt-2">⚠️ Default password: <span className="font-mono font-bold">rep123</span></p>
             </div>
 
             <form onSubmit={handleBulkUploadReps} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-2">Select File</label>
+                <label className="block text-xs font-semibold uppercase text-[#67748e] mb-2">Select File</label>
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"
@@ -2677,7 +2677,7 @@ export default function SuperAdminDashboard() {
                     <div className="mt-2 max-h-32 overflow-y-auto">
                       <p className="text-xs text-amber-400 font-semibold mb-1">Errors:</p>
                       {bulkUploadResult.errors.map((err, idx) => (
-                        <p key={idx} className="text-xs text-[#8392ab]">• {err}</p>
+                        <p key={idx} className="text-xs text-[#67748e]">• {err}</p>
                       ))}
                     </div>
                   )}
@@ -2728,7 +2728,7 @@ export default function SuperAdminDashboard() {
             <h3 className="text-lg font-bold text-[#344767] mb-4">Reset Rep Password</h3>
             <form onSubmit={handleResetPassword} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#8392ab] mb-1.5">New Password</label>
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#67748e] mb-1.5">New Password</label>
                 <input
                   type="password"
                   required
@@ -2816,7 +2816,7 @@ export default function SuperAdminDashboard() {
                   setShowAssignRepModal(false);
                   setSelectedClassForRep(null);
                 }}
-                className="text-[#8392ab] hover:text-[#344767]"
+                className="text-[#67748e] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -2842,12 +2842,12 @@ export default function SuperAdminDashboard() {
                       className="w-full text-left p-3.5 bg-[#f0f2f5] hover:bg-[#0c2340]/5 border border-gray-200 hover:border-[#E5A93C]/50 rounded-xl flex items-center justify-between text-xs text-[#344767] transition"
                     >
                       <span className="font-bold text-[#344767]">{rep.username}</span>
-                      <span className="text-[#8392ab] font-bold">Assign →</span>
+                      <span className="text-[#67748e] font-bold">Assign →</span>
                     </button>
                   ))}
 
                 {reps.filter(r => r.isActive && !r.assignedClass).length === 0 && (
-                  <p className="text-center py-4 text-xs text-[#8392ab] italic">No unassigned active representatives found.</p>
+                  <p className="text-center py-4 text-xs text-[#67748e] italic">No unassigned active representatives found.</p>
                 )}
               </div>
             </div>
@@ -2871,7 +2871,7 @@ export default function SuperAdminDashboard() {
                   setManualStudents([{ name: '', indexNumber: '', email: '' }]);
                   setCsvPreview([]);
                 }}
-                className="text-[#8392ab] hover:text-[#344767]"
+                className="text-[#67748e] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -2905,12 +2905,12 @@ export default function SuperAdminDashboard() {
                 </div>
 
                 {classStudents.length === 0 ? (
-                  <p className="text-xs text-[#8392ab] italic py-6 text-center border border-dashed border-gray-200 rounded-xl">No students registered in this class group.</p>
+                  <p className="text-xs text-[#67748e] italic py-6 text-center border border-dashed border-gray-200 rounded-xl">No students registered in this class group.</p>
                 ) : (
                   <div className="overflow-hidden border border-gray-200 rounded-xl max-h-60 overflow-y-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-[#f0f2f5] text-[#8392ab] text-xs font-bold border-b border-gray-200 sticky top-0">
+                        <tr className="bg-[#f0f2f5] text-[#67748e] text-xs font-bold border-b border-gray-200 sticky top-0">
                           <th className="p-3 w-10">
                             <input
                               type="checkbox"
@@ -2950,7 +2950,7 @@ export default function SuperAdminDashboard() {
                               </td>
                               <td className="p-3 font-mono text-xs text-[#0c2340] font-bold">{student.indexNumber}</td>
                               <td className="p-3 text-xs font-semibold">{student.name}</td>
-                              <td className="p-3 text-xs font-semibold text-[#8392ab]">{student.email || 'N/A'}</td>
+                              <td className="p-3 text-xs font-semibold text-[#67748e]">{student.email || 'N/A'}</td>
                               <td className="p-3 text-right space-x-2">
                                 <button
                                   onClick={() => {
@@ -2982,7 +2982,7 @@ export default function SuperAdminDashboard() {
                   <button
                     onClick={() => setStudentAddTab('manual')}
                     className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all ${
-                      studentAddTab === 'manual' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#8392ab] hover:text-[#0c2340]'
+                      studentAddTab === 'manual' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#67748e] hover:text-[#0c2340]'
                     }`}
                   >
                     <span className="flex items-center gap-1.5">
@@ -2993,7 +2993,7 @@ export default function SuperAdminDashboard() {
                   <button
                     onClick={() => setStudentAddTab('csv')}
                     className={`pb-3 px-4 text-xs font-bold border-b-2 transition-all ${
-                      studentAddTab === 'csv' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#8392ab] hover:text-[#0c2340]'
+                      studentAddTab === 'csv' ? 'border-[#0c2340] text-[#0c2340]' : 'border-transparent text-[#67748e] hover:text-[#0c2340]'
                     }`}
                   >
                     <span className="flex items-center gap-1.5">
@@ -3072,7 +3072,7 @@ export default function SuperAdminDashboard() {
                 {/* CSV upload tab */}
                 {studentAddTab === 'csv' && (
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center text-xs text-[#8392ab]">
+                    <div className="flex justify-between items-center text-xs text-[#67748e]">
                       <span>Import student database using CSV (.csv), Excel (.xlsx, .xls) or PDF (.pdf) files.</span>
                       <a
                         href="/students_template.csv"
@@ -3097,7 +3097,7 @@ export default function SuperAdminDashboard() {
                       />
                       <label htmlFor="csv-file-selector" className="cursor-pointer">
                         <span className="block text-[#344767] font-bold text-sm">Drag and drop file here, or click to browse</span>
-                        <span className="block text-[10px] text-[#8392ab] mt-1">Supports CSV, Excel sheets, and class registers in PDF format</span>
+                        <span className="block text-[10px] text-[#67748e] mt-1">Supports CSV, Excel sheets, and class registers in PDF format</span>
                       </label>
                     </div>
 
@@ -3119,12 +3119,12 @@ export default function SuperAdminDashboard() {
                                 <tr key={i} className="text-xs bg-[#f8f9fa]">
                                   <td className="p-2 font-mono">{row.indexNumber}</td>
                                   <td className="p-2">{row.name}</td>
-                                  <td className="p-2 text-[#8392ab]">{row.email}</td>
+                                  <td className="p-2 text-[#67748e]">{row.email}</td>
                                 </tr>
                               ))}
                               {csvPreview.length > 10 && (
                                 <tr>
-                                  <td colSpan="3" className="p-2 text-center text-[#8392ab] text-[10px] italic">...and {csvPreview.length - 10} more rows</td>
+                                  <td colSpan="3" className="p-2 text-center text-[#67748e] text-[10px] italic">...and {csvPreview.length - 10} more rows</td>
                                 </tr>
                               )}
                             </tbody>
@@ -3155,7 +3155,7 @@ export default function SuperAdminDashboard() {
                   setSelectedClassForCourses(null);
                   setClassCourses([]);
                 }}
-                className="text-[#8392ab] hover:text-[#344767]"
+                className="text-[#67748e] hover:text-[#344767]"
               >
                 ✕
               </button>
@@ -3164,9 +3164,9 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4">
               {/* Linked courses */}
               <div className="space-y-2">
-                <span className="text-[10px] text-[#8392ab] font-bold block uppercase tracking-wider">Currently Linked</span>
+                <span className="text-[10px] text-[#67748e] font-bold block uppercase tracking-wider">Currently Linked</span>
                 {classCourses.length === 0 ? (
-                  <p className="text-xs text-[#8392ab] italic py-2">No courses linked to this class group yet.</p>
+                  <p className="text-xs text-[#67748e] italic py-2">No courses linked to this class group yet.</p>
                 ) : (
                   <div className="space-y-1.5 max-h-40 overflow-y-auto">
                     {classCourses.map(cc => (
@@ -3200,7 +3200,7 @@ export default function SuperAdminDashboard() {
 
               {/* Link new courses dropdown */}
               <div className="border-t border-gray-200 pt-4 space-y-2">
-                <span className="text-[10px] text-[#8392ab] font-bold block uppercase tracking-wider">Link Available Course</span>
+                <span className="text-[10px] text-[#67748e] font-bold block uppercase tracking-wider">Link Available Course</span>
                 <div className="max-h-40 overflow-y-auto space-y-1.5">
                   {courses
                     .filter(c => !classCourses.some(cc => cc.courseId === c.id))
@@ -3211,12 +3211,12 @@ export default function SuperAdminDashboard() {
                         className="w-full text-left p-3.5 bg-[#f0f2f5] hover:bg-[#0c2340]/5 border border-gray-200 hover:border-[#E5A93C]/50 rounded-xl flex items-center justify-between text-xs text-[#344767] transition"
                       >
                         <span className="font-bold text-[#344767]">{course.name} ({course.code})</span>
-                        <span className="text-[#8392ab] font-bold">Link +</span>
+                        <span className="text-[#67748e] font-bold">Link +</span>
                       </button>
                     ))}
 
                   {courses.filter(c => !classCourses.some(cc => cc.courseId === c.id)).length === 0 && (
-                    <p className="text-center py-2 text-xs text-[#8392ab] italic">All database courses are linked.</p>
+                    <p className="text-center py-2 text-xs text-[#67748e] italic">All database courses are linked.</p>
                   )}
                 </div>
               </div>

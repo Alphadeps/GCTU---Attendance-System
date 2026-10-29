@@ -269,14 +269,14 @@ const StudentPortal = () => {
               <img src={deptLogo} alt="Logo" className="w-12 h-12 object-contain" />
             </div>
             <h1 className="text-[22px] font-black text-[#344767] tracking-tight">Who are you?</h1>
-            <p className="text-[13px] text-[#8392ab] mt-1">Enter your details to mark attendance</p>
+            <p className="text-[13px] text-[#67748e] mt-1">Enter your details to mark attendance</p>
           </div>
 
           {/* Identification card */}
           <div className="bg-white rounded-2xl p-6 shadow-[0_4px_24px_rgba(0,0,0,.08)] border border-gray-100">
             <form onSubmit={handleIdentifySubmit} className="space-y-4">
               <div>
-                <label className="block text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-[#67748e] uppercase tracking-wider mb-2">
                   Index Number
                 </label>
                 <input
@@ -292,7 +292,7 @@ const StudentPortal = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-[#67748e] uppercase tracking-wider mb-2">
                   Full Name
                 </label>
                 <input
@@ -332,7 +332,7 @@ const StudentPortal = () => {
             </form>
           </div>
 
-          <p className="text-center text-[11px] text-[#8392ab]">{deptName}</p>
+          <p className="text-center text-[11px] text-[#67748e]">{deptName}</p>
         </div>
       </div>
     );
@@ -355,7 +355,7 @@ const StudentPortal = () => {
           {/* Online indicator */}
           <div className="flex items-center gap-1.5">
             <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-400' : 'bg-rose-400 animate-pulse'}`} />
-            <span className={`text-[10px] font-semibold ${isOnline ? 'text-emerald-500' : 'text-rose-400'}`}>
+            <span className={`text-[10px] font-semibold ${isOnline ? 'text-emerald-700' : 'text-rose-600'}`}>
               {isOnline ? 'Online' : 'Offline'}
             </span>
           </div>
@@ -387,7 +387,8 @@ const StudentPortal = () => {
               <button
                 onClick={fetchActiveSessions}
                 disabled={loadingActive}
-                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+                aria-label="Refresh sessions"
+                className="p-2.5 rounded-xl bg-white border border-gray-100 text-[#67748e] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingActive ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -413,7 +414,7 @@ const StudentPortal = () => {
                   </svg>
                 </div>
                 <p className="text-[14px] font-bold text-[#344767]">No active sessions</p>
-                <p className="text-[12px] text-[#8392ab] mt-1 max-w-[220px]">Check back when your class rep opens a session</p>
+                <p className="text-[12px] text-[#67748e] mt-1 max-w-[220px]">Check back when your class rep opens a session</p>
               </div>
             )}
 
@@ -431,11 +432,11 @@ const StudentPortal = () => {
                     <span className={`badge ${session.sessionType === 'PHYSICAL' ? 'badge-info' : 'badge-primary'}`}>
                       {session.sessionType === 'PHYSICAL' ? 'Physical' : 'Online'}
                     </span>
-                    <span className="text-[11px] text-[#8392ab]">{getTimeDiffText(session.startTime)}</span>
+                    <span className="text-[11px] text-[#67748e]">{getTimeDiffText(session.startTime)}</span>
                   </div>
                   <div>
                     <p className="text-[15px] font-extrabold text-[#344767] leading-snug">{session.courseName}</p>
-                    <p className="text-[11px] font-mono text-[#8392ab] mt-0.5">{session.courseCode}</p>
+                    <p className="text-[11px] font-mono text-[#67748e] mt-0.5">{session.courseCode}</p>
                   </div>
                   <button
                     onClick={() => handleStartCheckIn(session)}
@@ -464,19 +465,19 @@ const StudentPortal = () => {
             <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide">
               <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 <span className="block text-[18px] font-bold text-[#344767] font-mono">{totalClasses}</span>
-                <span className="text-[9px] text-[#8392ab] font-bold uppercase">Total</span>
+                <span className="text-[9px] text-[#67748e] font-bold uppercase">Total</span>
               </div>
               <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 <span className="block text-[18px] font-bold text-emerald-500 font-mono">{presentCount}</span>
-                <span className="text-[9px] text-[#8392ab] font-bold uppercase">Present</span>
+                <span className="text-[9px] text-[#67748e] font-bold uppercase">Present</span>
               </div>
               <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 <span className="block text-[18px] font-bold text-amber-500 font-mono">{lateCount}</span>
-                <span className="text-[9px] text-[#8392ab] font-bold uppercase">Late</span>
+                <span className="text-[9px] text-[#67748e] font-bold uppercase">Late</span>
               </div>
               <div className="flex-shrink-0 bg-white rounded-2xl px-4 py-3 text-center min-w-[76px] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 <span className="block text-[18px] font-bold text-rose-500 font-mono">{absentCount}</span>
-                <span className="text-[9px] text-[#8392ab] font-bold uppercase">Absent</span>
+                <span className="text-[9px] text-[#67748e] font-bold uppercase">Absent</span>
               </div>
               {/* Progress ring */}
               <div className="flex-shrink-0 bg-white rounded-2xl px-3 py-2 flex items-center gap-2 shadow-[0_1px_3px_rgba(0,0,0,.06)]">
@@ -489,7 +490,7 @@ const StudentPortal = () => {
                   <span className="absolute text-[9px] font-bold text-[#344767]">{attendanceRate}%</span>
                 </div>
                 <div>
-                  <span className="block text-[8px] text-[#8392ab] font-bold uppercase">Rate</span>
+                  <span className="block text-[8px] text-[#67748e] font-bold uppercase">Rate</span>
                 </div>
               </div>
             </div>
@@ -503,7 +504,7 @@ const StudentPortal = () => {
                   className={`px-3 py-1.5 rounded-full text-[11px] font-semibold border transition-all
                     ${filter === chip
                       ? 'bg-[#E5A93C] text-white border-[#E5A93C]'
-                      : 'bg-white text-[#8392ab] border-gray-200 hover:border-[#E5A93C]'
+                      : 'bg-white text-[#67748e] border-gray-200 hover:border-[#E5A93C]'
                     }`}
                 >
                   {chip}
@@ -521,10 +522,10 @@ const StudentPortal = () => {
                 <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                <p className="text-[12px] font-semibold text-[#8392ab]">No attendance logs found.</p>
+                <p className="text-[12px] font-semibold text-[#67748e]">No attendance logs found.</p>
               </div>
             ) : Object.keys(groupedHistory).length === 0 ? (
-              <div className="py-10 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-[12px] text-[#8392ab] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
+              <div className="py-10 text-center bg-white rounded-2xl border border-dashed border-gray-200 text-[12px] text-[#67748e] shadow-[0_1px_3px_rgba(0,0,0,.06)]">
                 No logs match the selected filter.
               </div>
             ) : (
@@ -546,7 +547,7 @@ const StudentPortal = () => {
                             <p className="text-[12px] font-semibold text-[#344767]">
                               {new Date(record.checkInTime || record.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </p>
-                            <p className="text-[10px] text-[#8392ab] mt-0.5">
+                            <p className="text-[10px] text-[#67748e] mt-0.5">
                               {record.status === 'ABSENT' ? '—' : new Date(record.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
@@ -576,7 +577,8 @@ const StudentPortal = () => {
               <button
                 onClick={fetchStudentGrievances}
                 disabled={loadingGrievances}
-                className="p-2 rounded-xl bg-white border border-gray-100 text-[#8392ab] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
+                aria-label="Refresh grievances"
+                className="p-2.5 rounded-xl bg-white border border-gray-100 text-[#67748e] hover:text-[#E5A93C] transition-colors shadow-[0_1px_3px_rgba(0,0,0,.06)]"
               >
                 <svg className={`w-4 h-4 ${loadingGrievances ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.2" />
@@ -584,7 +586,7 @@ const StudentPortal = () => {
               </button>
             </div>
 
-            <p className="text-[12px] text-[#8392ab] leading-relaxed">
+            <p className="text-[12px] text-[#67748e] leading-relaxed">
               Report GPS failures, request attendance overrides for excusable absences, or flag academic dishonesty.
             </p>
 
@@ -613,7 +615,7 @@ const StudentPortal = () => {
                 <svg className="w-9 h-9 text-gray-300 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                <p className="text-[12px] font-semibold text-[#8392ab]">No grievances logged yet.</p>
+                <p className="text-[12px] font-semibold text-[#67748e]">No grievances logged yet.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -641,8 +643,8 @@ const StudentPortal = () => {
                       </span>
                     </div>
                     <p className="text-[13px] font-bold text-[#344767]">{g.subject}</p>
-                    {g.courseCode && <p className="text-[10px] font-mono text-[#8392ab] mt-0.5">{g.courseCode}</p>}
-                    <p className="text-[11px] text-[#8392ab] mt-2 leading-relaxed line-clamp-2">{g.message}</p>
+                    {g.courseCode && <p className="text-[10px] font-mono text-[#67748e] mt-0.5">{g.courseCode}</p>}
+                    <p className="text-[11px] text-[#67748e] mt-2 leading-relaxed line-clamp-2">{g.message}</p>
                     {g.adminResponse && (
                       <div className="mt-3 bg-[#f8f9fa] rounded-xl p-3 border border-gray-100">
                         <p className="text-[9px] font-bold text-[#344767] uppercase tracking-wider mb-1">Department Reply</p>
@@ -657,7 +659,7 @@ const StudentPortal = () => {
                         </a>
                       </div>
                     )}
-                    <p className="text-[9px] text-[#8392ab] mt-2 text-right font-mono">
+                    <p className="text-[9px] text-[#67748e] mt-2 text-right font-mono">
                       {new Date(g.createdAt).toLocaleString()}
                     </p>
                   </div>
@@ -682,28 +684,28 @@ const StudentPortal = () => {
                 {getInitials(fullName)}
               </div>
               <p className="text-[16px] font-extrabold text-[#344767]">{fullName}</p>
-              <p className="text-[12px] text-[#8392ab] font-mono mt-0.5">Index: {indexNumber}</p>
+              <p className="text-[12px] text-[#67748e] font-mono mt-0.5">Index: {indexNumber}</p>
             </div>
 
             {/* Quick stats */}
             <div className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)]">
-              <p className="text-[11px] font-bold text-[#8392ab] uppercase tracking-wider mb-4">Attendance Summary</p>
+              <p className="text-[11px] font-bold text-[#67748e] uppercase tracking-wider mb-4">Attendance Summary</p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
                   <span className="block text-[18px] font-bold text-emerald-500 font-mono">{presentCount}</span>
-                  <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Present</span>
+                  <span className="text-[9px] text-[#67748e] uppercase font-semibold">Present</span>
                 </div>
                 <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
                   <span className="block text-[18px] font-bold text-amber-500 font-mono">{lateCount}</span>
-                  <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Late</span>
+                  <span className="text-[9px] text-[#67748e] uppercase font-semibold">Late</span>
                 </div>
                 <div className="bg-[#f8f9fa] rounded-xl p-3 text-center">
                   <span className="block text-[18px] font-bold text-rose-500 font-mono">{absentCount}</span>
-                  <span className="text-[9px] text-[#8392ab] uppercase font-semibold">Absent</span>
+                  <span className="text-[9px] text-[#67748e] uppercase font-semibold">Absent</span>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                <p className="text-[12px] text-[#8392ab]">Overall Attendance Rate</p>
+                <p className="text-[12px] text-[#67748e]">Overall Attendance Rate</p>
                 <div className="flex items-center gap-2">
                   <div className="w-24 bg-gray-200 rounded-full h-1.5 overflow-hidden">
                     <div
@@ -727,7 +729,7 @@ const StudentPortal = () => {
                 </svg>
                 Sign Out &amp; Clear Data
               </button>
-              <p className="text-center text-[10px] text-[#8392ab] font-mono">Class Attendance System v1.0</p>
+              <p className="text-center text-[10px] text-[#67748e] font-mono">Class Attendance System v1.0</p>
             </div>
           </div>
         )}
@@ -740,48 +742,48 @@ const StudentPortal = () => {
           <button
             onClick={() => setActiveTab('home')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Home</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'home' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}>Home</span>
           </button>
 
           {/* History */}
           <button
             onClick={() => setActiveTab('history')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>History</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'history' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}>History</span>
           </button>
 
           {/* Grievances */}
           <button
             onClick={() => { setActiveTab('grievances'); fetchStudentGrievances(); }}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Grievances</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'grievances' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}>Grievances</span>
           </button>
 
           {/* Profile */}
           <button
             onClick={() => setActiveTab('profile')}
             className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors
-              ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+              ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <span className={`text-[10px] font-semibold ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}>Profile</span>
+            <span className={`text-[10px] font-semibold ${activeTab === 'profile' ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}>Profile</span>
           </button>
         </div>
       </nav>
@@ -845,7 +847,7 @@ const StudentPortal = () => {
 
       {/* Credit footer */}
       <div className="fixed bottom-[72px] left-4 z-10 pointer-events-none">
-        <p className="text-[#8392ab] text-[9px] font-mono">
+        <p className="text-[#67748e] text-[9px] font-mono">
           Built by{' '}
           <a
             href="https://alphagroupofdevelopers.github.io"

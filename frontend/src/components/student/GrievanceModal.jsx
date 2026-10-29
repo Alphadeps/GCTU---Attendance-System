@@ -66,7 +66,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
           <h3 className="text-lg font-black text-[#344767]">New Support Case</h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-gray-200/40 text-[#8392ab] hover:text-[#344767] transition-colors"
+            className="p-1.5 rounded-lg bg-gray-200/40 text-[#67748e] hover:text-[#344767] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -77,7 +77,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
         <form onSubmit={handleGrievanceSubmit} className="space-y-4 text-left">
           {/* Type */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Category</label>
+            <label className="text-[10px] font-bold text-[#67748e] uppercase tracking-wider block">Category</label>
             <select
               value={grievanceType}
               onChange={(e) => {
@@ -99,7 +99,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* Course Selector (Optional) */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Associated Course (Optional)</label>
+            <label className="text-[10px] font-bold text-[#67748e] uppercase tracking-wider block">Associated Course (Optional)</label>
             <select
               value={grievanceCourse}
               onChange={(e) => setGrievanceCourse(e.target.value)}
@@ -114,7 +114,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* Subject */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Subject</label>
+            <label className="text-[10px] font-bold text-[#67748e] uppercase tracking-wider block">Subject</label>
             <input
               type="text"
               required
@@ -127,7 +127,7 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* Message */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Description</label>
+            <label className="text-[10px] font-bold text-[#67748e] uppercase tracking-wider block">Description</label>
             <textarea
               required
               rows={4}
@@ -140,12 +140,12 @@ const GrievanceModal = ({ indexNumber, fullName, courses, onClose, onSubmitted }
 
           {/* File evidence */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-[#8392ab] uppercase tracking-wider block">Evidence Attachment (PDF/Images - Optional)</label>
+            <label className="text-[10px] font-bold text-[#67748e] uppercase tracking-wider block">Evidence Attachment (PDF/Images - Optional)</label>
             <input
               type="file"
               accept="image/*,application/pdf"
               onChange={(e) => setEvidenceFile(e.target.files[0])}
-              className="w-full text-xs text-[#8392ab] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#002a63] file:text-[#344767] hover:file:bg-white cursor-pointer"
+              className="w-full text-xs text-[#67748e] file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#002a63] file:text-[#344767] hover:file:bg-white cursor-pointer"
             />
           </div>
 

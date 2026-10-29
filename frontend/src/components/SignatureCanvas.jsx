@@ -127,7 +127,7 @@ const SignatureCanvas = ({ onSave, label = 'Signature Pad' }) => {
           className="w-full cursor-crosshair touch-none"
         />
         {!hasDrawn && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#8392ab] text-sm">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none text-[#67748e] text-sm">
             Sign here using mouse or touch screen
           </div>
         )}

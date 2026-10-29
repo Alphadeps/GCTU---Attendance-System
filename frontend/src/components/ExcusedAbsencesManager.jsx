@@ -177,7 +177,7 @@ const ExcusedAbsencesManager = () => {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="font-bold text-[#344767] text-sm">Manage Excused Absences</h3>
-            <p className="text-xs text-[#8392ab] mt-0.5">
+            <p className="text-xs text-[#67748e] mt-0.5">
               Review and approve/reject student absence excuse requests
             </p>
           </div>
@@ -193,7 +193,7 @@ const ExcusedAbsencesManager = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <div className="text-xs text-[#8392ab] mb-1">Total Requests</div>
+          <div className="text-xs text-[#67748e] mb-1">Total Requests</div>
           <div className="text-2xl font-bold text-[#344767]">{stats.total}</div>
         </div>
         <div className="bg-white border border-yellow-500/30 rounded-xl p-4">
@@ -222,7 +222,7 @@ const ExcusedAbsencesManager = () => {
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition ${
                   filter === status
                     ? 'bg-[#0c2340] text-white'
-                    : 'bg-gray-100 text-[#8392ab] hover:bg-gray-200'
+                    : 'bg-gray-100 text-[#67748e] hover:bg-gray-200'
                 }`}
               >
                 {status}
@@ -245,7 +245,7 @@ const ExcusedAbsencesManager = () => {
       <div className="space-y-3">
         {filteredRequests.length === 0 ? (
           <div className="bg-white border border-dashed border-gray-200 rounded-xl p-12 text-center">
-            <p className="text-[#8392ab] text-sm">
+            <p className="text-[#67748e] text-sm">
               {search ? 'No requests match your search' : `No ${filter.toLowerCase()} requests found`}
             </p>
           </div>
@@ -265,25 +265,25 @@ const ExcusedAbsencesManager = () => {
                       <div className="flex items-center gap-2 mt-1">
                         {!request.anonymous && (
                           <>
-                            <span className="text-xs text-[#8392ab]">
+                            <span className="text-xs text-[#67748e]">
                               {request.studentName} ({request.studentIndex})
                             </span>
-                            <span className="text-[#8392ab]">•</span>
+                            <span className="text-[#67748e]">•</span>
                           </>
                         )}
                         {request.anonymous && (
                           <>
-                            <span className="text-xs text-[#8392ab] italic">Anonymous</span>
-                            <span className="text-[#8392ab]">•</span>
+                            <span className="text-xs text-[#67748e] italic">Anonymous</span>
+                            <span className="text-[#67748e]">•</span>
                           </>
                         )}
                         {request.courseCode && (
                           <>
                             <span className="text-xs text-blue-400">{request.courseCode}</span>
-                            <span className="text-[#8392ab]">•</span>
+                            <span className="text-[#67748e]">•</span>
                           </>
                         )}
-                        <span className="text-xs text-[#8392ab]">
+                        <span className="text-xs text-[#67748e]">
                           {new Date(request.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -296,10 +296,10 @@ const ExcusedAbsencesManager = () => {
 
                   {request.adminResponse && (
                     <div className="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-3 mb-3">
-                      <div className="text-xs text-[#8392ab] mb-1">Response:</div>
+                      <div className="text-xs text-[#67748e] mb-1">Response:</div>
                       <p className="text-xs text-[#344767]">{request.adminResponse}</p>
                       {request.resolvedBy && (
-                        <div className="text-xs text-[#8392ab] mt-2">
+                        <div className="text-xs text-[#67748e] mt-2">
                           — {request.resolvedBy.username} ({request.resolvedBy.role})
                         </div>
                       )}
@@ -349,7 +349,7 @@ const ExcusedAbsencesManager = () => {
               <h3 className="text-lg font-bold text-[#344767]">Excused Absence Request</h3>
               <button
                 onClick={closeDetailsModal}
-                className="text-[#8392ab] hover:text-[#0c2340] transition-colors"
+                className="text-[#67748e] hover:text-[#0c2340] transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -361,37 +361,37 @@ const ExcusedAbsencesManager = () => {
             <div className="p-6 space-y-4">
               {/* Student Info */}
               <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <div className="text-xs text-[#8392ab] mb-2">Student Information</div>
+                <div className="text-xs text-[#67748e] mb-2">Student Information</div>
                 {!selectedRequest.anonymous ? (
                   <div className="space-y-1">
                     <div className="text-sm text-[#344767] font-semibold">{selectedRequest.studentName}</div>
-                    <div className="text-xs text-[#8392ab]">Index: {selectedRequest.studentIndex}</div>
+                    <div className="text-xs text-[#67748e]">Index: {selectedRequest.studentIndex}</div>
                   </div>
                 ) : (
-                  <div className="text-sm text-[#8392ab] italic">Anonymous Request</div>
+                  <div className="text-sm text-[#67748e] italic">Anonymous Request</div>
                 )}
               </div>
 
               {/* Request Details */}
               <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <div className="text-xs text-[#8392ab] mb-2">Subject</div>
+                <div className="text-xs text-[#67748e] mb-2">Subject</div>
                 <div className="text-sm text-[#344767] font-semibold mb-3">{selectedRequest.subject}</div>
                 
                 {selectedRequest.courseCode && (
                   <>
-                    <div className="text-xs text-[#8392ab] mb-2">Course</div>
+                    <div className="text-xs text-[#67748e] mb-2">Course</div>
                     <div className="text-sm text-blue-400 mb-3">{selectedRequest.courseCode}</div>
                   </>
                 )}
 
-                <div className="text-xs text-[#8392ab] mb-2">Reason for Absence</div>
+                <div className="text-xs text-[#67748e] mb-2">Reason for Absence</div>
                 <div className="text-sm text-[#344767] whitespace-pre-wrap">{selectedRequest.message}</div>
               </div>
 
               {/* Evidence */}
               {selectedRequest.evidenceUrl && (
                 <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="text-xs text-[#8392ab] mb-2">Evidence Attached</div>
+                  <div className="text-xs text-[#67748e] mb-2">Evidence Attached</div>
                   <a
                     href={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${selectedRequest.evidenceUrl}`}
                     target="_blank"
@@ -408,7 +408,7 @@ const ExcusedAbsencesManager = () => {
 
               {/* Response Section */}
               <div className="bg-white border border-gray-200 rounded-xl p-4">
-                <div className="text-xs text-[#8392ab] mb-2">
+                <div className="text-xs text-[#67748e] mb-2">
                   {selectedRequest.status === 'PENDING' ? 'Your Response' : 'Response Given'}
                 </div>
                 <textarea
@@ -422,7 +422,7 @@ const ExcusedAbsencesManager = () => {
               </div>
 
               {/* Metadata */}
-              <div className="flex items-center justify-between text-xs text-[#8392ab]">
+              <div className="flex items-center justify-between text-xs text-[#67748e]">
                 <span>Submitted: {new Date(selectedRequest.createdAt).toLocaleString()}</span>
                 <span className={`px-3 py-1 rounded-full font-bold border ${getStatusBadge(selectedRequest.status)}`}>
                   {selectedRequest.status}
@@ -436,7 +436,7 @@ const ExcusedAbsencesManager = () => {
                 <button
                   onClick={closeDetailsModal}
                   disabled={processing}
-                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-[#8392ab] text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-[#67748e] text-sm font-bold rounded-lg transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>

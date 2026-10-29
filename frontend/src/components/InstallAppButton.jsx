@@ -17,7 +17,7 @@ const InstallAppButton = ({ dark = false }) => {
 
   const colors = dark
     ? { bg: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', text: '#fff', sub: 'rgba(255,255,255,0.65)' }
-    : { bg: '#fff', border: '1px solid #e9ecef', text: '#0c2340', sub: '#8392ab' };
+    : { bg: '#fff', border: '1px solid #e9ecef', text: '#0c2340', sub: '#67748e' };
 
   const handleClick = async () => {
     if (canInstall) await promptInstall();

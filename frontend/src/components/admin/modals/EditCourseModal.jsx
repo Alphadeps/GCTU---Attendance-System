@@ -38,7 +38,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
         )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Course Name</label>
+            <label className="block text-xs font-semibold uppercase text-[#67748e] mb-1.5">Course Name</label>
             <input
               type="text"
               required
@@ -49,7 +49,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase text-[#8392ab] mb-1.5">Course Code</label>
+            <label className="block text-xs font-semibold uppercase text-[#67748e] mb-1.5">Course Code</label>
             <input
               type="text"
               required
@@ -64,7 +64,7 @@ const EditCourseModal = ({ course, onClose, onSaved }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#8392ab] disabled:opacity-50 transition-colors"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-xs font-semibold text-[#67748e] disabled:opacity-50 transition-colors"
             >
               Cancel
             </button>

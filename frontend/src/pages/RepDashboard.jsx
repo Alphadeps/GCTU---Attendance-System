@@ -9,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import ExcusedAbsencesManager from '../components/ExcusedAbsencesManager';
 import AddClassmatesCard from '../components/rep/AddClassmatesCard';
 import SetupClassCard from '../components/rep/SetupClassCard';
+import ResetCodeModal from '../components/rep/ResetCodeModal';
 
 const RepDashboard = () => {
   const [courses, setCourses] = useState([]);
@@ -47,6 +48,7 @@ const RepDashboard = () => {
 
   // Confirm modal state
   const [confirmState, setConfirmState] = useState({ open: false, message: '', onConfirm: null });
+  const [resetCode, setResetCode] = useState(null);
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -155,6 +157,17 @@ const RepDashboard = () => {
         toast.success(`${student.name} removed from your class.`);
       } catch (err) {
         toast.error(err.response?.data?.error || 'Could not remove student');
+      }
+    });
+  };
+
+  const handleResetPassword = (student) => {
+    askConfirm(`Give ${student.name} a one-time code to reset their password? Their current password keeps working until they use it.`, async () => {
+      try {
+        const { data } = await api.post('/student-auth/reset-code', { indexNumber: student.indexNumber });
+        setResetCode(data);
+      } catch (err) {
+        toast.error(err.response?.data?.error || 'Could not create a reset code');
       }
     });
   };
@@ -401,11 +414,12 @@ const RepDashboard = () => {
           </div>
           <div className="min-w-0">
             <p className="text-[13px] font-bold text-[#344767] truncate leading-tight">{displayDeptName}</p>
-            <p className="text-[10px] text-[#8392ab] font-medium uppercase tracking-wider">Rep Portal</p>
+            <p className="text-[10px] text-[#67748e] font-medium uppercase tracking-wider">Rep Portal</p>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="ml-auto md:hidden p-1 rounded-lg text-[#8392ab] hover:text-[#344767] hover:bg-gray-100"
+            aria-label="Close menu"
+            className="ml-auto md:hidden p-2 rounded-lg text-[#67748e] hover:text-[#344767] hover:bg-gray-100"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -416,11 +430,11 @@ const RepDashboard = () => {
         {/* Class info pill */}
         {assignedClass && (
           <div className="mx-4 mt-4 px-3 py-2.5 rounded-xl bg-[#f8f9fa] border border-gray-100">
-            <p className="text-[9px] font-bold text-[#8392ab] uppercase tracking-wider mb-1">My Class</p>
+            <p className="text-[9px] font-bold text-[#67748e] uppercase tracking-wider mb-1">My Class</p>
             <p className="text-[12px] font-bold text-[#344767] truncate">{assignedClass.displayName}</p>
             <div className="flex gap-3 mt-1.5">
               <span className="text-[10px] text-[#E5A93C] font-semibold">{classStudentCount} students</span>
-              <span className="text-[10px] text-[#8392ab]">•</span>
+              <span className="text-[10px] text-[#67748e]">•</span>
               <span className="text-[10px] text-[#E5A93C] font-semibold">{courses.length} courses</span>
             </div>
           </div>
@@ -452,12 +466,12 @@ const RepDashboard = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[12px] font-bold text-[#344767] truncate">{username}</p>
-              <p className="text-[10px] text-[#8392ab] uppercase tracking-wider">{role}</p>
+              <p className="text-[10px] text-[#67748e] uppercase tracking-wider">{role}</p>
             </div>
             <button
               onClick={handleLogout}
               title="Sign Out"
-              className="p-1.5 rounded-lg text-[#8392ab] hover:text-rose-500 hover:bg-rose-50 transition-all"
+              className="p-1.5 rounded-lg text-[#67748e] hover:text-rose-500 hover:bg-rose-50 transition-all"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -475,7 +489,8 @@ const RepDashboard = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 -ml-1 rounded-lg text-[#8392ab] hover:text-[#344767]"
+              aria-label="Open menu"
+              className="md:hidden p-2 -ml-1 rounded-lg text-[#67748e] hover:text-[#344767]"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -489,7 +504,7 @@ const RepDashboard = () => {
                 {activeTab === 'excused' && 'Excused Absences'}
               </h1>
               {assignedClass && (
-                <p className="text-[11px] text-[#8392ab]">{assignedClass.displayName}</p>
+                <p className="text-[11px] text-[#67748e]">{assignedClass.displayName}</p>
               )}
             </div>
           </div>
@@ -540,20 +555,20 @@ const RepDashboard = () => {
 
               {/* Stat cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="stat-card-teal animate-fade-in-up">
+                <div className="stat-card-teal p-4 animate-fade-in-up">
                   <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80">Total Students</p>
                   <p className="text-3xl font-extrabold mt-1">{classStudentCount}</p>
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-100">
-                  <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Active Courses</p>
+                  <p className="text-[11px] font-semibold text-[#67748e] uppercase tracking-wider">Active Courses</p>
                   <p className="text-3xl font-extrabold text-[#344767] mt-1">{courses.length}</p>
                    <div className="mt-2 w-8 h-1 rounded-full bg-[#E5A93C]" />
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-200">
                   <div className="flex items-center gap-2">
-                    <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Live Sessions</p>
+                    <p className="text-[11px] font-semibold text-[#67748e] uppercase tracking-wider">Live Sessions</p>
                     {sessions.filter(s => s.status === 'OPEN').length > 0 && (
                       <span className="pulse-dot" />
                     )}
@@ -565,7 +580,7 @@ const RepDashboard = () => {
                 </div>
 
                 <div className="bg-white rounded-2xl p-4 shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-300">
-                  <p className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider">Total Sessions</p>
+                  <p className="text-[11px] font-semibold text-[#67748e] uppercase tracking-wider">Total Sessions</p>
                   <p className="text-3xl font-extrabold text-[#E5A93C] mt-1">{sessions.length}</p>
                   <div className="mt-2 w-8 h-1 rounded-full bg-[#E5A93C]" />
                 </div>
@@ -575,7 +590,7 @@ const RepDashboard = () => {
               <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)] animate-fade-in-up delay-200">
                 <div>
                   <p className="text-[13px] font-bold text-[#344767]">Attendance Operations</p>
-                  <p className="text-[11px] text-[#8392ab] mt-0.5">Open a session for your class to begin taking attendance.</p>
+                  <p className="text-[11px] text-[#67748e] mt-0.5">Open a session for your class to begin taking attendance.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -600,7 +615,7 @@ const RepDashboard = () => {
               {/* Sessions list */}
               <div className="bg-white rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,.08)] overflow-hidden animate-fade-in-up delay-300">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                  <p className="text-[12px] font-bold text-[#8392ab] uppercase tracking-wider">Recent Sessions</p>
+                  <p className="text-[12px] font-bold text-[#67748e] uppercase tracking-wider">Recent Sessions</p>
                   <button
                     onClick={fetchData}
                     className="text-[11px] text-[#E5A93C] hover:text-[#b5821c] font-semibold flex items-center gap-1 transition-colors"
@@ -623,8 +638,8 @@ const RepDashboard = () => {
                     <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-[13px] font-semibold text-[#8392ab]">No sessions yet</p>
-                    <p className="text-[11px] text-[#8392ab] mt-1">Click "Open New Session" to start.</p>
+                    <p className="text-[13px] font-semibold text-[#67748e]">No sessions yet</p>
+                    <p className="text-[11px] text-[#67748e] mt-1">Click "Open New Session" to start.</p>
                   </div>
                 ) : (
                   <table className="sip-table">
@@ -642,9 +657,9 @@ const RepDashboard = () => {
                         <tr key={s.id}>
                           <td>
                             <p className="font-semibold text-[#344767] text-[13px]">{s.courseName}</p>
-                            <p className="text-[11px] text-[#8392ab] font-mono">{s.courseCode}</p>
+                            <p className="text-[11px] text-[#67748e] font-mono">{s.courseCode}</p>
                           </td>
-                          <td className="hidden sm:table-cell text-[12px] text-[#8392ab]">
+                          <td className="hidden sm:table-cell text-[12px] text-[#67748e]">
                             {new Date(s.startTime).toLocaleDateString()}
                             <span className="block text-[11px]">{new Date(s.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                           </td>
@@ -694,7 +709,7 @@ const RepDashboard = () => {
               {assignedClass && <form onSubmit={handleAddCourse} className="bg-white rounded-2xl p-5 shadow-[0_1px_3px_rgba(0,0,0,.08)] space-y-3">
                 <div>
                   <p className="text-[13px] font-bold text-[#344767]">Add a course</p>
-                  <p className="text-[11px] text-[#8392ab]">Enter the course code and name from your timetable. If the course already exists, it is linked to your class.</p>
+                  <p className="text-[11px] text-[#67748e]">Enter the course code and name from your timetable. If the course already exists, it is linked to your class.</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr_auto] gap-2">
                   <input
@@ -727,8 +742,8 @@ const RepDashboard = () => {
                   <svg className="w-10 h-10 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 5s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
-                  <p className="text-[13px] font-semibold text-[#8392ab]">No courses assigned yet</p>
-                  <p className="text-[11px] text-[#8392ab] mt-1 max-w-xs mx-auto">Add your courses above using their code and name.</p>
+                  <p className="text-[13px] font-semibold text-[#67748e]">No courses assigned yet</p>
+                  <p className="text-[11px] text-[#67748e] mt-1 max-w-xs mx-auto">Add your courses above using their code and name.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -743,7 +758,7 @@ const RepDashboard = () => {
                         {c.level && <span className="badge badge-dark">{c.level}</span>}
                       </div>
                       <p className="text-[14px] font-bold text-[#344767] leading-snug">{c.name}</p>
-                      {c.type && <p className="text-[11px] text-[#8392ab] mt-1">{c.type}</p>}
+                      {c.type && <p className="text-[11px] text-[#67748e] mt-1">{c.type}</p>}
                       <div className="flex gap-2 mt-4">
                         <button
                           onClick={() => handleGenerateReport(c.id)}
@@ -787,7 +802,7 @@ const RepDashboard = () => {
               <div className="bg-white rounded-2xl px-5 py-4 flex flex-wrap gap-3 items-center justify-between shadow-[0_1px_3px_rgba(0,0,0,.08)]">
                 <div>
                   <p className="text-[13px] font-bold text-[#344767]">Class Students</p>
-                  <p className="text-[11px] text-[#8392ab]">All enrolled students in your class</p>
+                  <p className="text-[11px] text-[#67748e]">All enrolled students in your class</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <input
@@ -811,7 +826,7 @@ const RepDashboard = () => {
                     <svg className="w-10 h-10 text-gray-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                     </svg>
-                    <p className="text-[13px] font-semibold text-[#8392ab]">No students enrolled yet</p>
+                    <p className="text-[13px] font-semibold text-[#67748e]">No students enrolled yet</p>
                     <p className="text-[11px] text-[#adb5bd] mt-1">Share your join link or upload your class list above.</p>
                   </div>
                 ) : (
@@ -819,7 +834,7 @@ const RepDashboard = () => {
                     <table className="sip-table">
                       <thead>
                         <tr>
-                          <th>#</th>
+                          <th className="hidden sm:table-cell">#</th>
                           <th>Index Number</th>
                           <th>Name</th>
                           <th className="hidden md:table-cell">Email</th>
@@ -834,18 +849,27 @@ const RepDashboard = () => {
                           )
                           .map((student, index) => (
                             <tr key={student.id}>
-                              <td className="text-[#8392ab] text-[12px]">{index + 1}</td>
+                              <td className="hidden sm:table-cell text-[#67748e] text-[12px]">{index + 1}</td>
                               <td><span className="font-mono text-[12px] font-bold text-[#344767]">{student.indexNumber}</span></td>
                               <td><span className="text-[13px] font-semibold text-[#344767]">{student.name}</span></td>
-                              <td className="hidden md:table-cell text-[12px] text-[#8392ab]">{student.email || 'N/A'}</td>
+                              <td className="hidden md:table-cell text-[12px] text-[#67748e]">{student.email || 'N/A'}</td>
                               <td className="text-right">
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveStudent(student)}
-                                  className="text-[11px] font-semibold text-red-500 hover:text-red-700"
-                                >
-                                  Remove
-                                </button>
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-1 sm:gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleResetPassword(student)}
+                                    className="whitespace-nowrap text-[12px] font-semibold text-[#1a3c6d] hover:bg-[#f0f2f5] rounded-lg px-2 py-2"
+                                  >
+                                    Reset password
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveStudent(student)}
+                                    className="text-[12px] font-semibold text-red-600 hover:bg-red-50 rounded-lg px-2 py-2"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           ))}
@@ -855,7 +879,7 @@ const RepDashboard = () => {
                       student.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
                       student.indexNumber.includes(studentSearch)
                     ).length === 0 && (
-                      <div className="py-8 text-center text-[12px] text-[#8392ab]">No students match your search.</div>
+                      <div className="py-8 text-center text-[12px] text-[#67748e]">No students match your search.</div>
                     )}
                   </>
                 )}
@@ -878,8 +902,9 @@ const RepDashboard = () => {
           <button
             key={item.id}
             onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-            className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors
-              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#8392ab]'}`}
+            aria-current={activeTab === item.id ? 'page' : undefined}
+            className={`flex-1 flex flex-col items-center gap-1 py-2.5 text-[11px] font-semibold transition-colors
+              ${activeTab === item.id ? 'text-[#E5A93C]' : 'text-[#67748e]'}`}
           >
             {item.icon}
             {item.label}
@@ -894,7 +919,7 @@ const RepDashboard = () => {
             <div className="mb-5">
               <h3 className="text-[16px] font-bold text-[#344767]">Open New Attendance Session</h3>
               {assignedClass && (
-                <p className="text-[11px] text-[#8392ab] mt-1">{assignedClass.displayName}</p>
+                <p className="text-[11px] text-[#67748e] mt-1">{assignedClass.displayName}</p>
               )}
             </div>
 
@@ -940,14 +965,14 @@ const RepDashboard = () => {
                 <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] text-[#8392ab] font-semibold mb-1">Latitude</label>
+                      <label className="block text-[11px] text-[#67748e] font-semibold mb-1">Latitude</label>
                       <input type="number" step="0.000001" placeholder="5.6037" value={latitude}
                         onChange={(e) => setLatitude(e.target.value)}
                         className="sip-input w-full"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-[#8392ab] font-semibold mb-1">Longitude</label>
+                      <label className="block text-[11px] text-[#67748e] font-semibold mb-1">Longitude</label>
                       <input type="number" step="0.000001" placeholder="-0.1870" value={longitude}
                         onChange={(e) => setLongitude(e.target.value)}
                         className="sip-input w-full"
@@ -1015,12 +1040,12 @@ const RepDashboard = () => {
               <div>
                 <h3 className="text-[16px] font-bold text-[#344767]">Course Attendance Analytics</h3>
                 {analyticsData && (
-                  <p className="text-[11px] text-[#8392ab] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
+                  <p className="text-[11px] text-[#67748e] font-mono mt-0.5">{analyticsData.course.name} ({analyticsData.course.code})</p>
                 )}
               </div>
               <button
                 onClick={() => { setShowAnalyticsModal(false); setAnalyticsData(null); }}
-                className="p-1.5 rounded-lg text-[#8392ab] hover:text-[#344767] hover:bg-gray-100 transition-all"
+                className="p-1.5 rounded-lg text-[#67748e] hover:text-[#344767] hover:bg-gray-100 transition-all"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1031,14 +1056,14 @@ const RepDashboard = () => {
             {analyticsLoading ? (
               <div className="flex-1 flex flex-col items-center justify-center py-16 gap-3">
                 <div className="w-8 h-8 border-2 border-[#E5A93C] border-t-transparent rounded-full animate-spin" />
-                <span className="text-[12px] text-[#8392ab]">Loading attendance metrics…</span>
+                <span className="text-[12px] text-[#67748e]">Loading attendance metrics…</span>
               </div>
             ) : analyticsData ? (
               <div className="flex-1 overflow-y-auto space-y-5 pr-1">
                 <div className="grid grid-cols-3 gap-3">
                   <div className="bg-[#f8f9fa] rounded-xl p-4 text-center">
                     <span className="block text-2xl font-bold text-[#344767] font-mono">{analyticsData.totalSessionsCount}</span>
-                    <span className="text-[10px] text-[#8392ab] font-semibold uppercase">Concluded</span>
+                    <span className="text-[10px] text-[#67748e] font-semibold uppercase">Concluded</span>
                   </div>
                   <div className="bg-[#f8f9fa] rounded-xl p-4 text-center">
                     <span className="block text-2xl font-bold text-rose-500 font-mono">
@@ -1095,7 +1120,7 @@ const RepDashboard = () => {
                           <tr key={student.id}>
                             <td>
                               <p className="font-semibold text-[#344767] text-[13px]">{student.name}</p>
-                              <p className="text-[10px] text-[#8392ab] font-mono">{student.indexNumber}</p>
+                              <p className="text-[10px] text-[#67748e] font-mono">{student.indexNumber}</p>
                             </td>
                             <td className="text-[12px] text-[#344767] font-mono">{student.presentCount} / {student.totalConcluded}</td>
                             <td>
@@ -1118,13 +1143,15 @@ const RepDashboard = () => {
                 </table>
               </div>
             ) : (
-              <div className="text-center py-16 text-[12px] text-[#8392ab]">No analytics data available.</div>
+              <div className="text-center py-16 text-[12px] text-[#67748e]">No analytics data available.</div>
             )}
           </div>
         </div>
       )}
 
       {/* Confirm Modal */}
+      {resetCode && <ResetCodeModal reset={resetCode} onClose={() => setResetCode(null)} />}
+
       {confirmState.open && (
         <ConfirmModal
           message={confirmState.message}

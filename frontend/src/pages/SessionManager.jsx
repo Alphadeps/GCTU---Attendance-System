@@ -481,7 +481,7 @@ const SessionManager = () => {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex flex-col justify-center items-center gap-4">
         <div className="w-10 h-10 rounded-full border-2 border-[#E5A93C] border-t-transparent animate-spin" />
-        <p className="text-sm text-[#8392ab] font-semibold">Loading session…</p>
+        <p className="text-sm text-[#67748e] font-semibold">Loading session…</p>
       </div>
     );
   }
@@ -496,7 +496,7 @@ const SessionManager = () => {
             </svg>
           </div>
           <h3 className="text-base font-bold text-[#344767] mb-1">Session Error</h3>
-          <p className="text-sm text-[#8392ab] mb-5">{errorMsg || 'Session not found'}</p>
+          <p className="text-sm text-[#67748e] mb-5">{errorMsg || 'Session not found'}</p>
           <button onClick={() => navigate('/rep/dashboard')} className="sip-btn-dark">
             ← Back to Dashboard
           </button>
@@ -518,7 +518,7 @@ const SessionManager = () => {
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               onClick={() => navigate('/rep/dashboard')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#8392ab] hover:text-[#E5A93C] transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#67748e] hover:text-[#E5A93C] transition-colors shrink-0"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -592,7 +592,7 @@ const SessionManager = () => {
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <span className={`block text-2xl font-black ${s.color}`}>{s.value}</span>
-              <span className="text-[11px] font-semibold text-[#8392ab] uppercase tracking-wider mt-0.5 block">{s.label}</span>
+              <span className="text-[11px] font-semibold text-[#67748e] uppercase tracking-wider mt-0.5 block">{s.label}</span>
             </div>
           ))}
         </div>
@@ -622,7 +622,7 @@ const SessionManager = () => {
                   </div>
                 </div>
 
-                <p className="text-[11px] text-[#8392ab] leading-relaxed">
+                <p className="text-[11px] text-[#67748e] leading-relaxed">
                   Students check in via GPS. This code is only needed if their location is unavailable.
                 </p>
               </div>
@@ -640,7 +640,7 @@ const SessionManager = () => {
                   ...(session.networkSSID ? [{ label: 'Wi-Fi SSID', value: session.networkSSID }] : []),
                 ].map((item, i) => (
                   <div key={i} className="flex justify-between items-start gap-2">
-                    <span className="text-[11px] text-[#8392ab] shrink-0">{item.label}</span>
+                    <span className="text-[11px] text-[#67748e] shrink-0">{item.label}</span>
                     <span className="text-[12px] font-semibold text-[#344767] text-right">{item.value}</span>
                   </div>
                 ))}
@@ -649,7 +649,7 @@ const SessionManager = () => {
               {/* Attendance progress bar */}
               <div className="mt-4 pt-4 border-t border-gray-100">
                 <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[10px] text-[#8392ab] font-bold uppercase tracking-wider">Attendance Rate</span>
+                  <span className="text-[10px] text-[#67748e] font-bold uppercase tracking-wider">Attendance Rate</span>
                   <span className="text-xs font-black text-[#E5A93C]">{attendanceRate}%</span>
                 </div>
                 <div className="w-full h-1.5 bg-[#f0f2f5] rounded-full overflow-hidden">
@@ -665,7 +665,7 @@ const SessionManager = () => {
             {session.status === 'CLOSED' && (
               <div className="sip-card p-5 animate-fade-in-up delay-200">
                 <h3 className="text-xs font-bold text-[#344767] uppercase tracking-wider mb-1">Lecturer Sign-off</h3>
-                <p className="text-[11px] text-[#8392ab] mb-4">Hand this phone to the lecturer to type their name and sign.</p>
+                <p className="text-[11px] text-[#67748e] mb-4">Hand this phone to the lecturer to type their name and sign.</p>
                 <label className="sip-label" htmlFor="lecturer-name">Lecturer's full name</label>
                 <input
                   id="lecturer-name"
@@ -710,7 +710,7 @@ const SessionManager = () => {
                     <p className="text-xs font-bold text-emerald-600">
                       {session.lecturerName ? `Signed off by ${session.lecturerName}` : 'Signed off by Lecturer'}
                     </p>
-                    <p className="text-[10px] text-[#8392ab]">{new Date(session.approvedAt).toLocaleString()}</p>
+                    <p className="text-[10px] text-[#67748e]">{new Date(session.approvedAt).toLocaleString()}</p>
                   </div>
                 </div>
                 {session.lecturerSignature && (
@@ -733,7 +733,7 @@ const SessionManager = () => {
                     className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                       activePanelTab === 'logs'
                         ? 'bg-[#344767] text-white shadow-sm'
-                        : 'text-[#8392ab] hover:text-[#344767] hover:bg-[#f0f2f5]'
+                        : 'text-[#67748e] hover:text-[#344767] hover:bg-[#f0f2f5]'
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -746,7 +746,7 @@ const SessionManager = () => {
                     className={`relative flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                       activePanelTab === 'security'
                         ? 'bg-rose-600 text-white shadow-sm'
-                        : 'text-[#8392ab] hover:text-[#344767] hover:bg-[#f0f2f5]'
+                        : 'text-[#67748e] hover:text-[#344767] hover:bg-[#f0f2f5]'
                     }`}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -760,7 +760,7 @@ const SessionManager = () => {
                     )}
                   </button>
                 </div>
-                <span className="text-[11px] text-[#8392ab]">
+                <span className="text-[11px] text-[#67748e]">
                   Auto-refreshes every 10s
                 </span>
               </div>
@@ -784,7 +784,7 @@ const SessionManager = () => {
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[#344767]">Proxy & Fraud Detection</p>
-                        <p className="text-[10px] text-[#8392ab]">IP, GPS, device fingerprint analysis</p>
+                        <p className="text-[10px] text-[#67748e]">IP, GPS, device fingerprint analysis</p>
                       </div>
                     </div>
                     <span className="badge badge-danger">{securityAlerts.length} Flagged</span>
@@ -798,7 +798,7 @@ const SessionManager = () => {
                         </svg>
                       </div>
                       <p className="text-sm font-bold text-[#344767]">All Clear</p>
-                      <p className="text-xs text-[#8392ab] mt-1 max-w-xs">Every check-in meets unique IP, device token, and geofencing criteria</p>
+                      <p className="text-xs text-[#67748e] mt-1 max-w-xs">Every check-in meets unique IP, device token, and geofencing criteria</p>
                     </div>
                   ) : (
                     <div className="overflow-auto rounded-xl">
@@ -815,13 +815,13 @@ const SessionManager = () => {
                             <tr key={attendance.id}>
                               <td>
                                 <p className="font-semibold text-[#344767] text-[12px]">{attendance.student?.name || 'N/A'}</p>
-                                <p className="font-mono text-[10px] text-[#8392ab]">{attendance.student?.indexNumber || 'N/A'}</p>
+                                <p className="font-mono text-[10px] text-[#67748e]">{attendance.student?.indexNumber || 'N/A'}</p>
                               </td>
                               <td className="space-y-1 max-w-[240px]">
                                 {alerts.map((alert, idx) => (
                                   <div key={idx} className="flex items-start gap-1.5">
                                     <span className={`mt-1 w-1.5 h-1.5 rounded-full shrink-0 ${alert.severity === 'HIGH' ? 'bg-rose-500' : 'bg-amber-400'}`} />
-                                    <span className="text-[11px] text-[#8392ab]">{alert.message}</span>
+                                    <span className="text-[11px] text-[#67748e]">{alert.message}</span>
                                   </div>
                                 ))}
                               </td>

@@ -145,7 +145,7 @@ export default function OfficialArchives() {
   const allLevels = [...new Set(Object.values(groupedReports || {}).flatMap(levels => Object.keys(levels || {})))].sort();
 
   if (loading) {
-    return <div className="text-[#8392ab] text-center py-10">Loading archives...</div>;
+    return <div className="text-[#67748e] text-center py-10">Loading archives...</div>;
   }
 
   if (Object.keys(groupedReports).length === 0) {
@@ -157,7 +157,7 @@ export default function OfficialArchives() {
           </svg>
         </div>
         <h3 className="text-xl font-bold text-[#0c2340] mb-2">No Reports Archived Yet</h3>
-        <p className="text-[#8392ab]">Reports will appear here once reps generate them.</p>
+        <p className="text-[#67748e]">Reports will appear here once reps generate them.</p>
       </div>
     );
   }
@@ -171,7 +171,7 @@ export default function OfficialArchives() {
             <ChartBarIcon className="w-7 h-7 text-[#0c2340]" />
             <span>Official Archives</span>
           </h2>
-          <p className="text-sm text-[#8392ab] mt-1">Digitally signed course attendance reports organized by programme and level.</p>
+          <p className="text-sm text-[#67748e] mt-1">Digitally signed course attendance reports organized by programme and level.</p>
         </div>
       </div>
 
@@ -179,7 +179,7 @@ export default function OfficialArchives() {
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-[#8392ab] mb-1.5">Search Reports</label>
+            <label className="block text-xs font-semibold text-[#67748e] mb-1.5">Search Reports</label>
             <input
               type="text"
               placeholder="Course name or code..."
@@ -189,7 +189,7 @@ export default function OfficialArchives() {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#8392ab] mb-1.5">Programme</label>
+            <label className="block text-xs font-semibold text-[#67748e] mb-1.5">Programme</label>
             <select
               value={filterProgramme}
               onChange={(e) => setFilterProgramme(e.target.value)}
@@ -202,7 +202,7 @@ export default function OfficialArchives() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-[#8392ab] mb-1.5">Level</label>
+            <label className="block text-xs font-semibold text-[#67748e] mb-1.5">Level</label>
             <select
               value={filterLevel}
               onChange={(e) => setFilterLevel(e.target.value)}
@@ -248,14 +248,14 @@ export default function OfficialArchives() {
                   </svg>
                   <div className="text-left">
                     <h3 className="text-lg font-bold text-[#0c2340]">{programmeName}</h3>
-                    <p className="text-xs text-[#8392ab]">Programme</p>
+                    <p className="text-xs text-[#67748e]">Programme</p>
                   </div>
                   <span className="text-xs bg-[#0c2340]/10 text-[#0c2340] px-3 py-1 rounded-full font-bold">
                     {totalProgrammeReports} report{totalProgrammeReports !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <svg
-                  className={`w-5 h-5 text-[#8392ab] transition-transform ${expandedProgrammes[programmeKey] ? 'rotate-180' : ''}`}
+                  className={`w-5 h-5 text-[#67748e] transition-transform ${expandedProgrammes[programmeKey] ? 'rotate-180' : ''}`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -288,7 +288,7 @@ export default function OfficialArchives() {
                             </span>
                           </div>
                           <svg
-                            className={`w-4 h-4 text-[#8392ab] transition-transform ${expandedLevels[levelKey] ? 'rotate-180' : ''}`}
+                            className={`w-4 h-4 text-[#67748e] transition-transform ${expandedLevels[levelKey] ? 'rotate-180' : ''}`}
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -307,7 +307,7 @@ export default function OfficialArchives() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                   </svg>
                                   Group {groupKey}
-                                  <span className="text-xs text-[#8392ab] font-normal">({(reports || []).length} report{(reports || []).length !== 1 ? 's' : ''})</span>
+                                  <span className="text-xs text-[#67748e] font-normal">({(reports || []).length} report{(reports || []).length !== 1 ? 's' : ''})</span>
                                 </h5>
                                 <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                                   {(reports || []).map(report => (
@@ -321,15 +321,15 @@ export default function OfficialArchives() {
                                           <span className="text-xs font-bold px-2 py-1 bg-[#0c2340]/10 text-[#0c2340] rounded-lg group-hover:bg-[#E5A93C]/20 group-hover:text-[#E5A93C] transition">
                                             {report.course?.code || 'N/A'}
                                           </span>
-                                          <span className="text-[10px] text-[#8392ab] font-bold">
+                                          <span className="text-[10px] text-[#67748e] font-bold">
                                             {report.signedAt ? new Date(report.signedAt).toLocaleDateString() : 'N/A'}
                                           </span>
                                         </div>
                                         <h6 className="text-[#344767] font-semibold text-sm line-clamp-2 mb-1 group-hover:text-[#0c2340] transition">{report.course?.name || 'Unknown Course'}</h6>
-                                        <p className="text-xs text-[#8392ab]">Generated by: {report.generatedBy?.username || report.signedBy?.username || 'Unknown'}</p>
+                                        <p className="text-xs text-[#67748e]">Generated by: {report.generatedBy?.username || report.signedBy?.username || 'Unknown'}</p>
                                       </div>
 
-                                      <div className="mt-4 flex items-center justify-center gap-2 py-2 bg-gray-50 group-hover:bg-[#E5A93C]/10 text-[#8392ab] group-hover:text-[#E5A93C] text-xs font-bold rounded-lg border border-gray-200 group-hover:border-[#E5A93C]/30 transition">
+                                      <div className="mt-4 flex items-center justify-center gap-2 py-2 bg-gray-50 group-hover:bg-[#E5A93C]/10 text-[#67748e] group-hover:text-[#E5A93C] text-xs font-bold rounded-lg border border-gray-200 group-hover:border-[#E5A93C]/30 transition">
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -360,7 +360,7 @@ export default function OfficialArchives() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <h3 className="text-lg font-bold text-[#0c2340] mb-2">No Reports Found</h3>
-          <p className="text-[#8392ab] text-sm">Try adjusting your filters or search query.</p>
+          <p className="text-[#67748e] text-sm">Try adjusting your filters or search query.</p>
         </div>
       )}
 
@@ -397,7 +397,7 @@ export default function OfficialArchives() {
                 <div className="flex items-center justify-center py-20">
                   <div className="text-center">
                     <div className="w-12 h-12 border-4 border-[#0c2340] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-[#8392ab] font-semibold">Loading report preview...</p>
+                    <p className="text-[#67748e] font-semibold">Loading report preview...</p>
                   </div>
                 </div>
               ) : (
