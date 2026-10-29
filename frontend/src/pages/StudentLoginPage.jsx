@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import InstallAppButton from '../components/InstallAppButton';
 import HumanCheck from '../components/HumanCheck';
 import { HUMAN_CHECK_ENABLED } from '../lib/humanCheck';
+import PasswordInput from '../components/PasswordInput';
 
 /* ─── Icon helpers ────────────────────────────────────────────────────────── */
 const QrIcon = () => (
@@ -381,9 +382,8 @@ const StudentLoginPage = () => {
                   <label className="sip-label" htmlFor="slp-reset-pw">New Password</label>
                   <div className="sip-input-group">
                     <span className="sip-input-icon"><KeyIcon /></span>
-                    <input
+                    <PasswordInput
                       id="slp-reset-pw"
-                      type="password"
                       required
                       autoComplete="new-password"
                       value={newPassword}
@@ -398,9 +398,8 @@ const StudentLoginPage = () => {
                   <label className="sip-label" htmlFor="slp-reset-confirm">Confirm New Password</label>
                   <div className="sip-input-group">
                     <span className="sip-input-icon"><KeyIcon /></span>
-                    <input
+                    <PasswordInput
                       id="slp-reset-confirm"
-                      type="password"
                       required
                       autoComplete="new-password"
                       value={confirmPassword}
@@ -492,9 +491,8 @@ const StudentLoginPage = () => {
                   <label className="sip-label" htmlFor="slp-password">Password</label>
                   <div className="sip-input-group">
                     <span className="sip-input-icon"><KeyIcon /></span>
-                    <input
+                    <PasswordInput
                       id="slp-password"
-                      type="password"
                       required
                       autoComplete="current-password"
                       value={password}
@@ -617,9 +615,8 @@ const StudentLoginPage = () => {
                   <label className="sip-label" htmlFor="slp-newpw">New Password</label>
                   <div className="sip-input-group">
                     <span className="sip-input-icon"><KeyIcon /></span>
-                    <input
+                    <PasswordInput
                       id="slp-newpw"
-                      type="password"
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
@@ -633,9 +630,8 @@ const StudentLoginPage = () => {
                   <label className="sip-label" htmlFor="slp-confirmpw">Confirm Password</label>
                   <div className="sip-input-group">
                     <span className="sip-input-icon"><KeyIcon /></span>
-                    <input
+                    <PasswordInput
                       id="slp-confirmpw"
-                      type="password"
                       required
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import PasswordInput from '../components/PasswordInput';
 
 // Shown after a rep logs in with a password an admin set (e.g. the default "rep123").
 // Every other screen is blocked by the API until a personal password is chosen.
@@ -59,15 +60,15 @@ const ChangePasswordPage = () => {
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
               <label className="sip-label" htmlFor="cp-current">Temporary password</label>
-              <input id="cp-current" type="password" className="sip-input" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" placeholder="The password you just used" />
+              <PasswordInput id="cp-current" className="sip-input" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required autoComplete="current-password" placeholder="The password you just used" />
             </div>
             <div>
               <label className="sip-label" htmlFor="cp-new">New password</label>
-              <input id="cp-new" type="password" className="sip-input" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
+              <PasswordInput id="cp-new" className="sip-input" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" />
             </div>
             <div>
               <label className="sip-label" htmlFor="cp-confirm">Confirm new password</label>
-              <input id="cp-confirm" type="password" className="sip-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
+              <PasswordInput id="cp-confirm" className="sip-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" />
             </div>
 
             {errorMsg && <div className="sip-alert sip-alert-error">{errorMsg}</div>}
