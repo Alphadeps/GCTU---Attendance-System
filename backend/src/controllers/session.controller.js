@@ -155,6 +155,8 @@ const createSession = async (req, res) => {
 
     // Register active session in security cache
     cacheSession(session);
+    // Wake the auto-close checker (required here: sessionExpiry itself requires this file)
+    require('../lib/sessionExpiry').noteSessionOpened();
 
     // Send response immediately
     res.status(201).json(session);

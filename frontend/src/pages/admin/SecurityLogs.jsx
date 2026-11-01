@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { pollWhileVisible } from '../../lib/poll';
 
 const AlertCircleIcon = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -108,8 +109,7 @@ const SecurityLogs = () => {
 
   useEffect(() => {
     if (autoRefresh) {
-      const interval = setInterval(fetchLogs, refreshInterval);
-      return () => clearInterval(interval);
+      return pollWhileVisible(fetchLogs, refreshInterval);
     }
   }, [autoRefresh, refreshInterval]);
 

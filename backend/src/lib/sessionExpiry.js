@@ -7,7 +7,16 @@ const { warnLowAttendance } = require('./lowAttendance');
 const INACTIVITY_THRESHOLD_MS = 60 * 60 * 1000; // 1 hour
 const CHECK_INTERVAL_MS = 5 * 60 * 1000;        // Check every 5 minutes
 
+// Neon's free plan bills for every minute the database is awake, and it only falls asleep after
+// 5 idle minutes. Querying every 5 minutes kept it awake around the clock, so skip the query
+// while we know no session is open. Set on startup and whenever a session is opened.
+let mayHaveOpenSessions = true;
+function noteSessionOpened() {
+  mayHaveOpenSessions = true;
+}
+
 async function expireInactiveSessions() {
+  if (!mayHaveOpenSessions) return;
   try {
     const now = new Date();
     const inactivityCutoff = new Date(now.getTime() - INACTIVITY_THRESHOLD_MS);
@@ -24,18 +33,20 @@ async function expireInactiveSessions() {
       }
     });
 
+    let stillOpen = 0;
     for (const session of openSessions) {
       const lastActivity = session.attendances[0]?.checkInTime || session.startTime;
       const isPastEndTime = session.endTime < now;
       const isInactive = new Date(lastActivity) < inactivityCutoff;
 
-      if (!isPastEndTime && !isInactive) continue;
+      if (!isPastEndTime && !isInactive) { stillOpen++; continue; }
 
       const reason = isPastEndTime ? 'scheduled end time reached' : '1 hour of inactivity';
       console.log(`[SessionExpiry] Auto-closing session ${session.id} (${session.course?.name}): ${reason}`);
 
       await autoCloseSession(session, reason);
     }
+    if (stillOpen === 0) mayHaveOpenSessions = false;
   } catch (err) {
     console.error('[SessionExpiry] Error during expiry check:', err);
   }
@@ -111,4 +122,4 @@ function startSessionExpiryScheduler() {
   return setInterval(expireInactiveSessions, CHECK_INTERVAL_MS);
 }
 
-module.exports = { startSessionExpiryScheduler };
+module.exports = { startSessionExpiryScheduler, noteSessionOpened, expireInactiveSessions };

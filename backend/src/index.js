@@ -147,6 +147,11 @@ app.use('/api', idempotencyMiddleware);
 
 // Health Check
 app.get('/api/health', async (req, res) => {
+  // Uptime pingers hit this every few minutes. Touching the database each time would keep Neon
+  // awake (and billing) around the clock, so only check it when asked: /api/health?db=1
+  if (req.query.db !== '1') {
+    return res.json({ status: 'OK', timestamp: new Date() });
+  }
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.json({

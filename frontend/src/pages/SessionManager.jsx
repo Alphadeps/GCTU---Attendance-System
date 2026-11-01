@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import AttendanceTable from '../components/AttendanceTable';
@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { pollWhileVisible } from '../lib/poll';
 
 const SessionManager = () => {
   const { id } = useParams();
@@ -35,7 +36,6 @@ const SessionManager = () => {
   const [approving, setApproving] = useState(false);
 
   // Poll timers
-  const pollTimerRef = useRef(null);
 
   const fetchSessionDetails = async () => {
     try {
@@ -68,8 +68,7 @@ const SessionManager = () => {
 
   useEffect(() => {
     fetchSessionDetails();
-    pollTimerRef.current = setInterval(fetchSessionDetails, 10000);
-    return () => { clearInterval(pollTimerRef.current); };
+    return pollWhileVisible(fetchSessionDetails, 10000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
