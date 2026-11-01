@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
+import { pollWhileVisible } from '../lib/poll';
 
 const typeMap = {
   SUCCESS: { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', cls: 'badge-success', color: '#2dce89' },
@@ -36,8 +37,7 @@ const NotificationPanel = ({ studentIndex }) => {
       }
     };
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
+    return pollWhileVisible(fetchNotifications, 60000);
   }, [studentIndex]);
 
   useEffect(() => {

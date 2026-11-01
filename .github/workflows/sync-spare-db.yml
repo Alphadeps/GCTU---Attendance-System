@@ -1,0 +1,63 @@
+# Keeps the spare database (Supabase) a fresh copy of the main one (Neon), every night.
+# If Neon runs out of free hours it can't be read until next month, so the copy has to
+# exist beforehand. To switch, point Render's DATABASE_URL and DIRECT_URL at the spare.
+#
+# Setup: GitHub repo -> Settings -> Secrets and variables -> Actions -> New repository secret
+#   MAIN_DATABASE_URL   Neon connection string (the direct one, without "-pooler")
+#   SPARE_DATABASE_URL  Supabase "Session pooler" connection string
+# Until both are set, this job does nothing.
+#
+# After switching to the spare, turn this workflow off (Actions -> Sync spare database ->
+# ... -> Disable workflow). The copy also refuses on its own to overwrite a database that
+# has newer data than the source.
+name: Sync spare database
+
+on:
+  schedule:
+    - cron: '17 2 * * *' # every night at 02:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-spare-db
+  cancel-in-progress: false
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FROM_DATABASE_URL: ${{ secrets.MAIN_DATABASE_URL }}
+      TO_DATABASE_URL: ${{ secrets.SPARE_DATABASE_URL }}
+    steps:
+      - name: Check the secrets are set
+        id: ready
+        run: |
+          if [ -z "$FROM_DATABASE_URL" ] || [ -z "$TO_DATABASE_URL" ]; then
+            echo "MAIN_DATABASE_URL / SPARE_DATABASE_URL not set yet; nothing to do."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.ready.outputs.ok == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.ready.outputs.ok == 'true'
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install
+        if: steps.ready.outputs.ok == 'true'
+        working-directory: backend
+        run: npm ci
+
+      - name: Copy main database to the spare
+        if: steps.ready.outputs.ok == 'true'
+        working-directory: backend
+        run: node scripts/copy-db.js --replace

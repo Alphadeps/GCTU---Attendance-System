@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { pollWhileVisible } from '../../lib/poll';
 
 const AlertTriangleIcon = ({ className }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -71,8 +72,7 @@ const PerformanceMetrics = () => {
 
   useEffect(() => {
     if (autoRefresh) {
-      const interval = setInterval(fetchMetrics, refreshInterval);
-      return () => clearInterval(interval);
+      return pollWhileVisible(fetchMetrics, refreshInterval);
     }
   }, [autoRefresh, refreshInterval]);
 

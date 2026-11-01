@@ -15,7 +15,8 @@
     "test:unit": "jest tests/unit --runInBand --forceExit",
     "test:integration": "jest tests/integration --runInBand --forceExit",
     "test:watch": "jest --watch",
-    "seed:test": "node tests/seed/seed-test-data.js"
+    "seed:test": "node tests/seed/seed-test-data.js",
+    "copy-db": "node scripts/copy-db.js"
   },
   "keywords": [],
   "author": "",

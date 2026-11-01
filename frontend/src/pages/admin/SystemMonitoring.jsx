@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { pollWhileVisible } from '../../lib/poll';
 
 const SystemMonitoring = () => {
   const [healthData, setHealthData] = useState(null);
@@ -45,8 +46,7 @@ const SystemMonitoring = () => {
 
   useEffect(() => {
     fetchAllData();
-    const interval = setInterval(fetchAllData, refreshInterval);
-    return () => clearInterval(interval);
+    return pollWhileVisible(fetchAllData, refreshInterval);
   }, [refreshInterval]);
 
   const handleUnblockIP = async (ip) => {
